@@ -9,9 +9,9 @@
 
 ## 2. Wie wird der Projektverlauf dokumentiert?
 - Forlaufende Dokumentation der UML-Diagramme (Klassen, Use Case, Ablauf,...) mit Versionierung der Diagramme via Git
-    - [ ] Erste Version fertiggestellt
+    - [X] Erste Version fertiggestellt
 - Agile Steuerung der Meilensteine, Sprint & Storys per Projektmanagement tool
-    - [ ] Erste Storys / Sprints angelegt
+    - [X] Erste Storys / Sprints angelegt
 - Sonstige Projektdokumente als .md
     - [X] Etabliert
 
