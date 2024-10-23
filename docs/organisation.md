@@ -17,14 +17,14 @@
 
 ## 3. Welche Tools werden genutzt?
 - Projektmanagement: [Gitlab](http://gitlab.informatik.uni-halle.de)
-    - [ ] Angelegt
-    - [ ] Alle haben Zugriff
+    - [X] Angelegt
+    - [X] Alle haben Zugriff
 - Kommunikation: [Discord](discord.com)-Server
     - [X] Angelegt
     - [X] Alle haben Zugriff
 - Source Code Management: [Gitlab](http://gitlab.informatik.uni-halle.de)
-    - [ ] Angelegt
-    - [ ] Alle haben Zugriff
+    - [X] Angelegt
+    - [X] Alle haben Zugriff
 - Diagramme: [PlantUML](https://plantuml.com/de/) per [Gitlab](http://gitlab.informatik.uni-halle.de)
     - [ ] Datei für jedes Diagramm angelegt
 - Stack: vanilla js, HTML, CSS, node.js
