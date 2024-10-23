@@ -28,6 +28,6 @@
 - Diagramme: [PlantUML](https://plantuml.com/de/) per [Gitlab](http://gitlab.informatik.uni-halle.de)
     - [ ] Datei für jedes Diagramm angelegt
 - Stack: vanilla js, HTML, CSS, node.js
-    - [ ] Struktur im GitLab angelegt
+    - [X] Struktur im GitLab angelegt
     - [ ] https://github.com/Uniprojekte/multiplayergame-baseapp geholt
     - [ ] Projekt läuft bei allen Teilnehmern lokal
