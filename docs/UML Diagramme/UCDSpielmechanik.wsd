@@ -1,0 +1,33 @@
+
+@startuml
+actor Spieler
+actor System
+
+rectangle "Spielmechanik" {
+    Spieler --> (Wort auswählen)
+    Spieler --> (Zeichnen)
+    Spieler --> (Wort raten)
+    
+    System --> (Wörter vorschlagen)
+    System --> (Punktevergabe)
+    System --> (Zugende verwalten)
+    System --> (Rundenende verwalten)
+    System --> (Spielende verwalten)
+    System --> (Nächsten Zeichner bestimmen)
+    System --> (Zurück zur Lobby)
+    System --> (Buchstabenanzeige als Hilfe) : "Während des Ratens"
+
+    (Wörter vorschlagen) --> (Wort auswählen)
+    (Wort auswählen) --> (Zeichnen)
+    (Zeichnen) --> (Wort raten)
+    (Wort raten) --> (Punktevergabe)
+    (Wort raten) --> (Buchstabenanzeige als Hilfe) : "Zeitgesteuerte Hilfestellung"
+    (Punktevergabe) --> (Zugende verwalten)
+    (Zugende verwalten) --> (Nächsten Zeichner bestimmen) : "Wenn noch Spieler übrig"
+    (Nächsten Zeichner bestimmen) --> (Wort auswählen) : "Nächsten Zug starten"
+    (Zugende verwalten) --> (Rundenende verwalten) : "Wenn alle Spieler gezeichnet haben"
+    (Rundenende verwalten) --> (Spielende verwalten) : "Wenn maximale Runden erreicht"
+    (Spielende verwalten) --> (Zurück zur Lobby)
+    (Rundenende verwalten) --> (Wort auswählen) : "Neue Runde starten, wenn kein Spielende"
+}
+@enduml
