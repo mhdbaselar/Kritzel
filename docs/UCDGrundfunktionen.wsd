@@ -1,0 +1,56 @@
+@startuml
+
+top to bottom direction
+
+actor Spieler as SP
+
+usecase BM as "Betritt Spiel-Menü"
+
+package Menü {
+
+    usecase EL as "Erstellt Lobby"
+    usecase TB as "Tritt Spiel bei"
+
+    package Lobby {
+    usecase WB as "Wartet auf Spielbeginn"
+    usecase ST as "Alle Bereit"
+    usecase S as "Neues Spiel"
+    
+        package Spiel {
+            usecase RS as "Neue Runde startet"
+            
+            package Runde {
+            usecase Z as "Ein Spieler zeichnet"
+            usecase WW as "Wort auswählen"
+            usecase E as "Andere Spieler raten"
+            usecase PKT as "Erhält Punkte"
+            usecase RE as "Rundenende"
+            }
+            
+            usecase SE as "Spielende"
+        }
+    }
+}
+
+SP --> BM
+BM --> EL
+BM --> TB
+EL --> WB
+TB --> WB
+WB --> ST
+ST --> S
+
+S --> RS
+RS --> WW : "Spieler wird zum Zeichner"
+WW --> Z : "Spieler zeichnet Wort"
+RS --> E : "Andere Spieler raten"
+Z --> PKT : "Zeichner erhält Punkte"
+E --> PKT : "Rater erhält Punkte"
+PKT --> RE : "Ende der Runde"
+
+RE --> RS : "Zeichner wechselt"
+RE -down-> SE : "Spielende"
+SE -up-> S : "Neues Spiel starten"
+SE -up-> BM : "Rückkehr zum Menü"
+
+@enduml
