@@ -1,4 +1,4 @@
-# Spielkonzerption
+# Spielkonzeption
 
 ## 1. Konzeption/Auswahl des zu realisierenden Spieles
 
