@@ -17,7 +17,7 @@ Das Spiel schafft eine unterhaltsame, wettbewerbsorientierte Atmosphäre. Es eig
 
 ## 3. Skizzen
 
-- siehe skibble.io
+siehe /skizzen
 
 ## 4. Ausbaustufen
 
