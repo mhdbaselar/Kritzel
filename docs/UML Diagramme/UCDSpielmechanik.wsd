@@ -1,5 +1,4 @@
-
-@startuml
+@startuml UCD Spielmechanik
 actor Spieler
 actor System
 
