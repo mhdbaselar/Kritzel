@@ -1,7 +1,6 @@
-### Docker ###
 /docker/
-### Docker ###
+/app/public/bundle.js
+/app/node_modules/
 
 ### OS AND ENVIRONMENT SPECIFIC FILES ###
 **/.DS_Store
-### OS AND ENVIRONMENT SPECIFIC FILES ###
