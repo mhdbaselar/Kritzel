@@ -3,7 +3,7 @@
 cd app
 
 npm install
-npm install browserify
+npm install -g browserify
 browserify ./client/main.js -o ./public/bundle.js
 node ./server/gameserver.js
 
