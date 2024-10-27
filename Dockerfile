@@ -2,9 +2,8 @@ FROM node:18
 
 WORKDIR /app
 COPY app/. .
+COPY entrypoint.sh .
 
-#RUN npm install
-#RUN npm install -g browserify
 RUN ["chmod", "+x", "./entrypoint.sh"]
 
 EXPOSE 8123
