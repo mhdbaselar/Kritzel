@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-cd app
+cd /app
 
 npm install
 npm install -g browserify
