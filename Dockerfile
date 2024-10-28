@@ -9,4 +9,4 @@ RUN ["chmod", "+x", "./entrypoint.sh"]
 EXPOSE 8123
 
 CMD ["npm", "start"]
-ENTRYPOINT ["sh", "entrypoint.sh"]
+ENTRYPOINT ["sh", "./entrypoint.sh"]
