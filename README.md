@@ -2,7 +2,7 @@
 
 ## Konflikte zwischen Windows und Git
 
-Da Microsoft kläglich mit ihrer Marktmacht versuchte, ein eigenes Dateisystem (DOS-Dateisystem) in die Welt zu setzen und damit das Unix-Dateisystem (Linux, MacOS, Git und basically ALLES andere) zu verdrängen, haben wir, da wir in der Gruppe beide Dateisysteme verwenden, nun das Vergnügen, dass es immer mal wieder zu Konflikten bei Windows und Git kommen wird. Alle Nutzer sollten deshalb bei sich auf dem System die folgende Einstellung (einfach irgendwo im CMD) vornehmen:
+Da Microsoft kläglich mit ihrer Marktmacht versuchte, ein eigenes Dateisystem (DOS-Dateisystem) in die Welt zu setzen und damit das Unix-Dateisystem (Linux, MacOS, Git und basically ALLES andere) zu verdrängen, haben wir, da wir in der Gruppe beide Dateisysteme verwenden, nun das Vergnügen, dass es immer mal wieder zu Konflikten bei Windows und Git kommen wird. Alle Windows-Nutzer sollten deshalb bei sich auf dem Windows-System die folgende Einstellung (einfach irgendwo im CMD) vornehmen:
 > git config --global core.autocrlf true
 
 Sollte es danach noch zu Fehlern kommen, sollte sich von den betroffenen Nutzern ernsthaft über die Anschaffung eines vernünftigen (Unix-Like) Betriebssystem Gedanken gemacht werden, da ich hier mit Microsofts "Wir kochen hier unser eigenes Ding und begeben uns auf keinen Fall auf bestehende Standards aller anderen hinab"-Gehabe fertig habe und auch nicht mehr weiter weiß, wenn es jetzt noch zu Konflikten kommt.
