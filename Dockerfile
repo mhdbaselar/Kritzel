@@ -1,4 +1,4 @@
-FROM node:18
+FROM node:23
 
 WORKDIR /app
 COPY app/. .
@@ -9,4 +9,4 @@ RUN ["chmod", "+x", "./entrypoint.sh"]
 EXPOSE 8123
 
 CMD ["npm", "start"]
-ENTRYPOINT ["sh", "./entrypoint.sh"]
+ENTRYPOINT ["sh", "entrypoint.sh"]
