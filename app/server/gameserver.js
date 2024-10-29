@@ -1,4 +1,3 @@
-
 "use strict"
 
 const TinyServer = require('./tinyserver')
@@ -9,7 +8,7 @@ let server = new TinyServer(8123, (data) => {
 })
 
 let game = new ServerGame(() => {
-    console.log('tick')
+    //console.log('tick')
     let json = JSON.stringify(game.elementList)
     server.broadcastWsMessage(json, false)
 })
