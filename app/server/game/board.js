@@ -10,7 +10,13 @@ module.exports = class Board {
     #initialColor;
     #backgroundColor;
 
-    constructor(rows, columns, initialColor) {
+    /**
+     * Constructor to instanciate Board
+     * @param {int} columns number of columns (x coordinates)
+     * @param {int} rows number of rows (y coordinates)
+     * @param {string} initialColor color code in hexadecimal notation
+     */
+    constructor(columns, rows, initialColor) {
         this.#canvas = new Array();
 
         this.#rows = rows;

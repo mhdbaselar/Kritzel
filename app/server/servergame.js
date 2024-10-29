@@ -1,8 +1,5 @@
 "use strict"
 
-const RandomWalkCircleElement = require('../game/randomwalkcircleelement')
-const ElementList = require('../game/elementlist')
-
 const Board = require('./game/board');
 
 module.exports = class ServerGame {
@@ -11,29 +8,22 @@ module.exports = class ServerGame {
     constructor(tickCallback) {
         this.tickCallback = tickCallback;
         this.intervalReference = null;
-        this.elementList = null;
         this.#board = null;
     }
 
     start() {
-        this.elementList = new ElementList()
-        for (let i = 0; i < 60; i++) {
-            this.elementList.add(new RandomWalkCircleElement(i * 10, 150))
-        }
+        this.#board = new Board(400, 300, '#FFFFFF');
 
-        this.#board = new Board(4, 6, '#FFFFFF');
-
-        this.intervalReference = setInterval(this.tick.bind(this), 100)
+        this.intervalReference = setInterval(this.tick.bind(this), 100);
     }
 
     stop() {
-        if (this.intervalReference) clearInterval(this.intervalReference)
-        this.intervalReference = null
+        if (this.intervalReference) clearInterval(this.intervalReference);
+        this.intervalReference = null;
     }
 
     tick() {
-        this.elementList.action()
-        this.tickCallback()
+        this.tickCallback();
     }
 
     getBoard(){

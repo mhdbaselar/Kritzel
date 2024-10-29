@@ -5,9 +5,7 @@ const Message = require('./class/message');
 
 module.exports = class ClientGame {
 
-    constructor() {
-        this.elementList = null
-    }
+    constructor() {}
 
     openWebSocket() {
         // build websocket-url from current location
@@ -18,13 +16,14 @@ module.exports = class ClientGame {
         this.socket.onmessage = (event) => { this.update(event.data) }
     }
     
+    //DIESE FUNKTION WIRD AUFGERUFEN, WENN VOM SERVER DER NEUE INHALT ÜBERMITTELT WURDE
     update(json) {
-        let el = JSON.parse(json);
+        let canvasData = JSON.parse(json);
 
         //TODO: Update Canvas clientseitig
         //HIER WIRD DIE JSON MIT DEM INHALT DES BOARDS EMPFANGEN UND HIER KANN DANN DER INHALT DES CANVAS AKTUALISIERT WERDEN
 
-        console.log(el);
+        console.log(canvasData);
     }
 
     //------------------------------------- 
@@ -80,6 +79,10 @@ module.exports = class ClientGame {
 
         this.send(JSON.stringify(message));
     }
+
+    //------------------------------------- 
+    //-----------HELP FUNCTIONS------------
+    //-------------------------------------
 
     send(message) {
         if (this.socket)
