@@ -5,6 +5,6 @@ cd /app
 npm install
 npm install -g browserify
 browserify ./client/main.js -o ./public/bundle.js
-node ./server/gameserver.js
+node ./kritzel.js
 
 exec "$@"

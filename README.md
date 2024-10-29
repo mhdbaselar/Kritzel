@@ -23,6 +23,6 @@ Im Buildprozess wird automatisch auf Grundlage des Quelltextes eine aktualisiert
 
 > npm install
 
-> node ./server/gameserver.js
+> node ./kritzel.js
 
 Bitte beachtet, dass der Docker-Container sicherstellt, dass sich die Software im Deployment genau so verhält wie bei euch lokal auf dem Rechner. Die Arbeit ohne Docker-Container, sondern nur mit lokalem Environment, kann zu unvorhergesehenen Bugs führen.

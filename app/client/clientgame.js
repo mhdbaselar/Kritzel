@@ -1,15 +1,11 @@
 "use strict"
 
-const RandomWalkCircleElement = require('../game/randomwalkcircleelement')
-const ElementList = require('../game/elementlist')
-
-//----------------------
+const Action = require('./class/action');
+const Message = require('./class/message');
 
 module.exports = class ClientGame {
 
-    constructor() {
-        this.elementList = null
-    }
+    constructor() {}
 
     openWebSocket() {
         // build websocket-url from current location
@@ -19,32 +15,78 @@ module.exports = class ClientGame {
         this.socket.onerror = (event) => { console.log("socket error: " + JSON.stringify(event)) }
         this.socket.onmessage = (event) => { this.update(event.data) }
     }
-
-    //----------------------
-
+    
+    //DIESE FUNKTION WIRD AUFGERUFEN, WENN VOM SERVER DER NEUE INHALT ÜBERMITTELT WURDE
     update(json) {
-        this.elementList = new ElementList()
-        let el = JSON.parse(json)
-        for (let i = 0; i < el.length; i++) {
-            // dynamically create element by its classType attribute
-            let element = eval('new ' + el[i].classType + '()')
-            Object.assign(element, el[i])
-            this.elementList.add(element)
-        }
+        let canvasData = JSON.parse(json);
 
-        let mycanvas = window.document.getElementById("mycanvas")
-        let ctx = mycanvas.getContext('2d')
-        //--- clear screen
-        ctx.fillStyle = 'rgba(235, 250, 255, 0.05)'        // alpha < 1 löscht den Bildschrim nur teilweise -> bewegte Gegenstände erzeugen Spuren
-        ctx.fillRect(0, 0, mycanvas.clientWidth, mycanvas.clientHeight)
-        //--- draw elements
-        this.elementList.draw(ctx)
+        //TODO: Update Canvas clientseitig
+        //HIER WIRD DIE JSON MIT DEM INHALT DES BOARDS EMPFANGEN UND HIER KANN DANN DER INHALT DES CANVAS AKTUALISIERT WERDEN
+
+        console.log(canvasData);
     }
 
-    //----------------------
+    //------------------------------------- 
+    //----------SENDING FUNCTIONS----------
+    //-------------------------------------
+
+    /**
+     * Sends a draw action direct to the server
+     * @param {string} tool pen | eraser: Tool that is used for draw action, pen by default
+     * @param {int} x x-coordinate of pixel to draw on
+     * @param {int} y y-coordinate of pixel to draw on
+     * @param {string} color color code in hexadecimal notation
+     * @param {int} thickness thickness of draw action
+     */
+    sendDrawAction(tool = 'pen', x = 0, y = 0, color = '#000000', thickness = 3){
+        let _tool = 'pen';
+
+        if(tool == 'pen') _tool = 'pen';
+        if(tool == 'eraser') _tool = 'eraser';
+        
+        let action = new Action(_tool, x , y, color, thickness);
+        let message = new Message('action', action);
+
+        //this.send(JSON.stringify(message));
+
+        let _message = JSON.stringify(message);
+
+        console.log('Test');
+
+        this.send(_message);
+
+        //if (this.socket)
+            //this.socket.send(_message)
+    }
+    
+    /**
+     * Asks the server to clear the whole board
+     */
+    sendClearAction(){
+        let action = new Action('clear', 0 , 0, '', 0);
+        let message = new Message('action', action);
+
+        this.send(JSON.stringify(message));
+    }
+
+    /**
+     * Asks the server to fill the whole board into one color
+     * @param {string} color color code in hexadecimal notation
+     */
+    sendFillAction(color = '#000000'){
+        let action = new Action('fill', 0 , 0, color, 0);
+        let message = new Message('action', action);
+
+        this.send(JSON.stringify(message));
+    }
+
+    //------------------------------------- 
+    //-----------HELP FUNCTIONS------------
+    //-------------------------------------
 
     send(message) {
-        if (this.socket)    this.socket.send(message)
+        if (this.socket)
+            this.socket.send(message)
     }
 
 }
