@@ -21,24 +21,12 @@ module.exports = class ClientGame {
     }
 
     //----------------------
-
+    
     update(json) {
         this.elementList = new ElementList()
         let el = JSON.parse(json)
-        for (let i = 0; i < el.length; i++) {
-            // dynamically create element by its classType attribute
-            let element = eval('new ' + el[i].classType + '()')
-            Object.assign(element, el[i])
-            this.elementList.add(element)
-        }
-
-        let mycanvas = window.document.getElementById("mycanvas")
-        let ctx = mycanvas.getContext('2d')
-        //--- clear screen
-        ctx.fillStyle = 'rgba(235, 250, 255, 0.05)'        // alpha < 1 löscht den Bildschrim nur teilweise -> bewegte Gegenstände erzeugen Spuren
-        ctx.fillRect(0, 0, mycanvas.clientWidth, mycanvas.clientHeight)
-        //--- draw elements
-        this.elementList.draw(ctx)
+        
+        console.log(el);
     }
 
     //----------------------

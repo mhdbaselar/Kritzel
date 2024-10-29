@@ -19,7 +19,7 @@ module.exports = class Board {
         this.#initialColor = initialColor;
         this.#backgroundColor = initialColor;
         
-        this.clearWholeBoard();
+        this.clear();
     }
 
     /**
@@ -37,16 +37,16 @@ module.exports = class Board {
         this.#drawIn(x, y, this.#backgroundColor, thickness);
     }
 
-    clearWholeBoard(){
+    clear(){
         this.#setWholeBoard(this.#initialColor);
     }
 
-    colorWholeBoard(color){
+    fill(color){
         this.#setWholeBoard(color);
     }
 
     getBoard(){
-        return this.#canvas();
+        return this.#canvas;
     }
 
     //Hilfsmethoden
