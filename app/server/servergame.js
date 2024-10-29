@@ -3,7 +3,7 @@
 const RandomWalkCircleElement = require('../game/randomwalkcircleelement')
 const ElementList = require('../game/elementlist')
 
-const Board = require('../game/board');
+const Board = require('./game/board');
 
 module.exports = class ServerGame {
     #board;
@@ -12,7 +12,7 @@ module.exports = class ServerGame {
         this.tickCallback = tickCallback;
         this.intervalReference = null;
         this.elementList = null;
-        this.#board = new Board(4, 6, '#FFFFFF');
+        this.#board = null;
     }
 
     start() {

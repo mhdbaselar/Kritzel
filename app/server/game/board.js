@@ -49,28 +49,18 @@ module.exports = class Board {
         return this.#canvas;
     }
 
-    //Hilfsmethoden
-
+    //------------------------------------- 
+    //------------HELP FUNCTIONS-----------
+    //-------------------------------------
 
     #drawIn(x, y, color, thickness){
-        for (let i = 0; i < thickness; i++) {
-            //i entspricht y
-            for (let j = 0; j < thickness; j++) {
-                //j entspricht x
-
-                //Wenn x-j >= 0 und x+j < rows
-                if(x-j >= 0){
-                    //Wenn y-i >= 0 --> Zeichne Farbe
-                    if(y-i >= 0) this.#canvas[y-i][x-j] = color;
-                    //Wenn y+i < rows --> Zeichne Farbe
-                    if(y+i < this.#rows) this.#canvas[y+i][x-j] = color;
-                }
-
-                if(x+j < this.#columns){
-                    //Wenn y-i >= 0 --> Zeichne Farbe
-                    if(y-i >= 0) this.#canvas[y-i][x+j] = color;
-                    //Wenn y+i < rows --> Zeichne Farbe
-                    if(y+i < this.#rows) this.#canvas[y+i][x+j] = color;
+        for (let yt = (-thickness+1); yt < thickness; yt++) {
+            for (let xt = (-thickness+1); xt < thickness; xt++) {
+                
+                if(y+yt >= 0 && y+yt < this.#rows){
+                    if(x+xt >= 0 && x+xt < this.#columns){
+                        this.#canvas[y+yt][x+xt] = color;
+                    }
                 }
             }
         }
@@ -78,10 +68,10 @@ module.exports = class Board {
 
     #setWholeBoard(color){
         this.#backgroundColor = color;
-        for (let i = 0; i < this.#rows; i++) {
-            this.#canvas[i] = [];
-            for (let j = 0; j < this.#columns; j++) {
-                this.#canvas[i][j] = color;
+        for (let j = 0; j < this.#rows; j++) {
+            this.#canvas[j] = [];
+            for (let i = 0; i < this.#columns; i++) {
+                this.#canvas[j][i] = color;
             }
         }
     }
