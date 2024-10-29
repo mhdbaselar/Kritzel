@@ -1,7 +1,7 @@
 "use strict"
 
-const TinyServer = require('./tinyserver')
-const ServerGame = require('./servergame')
+const TinyServer = require('./server/tinyserver');
+const ServerGame = require('./server/servergame');
 
 let server = new TinyServer(8123, (data) => {
     console.log('received: %s', data);

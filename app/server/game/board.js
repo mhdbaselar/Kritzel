@@ -1,6 +1,3 @@
-/**
- * Serverseite Verwaltung der Leinwand
- */
 "use strict"
 
 module.exports = class Board {
