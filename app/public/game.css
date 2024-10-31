@@ -25,7 +25,6 @@ body {
     padding: 10px;
     display: flex;
     flex-direction: column;
-    /* Remove max-width or set it to 100% */
     max-width: 100%;
     box-sizing: border-box;
   }
@@ -42,17 +41,12 @@ body {
 .toolbar {
   display: flex;
   justify-content: center;
-  /* Center elements horizontally within the toolbar */
   align-items: center;
-  /* Center elements vertically */
   gap: 10px;
-  /* Adds spacing between elements */
   padding: 0 10px 10px 10px;
   border-radius: 5px;
   width: 50vw;
-  /* Sets toolbar width to 50% of viewport width */
   margin: 2vh auto 0;
-  /* Centers toolbar horizontally and adds top margin */
 }
 
 
@@ -76,7 +70,10 @@ body {
 
 #colorPicker {
     display: flex;
+    background-color: #1d2194;
     flex-direction: row;
+    outline: 8px solid #1d2194;
+    gap: 3px; 
 }
 
 .color-button {
@@ -139,7 +136,6 @@ body {
   padding: 10px;
   overflow-y: auto;
   background-color: #f9f9f9;
-  /* Height will be synchronized with the canvas */
 }
 
 .user {
