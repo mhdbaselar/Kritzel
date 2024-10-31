@@ -1,3 +1,4 @@
+// clientgame.js
 "use strict"
 
 const Action = require('./class/action');
@@ -16,14 +17,77 @@ module.exports = class ClientGame {
         this.socket.onmessage = (event) => { this.update(event.data) }
     }
     
-    //DIESE FUNKTION WIRD AUFGERUFEN, WENN VOM SERVER DER NEUE INHALT ÜBERMITTELT WURDE
+    // This function is called when new content is received from the server
     update(json) {
         let canvasData = JSON.parse(json);
 
-        //TODO: Update Canvas clientseitig
-        //HIER WIRD DIE JSON MIT DEM INHALT DES BOARDS EMPFANGEN UND HIER KANN DANN DER INHALT DES CANVAS AKTUALISIERT WERDEN
+        // Update the canvas on the client side
+        let canvas = document.getElementById('drawingCanvas');
+        if (!canvas) {
+            console.error('Canvas not found');
+            return;
+        }
+        let ctx = canvas.getContext('2d');
 
-        console.log(canvasData);
+        // Create an ImageData object with dimensions 600x400
+        let imageData = ctx.createImageData(600, 400); // Width 600, Height 400
+
+        // Loop through canvasData and set the pixel data
+        for (let y = 0; y < 400; y++) {
+            for (let x = 0; x < 600; x++) {
+                let hexColor = canvasData[y][x]; // Should be '#RRGGBB'
+
+                let index = (y * 600 + x) * 4;
+
+                let rgb = hexToRgb(hexColor);
+
+                if (!rgb) {
+                    // If invalid color, default to white
+                    rgb = { r: 255, g: 255, b: 255 };
+                }
+
+                imageData.data[index] = rgb.r;
+                imageData.data[index + 1] = rgb.g;
+                imageData.data[index + 2] = rgb.b;
+                imageData.data[index + 3] = 255; // Alpha channel
+            }
+        }
+
+        // Create a temporary canvas to scale the imageData
+        let tempCanvas = document.createElement('canvas');
+        tempCanvas.width = 600;
+        tempCanvas.height = 400;
+        let tempCtx = tempCanvas.getContext('2d');
+
+        // Put the imageData onto the temporary canvas
+        tempCtx.putImageData(imageData, 0, 0);
+
+        // Clear the main canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Draw the temp canvas onto the main canvas, scaling it to fit
+        ctx.drawImage(tempCanvas, 0, 0, canvas.width, canvas.height);
+
+        function hexToRgb(hex) {
+            // Remove '#' if present
+            hex = hex.replace(/^#/, '');
+
+            if (hex.length === 3) {
+                // Expand shorthand form (#03F => #0033FF)
+                hex = hex.split('').map(c => c + c).join('');
+            }
+
+            if (hex.length !== 6) {
+                return null;
+            }
+
+            let num = parseInt(hex, 16);
+            let r = (num >> 16) & 255;
+            let g = (num >> 8) & 255;
+            let b = num & 255;
+
+            return { r: r, g: g, b: b };
+        }
     }
 
     //------------------------------------- 
@@ -47,16 +111,11 @@ module.exports = class ClientGame {
         let action = new Action(_tool, x , y, color, thickness);
         let message = new Message('action', action);
 
-        //this.send(JSON.stringify(message));
-
         let _message = JSON.stringify(message);
 
-        console.log('Test');
+        console.log(_message);
 
         this.send(_message);
-
-        //if (this.socket)
-            //this.socket.send(_message)
     }
     
     /**

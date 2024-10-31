@@ -1,16 +1,31 @@
 <!DOCTYPE html>
-<html>
+<html lang="de">
 
 <head>
-    <meta charset="utf-8">
-    <title>oh, what a game!</title>
-
-    <link rel="stylesheet" type="text/css" href="game.css" />
-    <script src="bundle.js"></script>
+    <meta charset="UTF-8">
+    <title>Kritzel</title>
+    <link rel="stylesheet" href="game.css">
 </head>
 
-<body>
-    <canvas id="mycanvas" width="600" height="300"></canvas>
+<body style="background-color: #000350;">
+
+    <div class="head"><img src="kritzel.png" alt="Kritzel Logo" height="60vh"></div>
+    <div class="row">
+        <div class="column"></div>
+        <div class="column"></div>
+        <canvas id="drawingCanvas"></canvas>
+        <div class="toolbar">
+            <input type="color" id="colorPicker" value="#000000">
+            <input type="range" id="penSize" min="1" max="50" value="5">
+            <button id="clearCanvas">Leeren</button>
+            <button id="saveCanvas">Speichern</button>
+        </div>
+        <div class="column"></div>
+    </div>
+
+    <div id="mousePosition"></div>
+
+    <script src="bundle.js"></script>
 </body>
 
 </html>
