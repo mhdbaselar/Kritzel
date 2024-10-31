@@ -81,45 +81,27 @@ window.addEventListener("load", () => {
   window.addEventListener("resize", resizeCanvas);
 
   function resizeCanvas() {
-    // Create a temporary canvas to store the current drawing
     const tempCanvas = document.createElement("canvas");
     const tempCtx = tempCanvas.getContext("2d");
 
-    // Set the size of the temporary canvas to the current canvas size
+    // Preserve the current drawing
     tempCanvas.width = canvas.width;
     tempCanvas.height = canvas.height;
-
-    // Draw the current canvas content onto the temporary canvas
     tempCtx.drawImage(canvas, 0, 0);
 
-    // Calculate the new canvas size while maintaining aspect ratio
-    const maxWidth = window.innerWidth * 0.5; // Max width is 50% of window width
-    const maxHeight = window.innerHeight * 0.5; // Max height is 50% of window height
+    // Get column width to resize canvas
+    const columnWidth = canvas.parentElement.clientWidth;
+    const newWidth = columnWidth;
+    const newHeight = newWidth / ASPECT_RATIO;
 
-    let newWidth = maxWidth;
-    let newHeight = newWidth / ASPECT_RATIO;
-
-    // Adjust if height exceeds maxHeight
-    if (newHeight > maxHeight) {
-      newHeight = maxHeight;
-      newWidth = newHeight * ASPECT_RATIO;
-    }
-
-    // Update the canvas size
     canvas.width = newWidth;
     canvas.height = newHeight;
 
-    // Scale the drawing to the new canvas size
+    // Draw preserved image onto resized canvas
     ctx.drawImage(
       tempCanvas,
-      0,
-      0,
-      tempCanvas.width,
-      tempCanvas.height,
-      0,
-      0,
-      canvas.width,
-      canvas.height
+      0, 0, tempCanvas.width, tempCanvas.height,
+      0, 0, canvas.width, canvas.height
     );
   }
 
