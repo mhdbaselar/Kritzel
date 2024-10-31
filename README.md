@@ -17,6 +17,8 @@ Sowohl zum erstmaligen Build des Containers als auch zum Recreate (nach Änderun
 Nach dem Build des Containers lässt sich der Container starten mit
 > docker compose up -d
 
+Test für git Erklärung
+
 Im Buildprozess wird automatisch auf Grundlage des Quelltextes eine aktualisierte bundle.js erstellt und benötigte Pakete installiert. Sollte die Ausführung ohne Docker-Container gewünscht sein, lässt sich dies durch die folgenden Befehle durchführen (Befehle müssen im Verzeichnis app ausgeführt werden):
 
 > browserify ./client/main.js -o ./public/bundle.js
