@@ -107,6 +107,7 @@ module.exports = class ClientGame {
 
         if(tool == 'pen') _tool = 'pen';
         if(tool == 'eraser') _tool = 'eraser';
+        if(tool == 'fill') _tool = 'fill';
         
         let action = new Action(_tool, x , y, color, thickness);
         let message = new Message('action', action);
