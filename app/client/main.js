@@ -103,7 +103,22 @@ window.addEventListener("load", () => {
       0, 0, tempCanvas.width, tempCanvas.height,
       0, 0, canvas.width, canvas.height
     );
+
+    syncChatHeight();
   }
+
+  // Sync Chat height to canvas height
+  function syncChatHeight() {
+    const chatMessages = document.querySelector(".chat-messages");
+    const canvasHeight = canvas.clientHeight; // Get the canvas height in pixels
+
+    // Set the height of chat-messages to match canvas height
+    chatMessages.style.height = canvasHeight - 20 + "px";
+  }
+
+  // Initial Sync of Chat height
+  syncChatHeight();
+
 
   function getMousePos(e) {
     const rect = canvas.getBoundingClientRect();
@@ -211,20 +226,20 @@ document.addEventListener("DOMContentLoaded", () => {
   const chatMessages = document.querySelector(".chat-messages");
 
   sendButton.addEventListener("click", () => {
-      const message = chatInput.value.trim();
-      if (message !== "") {
-          const messageDiv = document.createElement("div");
-          messageDiv.textContent = message;
-          chatMessages.appendChild(messageDiv);
-          chatInput.value = "";
-          chatMessages.scrollTop = chatMessages.scrollHeight;
-      }
+    const message = chatInput.value.trim();
+    if (message !== "") {
+      const messageDiv = document.createElement("div");
+      messageDiv.textContent = 'User: ' + message; // Username ist hier hardcoded erstmal
+      chatMessages.appendChild(messageDiv);
+      chatInput.value = "";
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
   });
 
-  // Optional: Send message on Enter key press
+  // Send message on Enter key press
   chatInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-          sendButton.click();
-      }
+    if (e.key === "Enter") {
+      sendButton.click();
+    }
   });
 });
