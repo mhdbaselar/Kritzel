@@ -44,15 +44,7 @@ body {
 }
 
 #drawingCanvas {
-  width: 100%;
-  height: auto;
-  aspect-ratio: 3 / 2;
-  padding-left: 0;
-  padding-right: 0;
-  margin-left: auto;
-  margin-right: auto;
   display: block;
-  background-color: #ffffff;
 }
 
 .toolbar button {
