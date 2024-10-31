@@ -15,7 +15,17 @@
       <div class="column"></div>
       <canvas id="drawingCanvas"></canvas>
       <div class="toolbar">
-        <input type="color" id="colorPicker" value="#000000" />
+        <!-- <input type="color" id="colorPicker" value="#000000" /> -->
+        <div id="colorPicker">
+            <button class="color-button" style="background-color: #000000;" data-color="#000000"></button>
+            <button class="color-button" style="background-color: #FF0000;" data-color="#FF0000"></button>
+            <button class="color-button" style="background-color: #00FF00;" data-color="#00FF00"></button>
+            <button class="color-button" style="background-color: #0000FF;" data-color="#0000FF"></button>
+            <button class="color-button" style="background-color: #FFFF00;" data-color="#FFFF00"></button>
+            <button class="color-button" style="background-color: #FF00FF;" data-color="#FF00FF"></button>
+            <button class="color-button" style="background-color: #00FFFF;" data-color="#00FFFF"></button>
+            <button class="color-button" style="background-color: #FFFFFF;" data-color="#FFFFFF"></button>
+        </div>
         <input type="range" id="penSize" min="3" max="10" value="5" />
         <button id="clearCanvas">Leeren</button>
         <button id="saveCanvas">Speichern</button>
