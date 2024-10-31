@@ -23,8 +23,15 @@ window.addEventListener("load", () => {
   const colorPicker = document.getElementById("colorPicker");
   const penSizeInput = document.getElementById("penSize");
 
-  colorPicker.addEventListener("input", (e) => {
-    penColor = e.target.value;
+//   colorPicker.addEventListener("input", (e) => {
+//     penColor = e.target.value;
+//   });
+
+  // Color Buttons   
+  document.querySelectorAll('.color-button').forEach(button => {
+    button.addEventListener('click', (e) => {
+      penColor = e.target.getAttribute('data-color');
+    });
   });
 
   penSizeInput.addEventListener("input", (e) => {
