@@ -56,7 +56,6 @@ window.addEventListener("load", () => {
 
     // Update the global `tool` variable
     tool = selectedTool;
-    console.log("Selected tool:", tool);
   }
 
 
@@ -81,47 +80,44 @@ window.addEventListener("load", () => {
   window.addEventListener("resize", resizeCanvas);
 
   function resizeCanvas() {
-    // Create a temporary canvas to store the current drawing
     const tempCanvas = document.createElement("canvas");
     const tempCtx = tempCanvas.getContext("2d");
 
-    // Set the size of the temporary canvas to the current canvas size
+    // Preserve the current drawing
     tempCanvas.width = canvas.width;
     tempCanvas.height = canvas.height;
-
-    // Draw the current canvas content onto the temporary canvas
     tempCtx.drawImage(canvas, 0, 0);
 
-    // Calculate the new canvas size while maintaining aspect ratio
-    const maxWidth = window.innerWidth * 0.5; // Max width is 50% of window width
-    const maxHeight = window.innerHeight * 0.5; // Max height is 50% of window height
+    // Get column width to resize canvas
+    const columnWidth = canvas.parentElement.clientWidth;
+    const newWidth = columnWidth;
+    const newHeight = newWidth / ASPECT_RATIO;
 
-    let newWidth = maxWidth;
-    let newHeight = newWidth / ASPECT_RATIO;
-
-    // Adjust if height exceeds maxHeight
-    if (newHeight > maxHeight) {
-      newHeight = maxHeight;
-      newWidth = newHeight * ASPECT_RATIO;
-    }
-
-    // Update the canvas size
     canvas.width = newWidth;
     canvas.height = newHeight;
 
-    // Scale the drawing to the new canvas size
+    // Draw preserved image onto resized canvas
     ctx.drawImage(
       tempCanvas,
-      0,
-      0,
-      tempCanvas.width,
-      tempCanvas.height,
-      0,
-      0,
-      canvas.width,
-      canvas.height
+      0, 0, tempCanvas.width, tempCanvas.height,
+      0, 0, canvas.width, canvas.height
     );
+
+    syncChatHeight();
   }
+
+  // Sync Chat height to canvas height
+  function syncChatHeight() {
+    const chatMessages = document.querySelector(".chat-messages");
+    const canvasHeight = canvas.clientHeight; // Get the canvas height in pixels
+
+    // Set the height of chat-messages to match canvas height
+    chatMessages.style.height = canvasHeight - 20 + "px";
+  }
+
+  // Initial Sync of Chat height
+  syncChatHeight();
+
 
   function getMousePos(e) {
     const rect = canvas.getBoundingClientRect();
@@ -150,7 +146,6 @@ window.addEventListener("load", () => {
 
   function draw(e) {
     if (!drawing) return;
-    console.log("Current tool:", tool);
 
     e.preventDefault(); // Prevent scrolling on touch devices
 
@@ -220,4 +215,62 @@ window.addEventListener("load", () => {
   function clearMousePosition() {
     mousePositionDiv.textContent = "";
   }
+
+  // Dummy data für users
+  const users = [
+    { name: "Player1", points: 0 },
+    { name: "Player2", points: 20 },
+    { name: "Player3", points: 15 },
+  ];
+
+  // Render User
+  function renderUsers() {
+    const usersContainer = document.querySelector(".users-container");
+    usersContainer.innerHTML = ""; // Clear existing content
+
+    users.forEach((user) => {
+      const userDiv = document.createElement("div");
+      userDiv.classList.add("user");
+
+      const nameDiv = document.createElement("div");
+      nameDiv.classList.add("user-name");
+      nameDiv.textContent = user.name;
+
+      const pointsDiv = document.createElement("div");
+      pointsDiv.classList.add("user-points");
+      pointsDiv.textContent = `${user.points} Punkte`;
+
+      userDiv.appendChild(nameDiv);
+      userDiv.appendChild(pointsDiv);
+
+      usersContainer.appendChild(userDiv);
+    });
+  }
+
+  // Init Users
+  renderUsers();
+
+  // chat
+  const sendButton = document.getElementById("sendButton");
+  const chatInput = document.getElementById("chatMessage");
+  const chatMessages = document.querySelector(".chat-messages");
+
+  sendButton.addEventListener("click", () => {
+    const message = chatInput.value.trim();
+    if (message !== "") {
+      const messageDiv = document.createElement("div");
+      messageDiv.textContent = 'Player1: ' + message; // Username ist hier hardcoded erstmal
+      chatMessages.appendChild(messageDiv);
+      chatInput.value = "";
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+  });
+
+  // Send message on Enter key press
+  chatInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      sendButton.click();
+    }
+  });
 });
+

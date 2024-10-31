@@ -1,83 +1,142 @@
-/* styles.css */
+/* game.css */
 
 body {
-    margin: 0;
-    overflow: hidden;
+  margin: 0;
+  overflow: hidden;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
 }
-/*
-.toolbar {
-    background: rgba(255, 255, 255, 0.8);
-    padding: 10px;
-    border-radius: 8px;
-    z-index: 1;
-    margin-top: 4vh;
-    width: 50vw;
-    margin-left: auto;
-    margin-right: auto;
-    display: block;
-}*/
-
-.toolbar {
-    display: flex;
-    justify-content: center; /* Center elements horizontally within the toolbar */
-    align-items: center;     /* Center elements vertically */
-    gap: 10px;               /* Adds spacing between elements */
-    padding: 10px;
-    border-radius: 5px;
-    width: 50vw;             /* Sets toolbar width to 50% of viewport width */
-    margin: 2vh auto 0;      /* Centers toolbar horizontally and adds top margin */
-  }
 
 .head {
-    padding-left: 1vw;
-    margin: 3vh;
-    border-radius: 8px;
-    background-color: #fff;
-    opacity: 90%;
+  padding-left: 1vw;
+  margin: 20px 30px 10px 30px;
+  border-radius: 8px;
+  background-color: #fff;
+  opacity: 90%;
+}
+
+.row {
+  display: flex;
+  padding: 0 20px 0 20px;
+}
+
+.column {
+  flex: 1 1 33%; 
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  max-width: 50%;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: center;
+  /* Center elements horizontally within the toolbar */
+  align-items: center;
+  /* Center elements vertically */
+  gap: 10px;
+  /* Adds spacing between elements */
+  padding: 0 10px 10px 10px;
+  border-radius: 5px;
+  width: 50vw;
+  /* Sets toolbar width to 50% of viewport width */
+  margin: 2vh auto 0;
+  /* Centers toolbar horizontally and adds top margin */
 }
 
 #drawingCanvas {
-    padding-left: 0;
-    padding-right: 0;
-    margin-top: 3vh;
-    margin-left: auto;
-    margin-right: auto;
-    display: block;
-    background-color: #ffffff;
+  display: block;
 }
 
 .toolbar button {
-    padding: 5px 10px;
-    font-size: 16px;
+  padding: 5px 10px;
+  font-size: 16px;
 }
 
 #mousePosition {
-    position: fixed;
-    bottom: 10px;
-    right: 10px;
-    background: #fff;
-    color: #000;
-    padding: 5px 10px;
-    border-radius: 8px;
-    font-family: Arial, sans-serif;
-    font-size: 14px;
-    z-index: 2;
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  background: #fff;
+  color: #000;
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  z-index: 2;
 }
 
 .icon {
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  
-  .icon:hover {
-    background-color: #1d2194;
-    border-radius: 4px;
-  }
-  
-  .selected-tool {
-    background-color: #1d2194;
-  }
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.icon:hover {
+  background-color: #1d2194;
+  border-radius: 4px;
+}
+
+.selected-tool {
+  background-color: #1d2194;
+}
 
 #clearCanvas {
-    margin-left: 2vw;
+  margin-left: 2vw;
+}
+
+/* Styles for chat container */
+.chat-container {
+  flex-direction: column;
+  height: 100%;
+}
+
+.chat-messages {
+  border: 1px solid #ccc;
+  padding: 10px;
+  overflow-y: auto;
+  background-color: #f9f9f9;
+}
+
+.chat-input {
+  display: flex;
+  margin-top: 2vh;
+}
+
+.chat-input input {
+  flex: 1;
+  padding: 8px;
+  font-size: 16px;
+}
+
+.chat-input button {
+  padding: 8px 16px;
+  font-size: 16px;
+}
+
+/* Styles for User Container */
+.users-container {
+  border: 1px solid #ccc;
+  padding: 10px;
+  overflow-y: auto;
+  background-color: #f9f9f9;
+  /* Height will be synchronized with the canvas */
+}
+
+.user {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.user:last-child {
+  border-bottom: none;
+}
+
+.user-name {
+  font-weight: bold;
+}
+
+.user-points {
+  color: #555;
 }
