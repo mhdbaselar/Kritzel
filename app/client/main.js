@@ -56,7 +56,6 @@ window.addEventListener("load", () => {
 
     // Update the global `tool` variable
     tool = selectedTool;
-    console.log("Selected tool:", tool);
   }
 
 
@@ -147,7 +146,6 @@ window.addEventListener("load", () => {
 
   function draw(e) {
     if (!drawing) return;
-    console.log("Current tool:", tool);
 
     e.preventDefault(); // Prevent scrolling on touch devices
 

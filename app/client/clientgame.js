@@ -114,8 +114,6 @@ module.exports = class ClientGame {
 
         let _message = JSON.stringify(message);
 
-        console.log(_message);
-
         this.send(_message);
     }
     
