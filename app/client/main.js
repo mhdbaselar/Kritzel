@@ -87,30 +87,38 @@ window.addEventListener("load", () => {
   window.addEventListener("resize", resizeCanvas);
 
   function resizeCanvas() {
+    const ASPECT_RATIO = 3 / 2; // width : height = 3:2
+  
+    // Get the computed width of the canvas's parent column
+    const columnWidth = canvas.parentElement.clientWidth;
+  
+    // Calculate new dimensions
+    const newWidth = columnWidth;
+    const newHeight = newWidth / ASPECT_RATIO;
+  
+    // Set the canvas's internal dimensions
+    canvas.width = newWidth;
+    canvas.height = newHeight;
+  
+    // Let CSS handle the displayed dimensions
+    // Ensure that the displayed dimensions match the internal dimensions
+    canvas.style.width = '100%';
+    canvas.style.height = 'auto';
+  
+    // Redraw preserved image after resizing
     const tempCanvas = document.createElement("canvas");
     const tempCtx = tempCanvas.getContext("2d");
-
-    // Preserve the current drawing
     tempCanvas.width = canvas.width;
     tempCanvas.height = canvas.height;
     tempCtx.drawImage(canvas, 0, 0);
-
-    // Get column width to resize canvas
-    const columnWidth = canvas.parentElement.clientWidth;
-    const newWidth = columnWidth;
-    const newHeight = newWidth / ASPECT_RATIO;
-
-    canvas.width = newWidth;
-    canvas.height = newHeight;
-
-    // Draw preserved image onto resized canvas
+  
     ctx.drawImage(
       tempCanvas,
       0, 0, tempCanvas.width, tempCanvas.height,
       0, 0, canvas.width, canvas.height
     );
-
-    syncChatHeight();
+  
+    syncChatHeight(); // Ensure chat height syncs with resized canvas
   }
 
   // Sync Chat height to canvas height
@@ -129,7 +137,7 @@ window.addEventListener("load", () => {
   function getMousePos(e) {
     const rect = canvas.getBoundingClientRect();
     let x, y;
-
+  
     if (e.touches && e.touches.length > 0) {
       x = e.touches[0].clientX - rect.left;
       y = e.touches[0].clientY - rect.top;
@@ -137,7 +145,11 @@ window.addEventListener("load", () => {
       x = e.clientX - rect.left;
       y = e.clientY - rect.top;
     }
-
+  
+    // Adjust for canvas scaling
+    x *= canvas.width / rect.width;
+    y *= canvas.height / rect.height;
+  
     return { x, y };
   }
 

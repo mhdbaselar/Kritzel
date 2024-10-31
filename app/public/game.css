@@ -7,20 +7,6 @@ body {
     Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
 }
 
-.toolbar {
-    background: rgba(255, 255, 255, 0.8);
-    padding: 10px;
-    border-radius: 8px;
-    z-index: 1;
-    margin-top: 4vh;
-    width: 50vw;
-    margin-left: auto;
-    margin-right: auto;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
 .head {
   padding-left: 1vw;
   margin: 20px 30px 10px 30px;
@@ -35,12 +21,23 @@ body {
 }
 
 .column {
-  flex: 1 1 33%; 
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  max-width: 50%;
-}
+    flex: 1;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    /* Remove max-width or set it to 100% */
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  
+  #drawingCanvas {
+    display: block;
+    width: 100%;
+    height: auto; /* Maintains aspect ratio */
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
 
 .toolbar {
   display: flex;
@@ -58,9 +55,6 @@ body {
   /* Centers toolbar horizontally and adds top margin */
 }
 
-#drawingCanvas {
-  display: block;
-}
 
 .toolbar button {
   padding: 5px 10px;
@@ -83,12 +77,11 @@ body {
 #colorPicker {
     display: flex;
     flex-direction: row;
-    gap: 5px; 
 }
 
 .color-button {
-    width: 30px;
-    height: 40px;
+    width: 25px;
+    height: 30px;
     border: none;
     cursor: pointer;
 }
