@@ -217,10 +217,42 @@ window.addEventListener("load", () => {
   function clearMousePosition() {
     mousePositionDiv.textContent = "";
   }
-});
 
-// chat
-document.addEventListener("DOMContentLoaded", () => {
+  // Dummy data für users
+  const users = [
+    { name: "Player1", points: 0 },
+    { name: "Player2", points: 20 },
+    { name: "Player3", points: 15 },
+  ];
+
+  // Render User
+  function renderUsers() {
+    const usersContainer = document.querySelector(".users-container");
+    usersContainer.innerHTML = ""; // Clear existing content
+
+    users.forEach((user) => {
+      const userDiv = document.createElement("div");
+      userDiv.classList.add("user");
+
+      const nameDiv = document.createElement("div");
+      nameDiv.classList.add("user-name");
+      nameDiv.textContent = user.name;
+
+      const pointsDiv = document.createElement("div");
+      pointsDiv.classList.add("user-points");
+      pointsDiv.textContent = `${user.points} Punkte`;
+
+      userDiv.appendChild(nameDiv);
+      userDiv.appendChild(pointsDiv);
+
+      usersContainer.appendChild(userDiv);
+    });
+  }
+
+  // Init Users
+  renderUsers();
+
+  // chat
   const sendButton = document.getElementById("sendButton");
   const chatInput = document.getElementById("chatMessage");
   const chatMessages = document.querySelector(".chat-messages");
@@ -229,7 +261,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const message = chatInput.value.trim();
     if (message !== "") {
       const messageDiv = document.createElement("div");
-      messageDiv.textContent = 'User: ' + message; // Username ist hier hardcoded erstmal
+      messageDiv.textContent = 'Player1: ' + message; // Username ist hier hardcoded erstmal
       chatMessages.appendChild(messageDiv);
       chatInput.value = "";
       chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -243,3 +275,4 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+
