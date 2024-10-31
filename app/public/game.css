@@ -58,13 +58,12 @@ body {
 #colorPicker {
     display: flex;
     flex-direction: row;
-    gap: 10px; 
+    gap: 5px; 
 }
 
 .color-button {
-    width: 40px;
+    width: 30px;
     height: 40px;
     border: none;
     cursor: pointer;
-    border-radius: 50%; /* Rundes Design der Buttons */
 }
