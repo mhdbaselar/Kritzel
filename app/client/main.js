@@ -15,6 +15,7 @@ window.addEventListener("load", () => {
   resizeCanvas();
 
   let drawing = false;
+  let tool = 'pen'
   let penColor = document.getElementById("colorPicker").value;
   let penSize = document.getElementById("penSize").value;
 
@@ -30,20 +31,40 @@ window.addEventListener("load", () => {
     penSize = e.target.value;
   });
 
+  // Define available tools and add event listeners to each
+  const tools = {
+    pen: document.getElementById("penTool"),
+    eraser: document.getElementById("eraserTool"),
+    fill: document.getElementById("fillTool"),
+  };
+
+  // Add the .selected-tool class to the default tool (pen) on load
+  tools.pen.classList.add("selected-tool");
+
+  Object.keys(tools).forEach((toolName) => {
+    tools[toolName].addEventListener("click", () => selectTool(toolName));
+  });
+
+  function selectTool(selectedTool) {
+    // Remove .selected-tool class from previously selected tool
+    Object.values(tools).forEach((icon) => {
+      icon.classList.remove("selected-tool");
+    });
+
+    // Add .selected-tool class to the new selected tool
+    tools[selectedTool].classList.add("selected-tool");
+
+    // Update the global `tool` variable
+    tool = selectedTool;
+    console.log("Selected tool:", tool);
+  }
+
+
   // "Clear Canvas" button
   const clearCanvasButton = document.getElementById("clearCanvas");
   clearCanvasButton.addEventListener("click", () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     clientGame.sendClearAction(); // Send clear action to server
-  });
-
-  // "Save Canvas" button (Optional)
-  const saveCanvasButton = document.getElementById("saveCanvas");
-  saveCanvasButton.addEventListener("click", () => {
-    const link = document.createElement("a");
-    link.download = "drawing.png";
-    link.href = canvas.toDataURL();
-    link.click();
   });
 
   // Mouse events
@@ -129,6 +150,7 @@ window.addEventListener("load", () => {
 
   function draw(e) {
     if (!drawing) return;
+    console.log("Current tool:", tool);
 
     e.preventDefault(); // Prevent scrolling on touch devices
 
@@ -147,7 +169,7 @@ window.addEventListener("load", () => {
     const scaledX = (pos.x / canvas.width) * 600;
     const scaledY = (pos.y / canvas.height) * 400;
     clientGame.sendDrawAction(
-      "pen",
+      tool,
       Math.round(scaledX),
       Math.round(scaledY),
       penColor,
