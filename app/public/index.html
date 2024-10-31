@@ -1,31 +1,30 @@
 <!DOCTYPE html>
 <html lang="de">
-
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Kritzel</title>
-    <link rel="stylesheet" href="game.css">
-</head>
+    <link rel="stylesheet" href="game.css" />
+  </head>
 
-<body style="background-color: #000350;">
-
-    <div class="head"><img src="kritzel.png" alt="Kritzel Logo" height="60vh"></div>
+  <body style="background-color: #000350">
+    <div class="head">
+      <img src="kritzel.png" alt="Kritzel Logo" height="60vh" />
+    </div>
     <div class="row">
-        <div class="column"></div>
-        <div class="column"></div>
-        <canvas id="drawingCanvas"></canvas>
-        <div class="toolbar">
-            <input type="color" id="colorPicker" value="#000000">
-            <input type="range" id="penSize" min="1" max="50" value="5">
-            <button id="clearCanvas">Leeren</button>
-            <button id="saveCanvas">Speichern</button>
-        </div>
-        <div class="column"></div>
+      <div class="column"></div>
+      <div class="column"></div>
+      <canvas id="drawingCanvas"></canvas>
+      <div class="toolbar">
+        <input type="color" id="colorPicker" value="#000000" />
+        <input type="range" id="penSize" min="3" max="10" value="5" />
+        <button id="clearCanvas">Leeren</button>
+        <button id="saveCanvas">Speichern</button>
+      </div>
+      <div class="column"></div>
     </div>
 
     <div id="mousePosition"></div>
 
     <script src="bundle.js"></script>
-</body>
-
+  </body>
 </html>
