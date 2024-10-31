@@ -1,4 +1,4 @@
-/* styles.css */
+/* game.css */
 
 body {
   margin: 0;
@@ -86,4 +86,35 @@ body {
 
 #clearCanvas {
   margin-left: 2vw;
+}
+
+/* Styles for chat container */
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.chat-messages {
+  flex: 1;
+  border: 1px solid #ccc;
+  padding: 10px;
+  overflow-y: auto;
+  background-color: #f9f9f9;
+}
+
+.chat-input {
+  display: flex;
+  margin-top: 10px;
+}
+
+.chat-input input {
+  flex: 1;
+  padding: 8px;
+  font-size: 16px;
+}
+
+.chat-input button {
+  padding: 8px 16px;
+  font-size: 16px;
 }

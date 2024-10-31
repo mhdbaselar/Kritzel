@@ -203,3 +203,28 @@ window.addEventListener("load", () => {
     mousePositionDiv.textContent = "";
   }
 });
+
+// chat
+document.addEventListener("DOMContentLoaded", () => {
+  const sendButton = document.getElementById("sendButton");
+  const chatInput = document.getElementById("chatMessage");
+  const chatMessages = document.querySelector(".chat-messages");
+
+  sendButton.addEventListener("click", () => {
+      const message = chatInput.value.trim();
+      if (message !== "") {
+          const messageDiv = document.createElement("div");
+          messageDiv.textContent = message;
+          chatMessages.appendChild(messageDiv);
+          chatInput.value = "";
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+  });
+
+  // Optional: Send message on Enter key press
+  chatInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+          sendButton.click();
+      }
+  });
+});
