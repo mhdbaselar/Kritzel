@@ -12,7 +12,7 @@ module.exports = class ServerGame {
     }
 
     start() {
-        this.#board = new Board(400, 300, '#FFFFFF');
+        this.#board = new Board(600, 400, '#FFFFFF'); 
 
         this.intervalReference = setInterval(this.tick.bind(this), 100);
     }
