@@ -4,7 +4,7 @@ body {
     margin: 0;
     overflow: hidden;
 }
-/*
+
 .toolbar {
     background: rgba(255, 255, 255, 0.8);
     padding: 10px;
@@ -15,18 +15,7 @@ body {
     margin-left: auto;
     margin-right: auto;
     display: block;
-}*/
-
-.toolbar {
-    display: flex;
-    justify-content: center; /* Center elements horizontally within the toolbar */
-    align-items: center;     /* Center elements vertically */
-    gap: 10px;               /* Adds spacing between elements */
-    padding: 10px;
-    border-radius: 5px;
-    width: 50vw;             /* Sets toolbar width to 50% of viewport width */
-    margin: 2vh auto 0;      /* Centers toolbar horizontally and adds top margin */
-  }
+}
 
 .head {
     padding-left: 1vw;
@@ -62,22 +51,4 @@ body {
     font-family: Arial, sans-serif;
     font-size: 14px;
     z-index: 2;
-}
-
-.icon {
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  
-  .icon:hover {
-    background-color: #1d2194;
-    border-radius: 4px;
-  }
-  
-  .selected-tool {
-    background-color: #1d2194;
-  }
-
-#clearCanvas {
-    margin-left: 2vw;
 }
