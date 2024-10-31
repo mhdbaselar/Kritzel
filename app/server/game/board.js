@@ -57,12 +57,13 @@ module.exports = class Board {
     //-------------------------------------
 
     #drawIn(x, y, color, thickness){
-        for (let yt = (-thickness+1); yt < thickness; yt++) {
-            for (let xt = (-thickness+1); xt < thickness; xt++) {
-                
-                if(y+yt >= 0 && y+yt < this.#rows){
-                    if(x+xt >= 0 && x+xt < this.#columns){
-                        this.#canvas[y+yt][x+xt] = color;
+        for (let yt = -thickness + 1; yt < thickness; yt++) {
+            for (let xt = -thickness + 1; xt < thickness; xt++) {
+                if (Math.sqrt(xt * xt + yt * yt) < thickness) {
+                    if (y + yt >= 0 && y + yt < this.#rows) {
+                        if (x + xt >= 0 && x + xt < this.#columns) {
+                            this.#canvas[y + yt][x + xt] = color;
+                        }
                     }
                 }
             }
