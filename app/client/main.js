@@ -78,7 +78,7 @@ window.addEventListener("load", () => {
   /** @type {string} */
   let penColor = '#000';
   /** @type {number} */
-  let penSize = 4;
+  let penSize = 3;
 
   // -------------------------------
   // Pen Size Buttons Setup
@@ -86,8 +86,8 @@ window.addEventListener("load", () => {
 
   const penSizes = [
     { size: 2, element: document.getElementById("penSize2") },
-    { size: 4, element: document.getElementById("penSize4") },
-    { size: 7, element: document.getElementById("penSize7") },
+    { size: 3, element: document.getElementById("penSize3") },
+    { size: 6, element: document.getElementById("penSize6") },
   ];
 
   const validPenSizes = penSizes.filter(ps => ps.element);
