@@ -16,26 +16,79 @@ window.addEventListener("load", () => {
 
   let drawing = false;
   let tool = 'pen'
-  let penColor = document.getElementById("colorPicker").value;
-  let penSize = document.getElementById("penSize").value;
+  let penColor = '#000';
+  let penSize = 5
 
-  // Toolbar elements
-  const colorPicker = document.getElementById("colorPicker");
-  const penSizeInput = document.getElementById("penSize");
 
-//   colorPicker.addEventListener("input", (e) => {
-//     penColor = e.target.value;
-//   });
+  // Stiftgröße-Buttons prüfen
+  const penSize2 = document.getElementById("penSize2");
+  const penSize4 = document.getElementById("penSize4");
+  const penSize7 = document.getElementById("penSize7");
+
+  const penSizeButtons = [penSize2, penSize4, penSize7];
+
+  if (!penSize2 || !penSize4 || !penSize7) {
+    console.error("One or more pen size buttons not found.");
+  } else {
+    penSize2.addEventListener("click", () => {
+      penSize = 2;
+      updatePenSettings();
+      updateSelectedButton(penSize2);
+    });
+    penSize4.addEventListener("click", () => {
+      penSize = 4;
+      updatePenSettings();
+      updateSelectedButton(penSize4);
+    });
+    penSize7.addEventListener("click", () => {
+      penSize = 7;
+      updatePenSettings();
+      updateSelectedButton(penSize7);
+    });
+  }
+
+  // Funktion zur Aktualisierung der Stiftgröße und Farbe
+  function updatePenSettings() {
+    ctx.lineWidth = penSize;
+    ctx.strokeStyle = penColor;
+    console.log(`Pen settings updated: Size=${penSize}, Color=${penColor}`);
+  }
+
+  // Funktion zum Markieren des ausgewählten Buttons
+  function updateSelectedButton(selectedButton) {
+    penSizeButtons.forEach(button => button.classList.remove("selected")); // Entfernt "selected" von allen Buttons
+    selectedButton.classList.add("selected"); // Fügt "selected" nur zum geklickten Button hinzu
+    updateSelectedButtonColor(penColor);
+  }
+
+  // Update selected button color based on the currently selected button
+  function updateSelectedButtonColor(selectedColor) {
+    // Find the button that has the "selected" class
+    const selectedButton = document.querySelector(".pen-size-btn.selected");
+
+    // Reset color for all buttons
+    penSizeButtons.forEach(button => button.style.backgroundColor = "#ffffff"); // Reset background to white
+
+    // Set color for the currently selected button
+    if (selectedButton) {
+      selectedButton.style.backgroundColor = selectedColor;
+    }
+  }
+
+  //Standardbutton auswählen & Standardfarbe setzen
+  updateSelectedButton(penSize4);
+  updateSelectedButtonColor(penColor);
+
+  //   colorPicker.addEventListener("input", (e) => {
+  //     penColor = e.target.value;
+  //   });
 
   // Color Buttons   
   document.querySelectorAll('.color-button').forEach(button => {
     button.addEventListener('click', (e) => {
       penColor = e.target.getAttribute('data-color');
+      updateSelectedButtonColor(penColor);
     });
-  });
-
-  penSizeInput.addEventListener("input", (e) => {
-    penSize = e.target.value;
   });
 
   // Define available tools and add event listeners to each
@@ -88,36 +141,36 @@ window.addEventListener("load", () => {
 
   function resizeCanvas() {
     const ASPECT_RATIO = 3 / 2; // width : height = 3:2
-  
+
     // Get the computed width of the canvas's parent column
     const columnWidth = canvas.parentElement.clientWidth;
-  
+
     // Calculate new dimensions
     const newWidth = columnWidth;
     const newHeight = newWidth / ASPECT_RATIO;
-  
+
     // Set the canvas's internal dimensions
     canvas.width = newWidth;
     canvas.height = newHeight;
-  
+
     // Let CSS handle the displayed dimensions
     // Ensure that the displayed dimensions match the internal dimensions
     canvas.style.width = '100%';
     canvas.style.height = 'auto';
-  
+
     // Redraw preserved image after resizing
     const tempCanvas = document.createElement("canvas");
     const tempCtx = tempCanvas.getContext("2d");
     tempCanvas.width = canvas.width;
     tempCanvas.height = canvas.height;
     tempCtx.drawImage(canvas, 0, 0);
-  
+
     ctx.drawImage(
       tempCanvas,
       0, 0, tempCanvas.width, tempCanvas.height,
       0, 0, canvas.width, canvas.height
     );
-  
+
     syncChatHeight(); // Ensure chat height syncs with resized canvas
   }
 
@@ -137,7 +190,7 @@ window.addEventListener("load", () => {
   function getMousePos(e) {
     const rect = canvas.getBoundingClientRect();
     let x, y;
-  
+
     if (e.touches && e.touches.length > 0) {
       x = e.touches[0].clientX - rect.left;
       y = e.touches[0].clientY - rect.top;
@@ -145,11 +198,11 @@ window.addEventListener("load", () => {
       x = e.clientX - rect.left;
       y = e.clientY - rect.top;
     }
-  
+
     // Adjust for canvas scaling
     x *= canvas.width / rect.width;
     y *= canvas.height / rect.height;
-  
+
     return { x, y };
   }
 
