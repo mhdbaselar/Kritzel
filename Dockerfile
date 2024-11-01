@@ -2,21 +2,18 @@ FROM node:21
 
 WORKDIR /app
 
-# Copy package files first to install dependencies
-COPY app/package*.json ./
+# Install global dependencies
+RUN npm install -g nodemon browserify
 
-# Install dependencies globally and locally
-RUN npm install && npm install -g nodemon browserify watchify
-
-# Copy the rest of the application code and entrypoint script
+# Copy app and entrypoint script
 COPY app/. .
 COPY entrypoint.sh /scripts/entrypoint.sh
 
-# Make the entrypoint script executable
+# Make entrypoint executable
 RUN chmod +x /scripts/entrypoint.sh
 
 EXPOSE 8123
 
-# Set the entrypoint and CMD
+# Set entrypoint and cmd
 ENTRYPOINT ["/scripts/entrypoint.sh"]
 CMD ["nodemon", "./kritzel.js"]

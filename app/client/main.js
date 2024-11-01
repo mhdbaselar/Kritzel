@@ -267,16 +267,16 @@ window.addEventListener("load", () => {
     clientGame.sendDrawAction(tool, Math.round(scaledX), Math.round(scaledY), penColor, penSize);
   }
 
-  // Mouse events
-  canvas.addEventListener("mousedown", startDrawing);
-  canvas.addEventListener("mouseup", stopDrawing);
-  canvas.addEventListener("mousemove", draw);
-  canvas.addEventListener("mouseout", stopDrawing);
+    // Mouse events
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseout', stopDrawing);
 
-  // Touch events
-  canvas.addEventListener("touchstart", startDrawing);
-  canvas.addEventListener("touchend", stopDrawing);
-  canvas.addEventListener("touchmove", draw);
+    // Touch events
+    canvas.addEventListener('touchstart', startDrawing);
+    canvas.addEventListener('touchend', stopDrawing);
+    canvas.addEventListener('touchmove', draw);
 
   // -------------------------------
   // User Rendering (Dummy Data)
