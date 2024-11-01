@@ -29,8 +29,13 @@ window.addEventListener("load", () => {
   const ASPECT_RATIO = 3 / 2; // Width : Height ratio = 3:2
 
   resizeCanvas();
-  window.addEventListener("resize", resizeCanvas);
+  window.addEventListener("resize", resizeCanvasEvent);
 
+  function resizeCanvasEvent (){
+    resizeCanvas();
+    clientGame.sendGetCanvasAction();
+  }
+  
   /**
    * Resizes the canvas based on the window size.
    */

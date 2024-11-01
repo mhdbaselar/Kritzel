@@ -11,15 +11,67 @@ module.exports = class ClientGame {
     openWebSocket() {
         // build websocket-url from current location
         this.socket = new WebSocket("ws://" + location.host + location.pathname)
-        this.socket.onopen = (event) => { console.log("socket opened") }
+        this.socket.onopen = (event) => { console.log("socket opened"); this.sendGetCanvasAction(); }
         this.socket.onclose = (event) => { console.log("socket closed") }
         this.socket.onerror = (event) => { console.log("socket error: " + JSON.stringify(event)) }
-        this.socket.onmessage = (event) => { this.update(event.data) }
+        this.socket.onmessage = (event) => { 
+            let data = JSON.parse(event.data);
+            console.log(data);
+            if (data.type == 'pl') {
+                this.updateWithPoints(data.data);
+            } else if (data.type == '2d'){
+                this.update(data.data);
+            }
+        }
     }
     
+    updateWithPoints(data){
+        let canvasData = data;
+        // Beispiel: Point List
+        //  [{x: 0, y: 0, color: #FFFFFF},
+        //  {x: 1, y: 1, color: #FFFFFF}]
+
+        // Update the canvas on the client side
+        let canvas = document.getElementById('drawingCanvas');
+        if (!canvas) {
+            console.error('Canvas not found');
+            return;
+        }
+        let ctx = canvas.getContext('2d');
+
+        // Loop through canvasData and set the pixel data
+        for (let i = 0; i < canvasData.length; i++) {
+                let hexColor = canvasData[i].color;
+                let rgb = hexToRgb(hexColor);
+                ctx.fillSytle = rgb;
+                ctx.fillRect( canvasData[i].x, canvasData[i].y, 1, 1 );
+        }
+
+        function hexToRgb(hex) {
+            // Remove '#' if present
+            hex = hex.replace(/^#/, '');
+
+            if (hex.length === 3) {
+                // Expand shorthand form (#03F => #0033FF)
+                hex = hex.split('').map(c => c + c).join('');
+            }
+
+            if (hex.length !== 6) {
+                return null;
+            }
+
+            let num = parseInt(hex, 16);
+            let r = (num >> 16) & 255;
+            let g = (num >> 8) & 255;
+            let b = num & 255;
+
+            return { r: r, g: g, b: b };
+        }
+    }
+
     // This function is called when new content is received from the server
-    update(json) {
-        let canvasData = JSON.parse(json);
+    update(data) {
+        let canvasData = data;
 
         // Update the canvas on the client side
         let canvas = document.getElementById('drawingCanvas');
@@ -135,6 +187,11 @@ module.exports = class ClientGame {
         let action = new Action('fill', 0 , 0, color, 0);
         let message = new Message('action', action);
 
+        this.send(JSON.stringify(message));
+    }
+
+    sendGetCanvasAction(){
+        let message = new Message('getCanvasAction', null);
         this.send(JSON.stringify(message));
     }
 
