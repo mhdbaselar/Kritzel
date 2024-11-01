@@ -214,6 +214,7 @@ window.addEventListener("load", () => {
   function stopDrawing() {
     drawing = false;
     ctx.beginPath();
+    clientGame.sendDrawAction('pen', null, null, penColor, 0);  // Trenne Linie für Server
   }
 
   function draw(e) {
