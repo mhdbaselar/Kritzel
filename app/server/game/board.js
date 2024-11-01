@@ -45,7 +45,12 @@ module.exports = class Board {
     }
 
     erase(x, y, thickness){
-        this.#drawPoint(x, y, this.#backgroundColor, thickness);
+        if(x != null || y != null) {
+            let x0 = this.#previousPoint.x0;
+            let y0 = this.#previousPoint.y0;
+            this.#drawLine(x0, y0, x, y, this.#backgroundColor, thickness);
+        }
+        this.#previousPoint = { x0 : x, y0 : y};
     }
 
     clear(){
