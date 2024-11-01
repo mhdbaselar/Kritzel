@@ -8,30 +8,53 @@ module.exports = class ClientGame {
 
     constructor() {}
 
+    /**
+     * Opens a WebSocket connection to the server.
+     */
     openWebSocket() {
-        // build websocket-url from current location
-        this.socket = new WebSocket("ws://" + location.host + location.pathname)
-        this.socket.onopen = (event) => { console.log("socket opened"); this.sendGetCanvasAction(); }
-        this.socket.onclose = (event) => { console.log("socket closed") }
-        this.socket.onerror = (event) => { console.log("socket error: " + JSON.stringify(event)) }
+        // Build WebSocket URL from current location
+        this.socket = new WebSocket("ws://" + location.host + location.pathname);
+        
+        // Event handler for when the connection is opened
+        this.socket.onopen = (event) => { 
+            console.log("Socket opened"); 
+            this.sendGetCanvasAction(); 
+        };
+        
+        // Event handler for when the connection is closed
+        this.socket.onclose = (event) => { 
+            console.log("Socket closed"); 
+        };
+        
+        // Event handler for any errors with the connection
+        this.socket.onerror = (event) => { 
+            console.log("Socket error: " + JSON.stringify(event)); 
+        };
+        
+        // Event handler for receiving messages from the server
         this.socket.onmessage = (event) => { 
             let data = JSON.parse(event.data);
-            console.log(data);
-            if (data.type == 'pl') {
+            console.log("Message received:", data);
+            
+            if (data.type === 'pl') { // 'pl' = PointList
                 this.updateWithPoints(data.data);
-            } else if (data.type == '2d'){
+            } else if (data.type === '2d'){ // '2d' = Canvas data
                 this.update(data.data);
             }
-        }
+        };
     }
     
+    /**
+     * Updates the canvas with a list of drawn points received from the server.
+     * @param {Array<{x: number, y: number, color: string, thickness: number}>} data 
+     */
     updateWithPoints(data){
         let canvasData = data;
-        // Beispiel: Point List
-        //  [{x: 0, y: 0, color: #FFFFFF},
-        //  {x: 1, y: 1, color: #FFFFFF}]
+        // Example: Point List
+        //  [{x: 0, y: 0, color: '#FFFFFF'},
+        //  {x: 1, y: 1, color: '#FFFFFF'}]
 
-        // Update the canvas on the client side
+        // Access the canvas element
         let canvas = document.getElementById('drawingCanvas');
         if (!canvas) {
             console.error('Canvas not found');
@@ -39,14 +62,46 @@ module.exports = class ClientGame {
         }
         let ctx = canvas.getContext('2d');
 
-        // Loop through canvasData and set the pixel data
+        // Calculate scaling factors based on current canvas size
+        let scaleX = canvas.width / 600;
+        let scaleY = canvas.height / 400;
+
+        // Enable image smoothing for better quality
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        // Iterate through each point and draw it
         for (let i = 0; i < canvasData.length; i++) {
-                let hexColor = canvasData[i].color;
-                let rgb = hexToRgb(hexColor);
-                ctx.fillSytle = rgb;
-                ctx.fillRect( canvasData[i].x, canvasData[i].y, 1, 1 );
+            let point = canvasData[i];
+            let hexColor = point.color;
+
+            // Convert hex color to RGB string
+            let rgb = hexToRgb(hexColor);
+            if (!rgb) {
+                // If invalid color, default to white
+                rgb = { r: 255, g: 255, b: 255 };
+            }
+            let rgbString = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+
+            // Set the fill style to the RGB string
+            ctx.fillStyle = rgbString;
+
+            // Scale the x and y coordinates
+            let scaledX = point.x * scaleX;
+            let scaledY = point.y * scaleY;
+
+            // Draw a small rectangle (1x1 pixel) at the scaled position
+            ctx.fillRect(scaledX, scaledY, 1, 1);
         }
 
+        /**
+         * Converts a hex color code to an RGB object.
+         * @param {string} hex - The hex color code.
+         * @returns {{r: number, g: number, b: number}} The RGB representation.
+         */
         function hexToRgb(hex) {
             // Remove '#' if present
             hex = hex.replace(/^#/, '');
@@ -69,11 +124,14 @@ module.exports = class ClientGame {
         }
     }
 
-    // This function is called when new content is received from the server
+    /**
+     * Updates the entire canvas based on the full Canvas data received from the server.
+     * @param {Array<Array<string>>} data 
+     */
     update(data) {
         let canvasData = data;
 
-        // Update the canvas on the client side
+        // Access the canvas element
         let canvas = document.getElementById('drawingCanvas');
         if (!canvas) {
             console.error('Canvas not found');
@@ -120,6 +178,11 @@ module.exports = class ClientGame {
         // Draw the temp canvas onto the main canvas, scaling it to fit
         ctx.drawImage(tempCanvas, 0, 0, canvas.width, canvas.height);
 
+        /**
+         * Converts a hex color code to an RGB object.
+         * @param {string} hex - The hex color code.
+         * @returns {{r: number, g: number, b: number}} The RGB representation.
+         */
         function hexToRgb(hex) {
             // Remove '#' if present
             hex = hex.replace(/^#/, '');
@@ -147,30 +210,32 @@ module.exports = class ClientGame {
     //-------------------------------------
 
     /**
-     * Sends a draw action direct to the server
-     * @param {string} tool pen | eraser: Tool that is used for draw action, pen by default
-     * @param {int} x x-coordinate of pixel to draw on
-     * @param {int} y y-coordinate of pixel to draw on
-     * @param {string} color color code in hexadecimal notation
-     * @param {int} thickness thickness of draw action
+     * Sends a draw action directly to the server.
+     * @param {string} tool - 'pen' | 'eraser' | 'fill': Tool used for the draw action.
+     * @param {number} x - x-coordinate of the pixel to draw on.
+     * @param {number} y - y-coordinate of the pixel to draw on.
+     * @param {string} color - Color code in hexadecimal notation.
+     * @param {number} thickness - Thickness of the draw action.
      */
     sendDrawAction(tool = 'pen', x = 0, y = 0, color = '#000000', thickness = 3){
         let _tool = 'pen';
 
-        if(tool == 'pen') _tool = 'pen';
-        if(tool == 'eraser') _tool = 'eraser';
-        if(tool == 'fill') _tool = 'fill';
+        if(tool === 'pen') _tool = 'pen';
+        if(tool === 'eraser') _tool = 'eraser';
+        if(tool === 'fill') _tool = 'fill';
         
         let action = new Action(_tool, x , y, color, thickness);
         let message = new Message('action', action);
 
         let _message = JSON.stringify(message);
 
+        console.log("Sending Action:", _message);
+
         this.send(_message);
     }
     
     /**
-     * Asks the server to clear the whole board
+     * Asks the server to clear the whole board.
      */
     sendClearAction(){
         let action = new Action('clear', 0 , 0, '', 0);
@@ -180,8 +245,8 @@ module.exports = class ClientGame {
     }
 
     /**
-     * Asks the server to fill the whole board into one color
-     * @param {string} color color code in hexadecimal notation
+     * Asks the server to fill the whole board into one color.
+     * @param {string} color  color code in hexadecimal notation.
      */
     sendFillAction(color = '#000000'){
         let action = new Action('fill', 0 , 0, color, 0);
@@ -190,6 +255,9 @@ module.exports = class ClientGame {
         this.send(JSON.stringify(message));
     }
 
+    /**
+     * Requests the server to send the current Canvas data.
+     */
     sendGetCanvasAction(){
         let message = new Message('getCanvasAction', null);
         this.send(JSON.stringify(message));
@@ -198,10 +266,17 @@ module.exports = class ClientGame {
     //------------------------------------- 
     //-----------HELP FUNCTIONS------------
     //-------------------------------------
-
+    
+    /**
+     * Sends a message over the WebSocket.
+     * @param {string} message 
+     */
     send(message) {
-        if (this.socket)
-            this.socket.send(message)
+        if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+            this.socket.send(message);
+        } else {
+            console.error("WebSocket is not open. Ready state:", this.socket.readyState);
+        }
     }
 
 }
