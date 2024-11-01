@@ -222,7 +222,7 @@ window.addEventListener("load", () => {
 
     e.preventDefault(); // Prevent scrolling on touch devices
 
-    ctx.lineWidth = penSize;
+    ctx.lineWidth = penSize + (penSize * 1.3); // Local Pen-Size adjusted to Server representation
     ctx.lineCap = "round";
     ctx.strokeStyle = penColor;
 
