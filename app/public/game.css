@@ -1,5 +1,4 @@
-/* game.css */
-
+/* Base Styling */
 body {
     margin: 0;
     overflow: hidden;
@@ -7,17 +6,19 @@ body {
         Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
 }
 
+/* Header */
 .head {
     padding-left: 1vw;
-    margin: 20px 30px 10px 30px;
+    margin: 20px 30px 10px;
     border-radius: 8px;
     background-color: #fff;
     opacity: 90%;
 }
 
+/* Layout Containers */
 .row {
     display: flex;
-    padding: 0 20px 0 20px;
+    padding: 0 20px;
 }
 
 .column {
@@ -29,27 +30,33 @@ body {
     box-sizing: border-box;
 }
 
+/* Canvas */
 #drawingCanvas {
     display: block;
     width: 100%;
     height: auto;
-    /* Maintains aspect ratio */
     box-sizing: border-box;
     margin: 0;
     padding: 0;
 }
 
+/* Toolbar */
 .toolbar {
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 10px;
-    padding: 0 10px 10px 10px;
+    padding: 0 10px 10px;
     border-radius: 5px;
     width: 50vw;
     margin: 2vh auto 0;
 }
 
+#clearCanvas {
+    margin-left: 2vw;
+}
+
+/* Mouse Position Indicator */
 #mousePosition {
     position: fixed;
     bottom: 10px;
@@ -63,6 +70,7 @@ body {
     z-index: 2;
 }
 
+/* Color Picker */
 #colorPicker {
     display: flex;
     background-color: #1d2194;
@@ -78,6 +86,7 @@ body {
     cursor: pointer;
 }
 
+/* Icons */
 .icon {
     cursor: pointer;
     transition: background-color 0.3s;
@@ -92,11 +101,7 @@ body {
     background-color: #1d2194;
 }
 
-#clearCanvas {
-    margin-left: 2vw;
-}
-
-/* Styles for chat container */
+/* Chat Styling */
 .chat-container {
     flex-direction: column;
     height: 100%;
@@ -125,7 +130,7 @@ body {
     font-size: 16px;
 }
 
-/* Styles for User Container */
+/* User Container */
 .users-container {
     border: 1px solid #ccc;
     padding: 10px;
@@ -152,9 +157,9 @@ body {
     color: #555;
 }
 
-/* Stiftgrößen-Buttons */
+/* Pen Size Buttons */
 .penSizePicker {
-    margin: 0 20px 0 20px;
+    margin: 0 20px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -168,7 +173,6 @@ body {
     background-color: #fff;
     transition: background-color 0.3s, transform 0.3s;
 }
-
 
 .pen-size-small {
     width: 15px;

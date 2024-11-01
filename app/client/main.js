@@ -1,130 +1,266 @@
-// main.js
 "use strict";
 
+/**
+ * @typedef {Object} User
+ * @property {string} name - The name of the user.
+ * @property {number} points - The points scored by the user.
+ */
+
+// Import the ClientGame module
 const ClientGame = require("./clientgame");
 
-let clientGame = new ClientGame();
+/** 
+ * @type {ClientGame} 
+ */
+const clientGame = new ClientGame();
 clientGame.openWebSocket();
 
 window.addEventListener("load", () => {
+  // -------------------------------
+  // Canvas Setup and Resizing
+  // -------------------------------
+
+  /** @type {HTMLCanvasElement} */
   const canvas = document.getElementById("drawingCanvas");
+  /** @type {CanvasRenderingContext2D} */
   const ctx = canvas.getContext("2d");
 
-  const ASPECT_RATIO = 3 / 2; // width : height = 3:2
+  /** @constant {number} */
+  const ASPECT_RATIO = 3 / 2; // Width : Height ratio = 3:2
 
   resizeCanvas();
+  window.addEventListener("resize", resizeCanvas);
 
-  let drawing = false;
-  let tool = 'pen'
-  let penColor = '#000';
-  let penSize = 5
+  /**
+   * Resizes the canvas based on the window size.
+   */
+  function resizeCanvas() {
+    const parentWidth = canvas.parentElement.clientWidth;
+    const newWidth = parentWidth;
+    const newHeight = newWidth / ASPECT_RATIO;
 
+    canvas.width = newWidth;
+    canvas.height = newHeight;
+    canvas.style.width = '100%';
+    canvas.style.height = 'auto';
 
-  // Stiftgröße-Buttons prüfen
-  const penSize2 = document.getElementById("penSize2");
-  const penSize4 = document.getElementById("penSize4");
-  const penSize7 = document.getElementById("penSize7");
+    // Redraw preserved image after resizing
+    const tempCanvas = document.createElement("canvas");
+    tempCanvas.width = canvas.width;
+    tempCanvas.height = canvas.height;
+    const tempCtx = tempCanvas.getContext("2d");
+    tempCtx.drawImage(canvas, 0, 0);
 
-  const penSizeButtons = [penSize2, penSize4, penSize7];
+    ctx.drawImage(tempCanvas, 0, 0, tempCanvas.width, tempCanvas.height, 0, 0, canvas.width, canvas.height);
 
-  if (!penSize2 || !penSize4 || !penSize7) {
-    console.error("One or more pen size buttons not found.");
-  } else {
-    penSize2.addEventListener("click", () => {
-      penSize = 2;
-      updatePenSettings();
-      updateSelectedButton(penSize2);
-    });
-    penSize4.addEventListener("click", () => {
-      penSize = 4;
-      updatePenSettings();
-      updateSelectedButton(penSize4);
-    });
-    penSize7.addEventListener("click", () => {
-      penSize = 7;
-      updatePenSettings();
-      updateSelectedButton(penSize7);
-    });
+    syncChatHeight();
   }
 
-  // Funktion zur Aktualisierung der Stiftgröße und Farbe
+  /**
+   * Syncs chat height to canvas height.
+   */
+  function syncChatHeight() {
+    const chatMessages = document.querySelector(".chat-messages");
+    const canvasHeight = canvas.clientHeight;
+    chatMessages.style.height = `${canvasHeight - 20}px`;
+  }
+
+  syncChatHeight();
+
+  // -------------------------------
+  // Drawing State Variables
+  // -------------------------------
+
+  /** @type {boolean} */
+  let drawing = false;
+  /** @type {string} */
+  let tool = 'pen';
+  /** @type {string} */
+  let penColor = '#000';
+  /** @type {number} */
+  let penSize = 4;
+
+  // -------------------------------
+  // Pen Size Buttons Setup
+  // -------------------------------
+
+  const penSizes = [
+    { size: 2, element: document.getElementById("penSize2") },
+    { size: 4, element: document.getElementById("penSize4") },
+    { size: 7, element: document.getElementById("penSize7") },
+  ];
+
+  const validPenSizes = penSizes.filter(ps => ps.element);
+
+  if (validPenSizes.length !== penSizes.length) {
+    console.error("One or more pen size buttons not found.");
+  }
+
+  validPenSizes.forEach(ps => {
+    ps.element.addEventListener("click", () => {
+      penSize = ps.size;
+      updatePenSettings();
+      updateSelectedPenSizeButton(ps.element);
+    });
+  });
+
+  const penSizeButtons = validPenSizes.map(ps => ps.element);
+
+  /**
+   * Updates the pen settings (size and color).
+   */
   function updatePenSettings() {
     ctx.lineWidth = penSize;
     ctx.strokeStyle = penColor;
     console.log(`Pen settings updated: Size=${penSize}, Color=${penColor}`);
   }
 
-  // Funktion zum Markieren des ausgewählten Buttons
-  function updateSelectedButton(selectedButton) {
-    penSizeButtons.forEach(button => button.classList.remove("selected")); // Entfernt "selected" von allen Buttons
-    selectedButton.classList.add("selected"); // Fügt "selected" nur zum geklickten Button hinzu
-    updateSelectedButtonColor(penColor);
+  /**
+   * Updates the selected pen size button.
+   * @param {HTMLElement} selectedButton - The button element to select.
+   */
+  function updateSelectedPenSizeButton(selectedButton) {
+    penSizeButtons.forEach(button => button.classList.remove("selected"));
+    selectedButton.classList.add("selected");
+    updateSelectedPenButtonColor(penColor);
   }
 
-  // Update selected button color based on the currently selected button
-  function updateSelectedButtonColor(selectedColor) {
-    // Find the button that has the "selected" class
+  /**
+   * Updates the color of the selected pen size button.
+   * @param {string} selectedColor - The color to apply to the selected button.
+   */
+  function updateSelectedPenButtonColor(selectedColor) {
     const selectedButton = document.querySelector(".pen-size-btn.selected");
-
-    // Reset color for all buttons
-    penSizeButtons.forEach(button => button.style.backgroundColor = "#ffffff"); // Reset background to white
-
-    // Set color for the currently selected button
+    penSizeButtons.forEach(button => button.style.backgroundColor = "#ffffff");
     if (selectedButton) {
       selectedButton.style.backgroundColor = selectedColor;
     }
   }
 
-  //Standardbutton auswählen & Standardfarbe setzen
-  updateSelectedButton(penSize4);
-  updateSelectedButtonColor(penColor);
+  const defaultPenSizeButton = penSizes.find(ps => ps.size === penSize).element;
+  updateSelectedPenSizeButton(defaultPenSizeButton);
+  updateSelectedPenButtonColor(penColor);
 
-  //   colorPicker.addEventListener("input", (e) => {
-  //     penColor = e.target.value;
-  //   });
+  // -------------------------------
+  // Color Buttons Setup
+  // -------------------------------
 
-  // Color Buttons   
-  document.querySelectorAll('.color-button').forEach(button => {
+  const colorButtons = document.querySelectorAll('.color-button');
+
+  colorButtons.forEach(button => {
     button.addEventListener('click', (e) => {
       penColor = e.target.getAttribute('data-color');
-      updateSelectedButtonColor(penColor);
+      updatePenSettings();
+      updateSelectedPenButtonColor(penColor);
     });
   });
 
-  // Define available tools and add event listeners to each
+  // -------------------------------
+  // Tool Selection Setup
+  // -------------------------------
+
   const tools = {
     pen: document.getElementById("penTool"),
     eraser: document.getElementById("eraserTool"),
     fill: document.getElementById("fillTool"),
   };
 
-  // Add the .selected-tool class to the default tool (pen) on load
   tools.pen.classList.add("selected-tool");
 
   Object.keys(tools).forEach((toolName) => {
     tools[toolName].addEventListener("click", () => selectTool(toolName));
   });
 
+  /**
+   * Selects a drawing tool.
+   * @param {string} selectedTool - The tool to select ('pen', 'eraser', 'fill').
+   */
   function selectTool(selectedTool) {
-    // Remove .selected-tool class from previously selected tool
-    Object.values(tools).forEach((icon) => {
-      icon.classList.remove("selected-tool");
-    });
-
-    // Add .selected-tool class to the new selected tool
+    Object.values(tools).forEach((icon) => icon.classList.remove("selected-tool"));
     tools[selectedTool].classList.add("selected-tool");
-
-    // Update the global `tool` variable
     tool = selectedTool;
   }
 
+  // -------------------------------
+  // Clear Canvas Button Setup
+  // -------------------------------
 
-  // "Clear Canvas" button
   const clearCanvasButton = document.getElementById("clearCanvas");
+
   clearCanvasButton.addEventListener("click", () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    clientGame.sendClearAction(); // Send clear action to server
+    clientGame.sendClearAction();
   });
+
+  // -------------------------------
+  // Drawing Functions
+  // -------------------------------
+
+  /**
+   * Gets the mouse or touch position relative to the canvas.
+   * @param {MouseEvent | TouchEvent} e - The event to get the position from.
+   * @returns {{x: number, y: number}} The x and y coordinates on the canvas.
+   */
+  function getPointerPosition(e) {
+    const rect = canvas.getBoundingClientRect();
+    let x, y;
+
+    if (e.touches && e.touches.length > 0) {
+      x = e.touches[0].clientX - rect.left;
+      y = e.touches[0].clientY - rect.top;
+    } else {
+      x = e.clientX - rect.left;
+      y = e.clientY - rect.top;
+    }
+
+    x *= canvas.width / rect.width;
+    y *= canvas.height / rect.height;
+
+    return { x, y };
+  }
+
+  /**
+   * Starts drawing on the canvas.
+   * @param {MouseEvent | TouchEvent} e - The event to start drawing from.
+   */
+  function startDrawing(e) {
+    drawing = true;
+    draw(e);
+  }
+
+  /**
+   * Stops drawing on the canvas.
+   */
+  function stopDrawing() {
+    drawing = false;
+    ctx.beginPath();
+    clientGame.sendDrawAction('pen', null, null, penColor, 0);
+  }
+
+  /**
+   * Draws on the canvas.
+   * @param {MouseEvent | TouchEvent} e - The event to draw from.
+   */
+  function draw(e) {
+    if (!drawing) return;
+
+    e.preventDefault();
+
+    ctx.lineWidth = penSize * 1.3;
+    ctx.lineCap = "round";
+    ctx.strokeStyle = penColor;
+
+    const pos = getPointerPosition(e);
+
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+
+    const scaledX = (pos.x / canvas.width) * 600;
+    const scaledY = (pos.y / canvas.height) * 400;
+    clientGame.sendDrawAction(tool, Math.round(scaledX), Math.round(scaledY), penColor, penSize);
+  }
 
   // Mouse events
   canvas.addEventListener("mousedown", startDrawing);
@@ -137,169 +273,23 @@ window.addEventListener("load", () => {
   canvas.addEventListener("touchend", stopDrawing);
   canvas.addEventListener("touchmove", draw);
 
-  window.addEventListener("resize", resizeCanvas);
+  // -------------------------------
+  // User Rendering (Dummy Data)
+  // -------------------------------
 
-  function resizeCanvas() {
-    const ASPECT_RATIO = 3 / 2; // width : height = 3:2
-
-    // Get the computed width of the canvas's parent column
-    const columnWidth = canvas.parentElement.clientWidth;
-
-    // Calculate new dimensions
-    const newWidth = columnWidth;
-    const newHeight = newWidth / ASPECT_RATIO;
-
-    // Set the canvas's internal dimensions
-    canvas.width = newWidth;
-    canvas.height = newHeight;
-
-    // Let CSS handle the displayed dimensions
-    // Ensure that the displayed dimensions match the internal dimensions
-    canvas.style.width = '100%';
-    canvas.style.height = 'auto';
-
-    // Redraw preserved image after resizing
-    const tempCanvas = document.createElement("canvas");
-    const tempCtx = tempCanvas.getContext("2d");
-    tempCanvas.width = canvas.width;
-    tempCanvas.height = canvas.height;
-    tempCtx.drawImage(canvas, 0, 0);
-
-    ctx.drawImage(
-      tempCanvas,
-      0, 0, tempCanvas.width, tempCanvas.height,
-      0, 0, canvas.width, canvas.height
-    );
-
-    syncChatHeight(); // Ensure chat height syncs with resized canvas
-  }
-
-  // Sync Chat height to canvas height
-  function syncChatHeight() {
-    const chatMessages = document.querySelector(".chat-messages");
-    const canvasHeight = canvas.clientHeight; // Get the canvas height in pixels
-
-    // Set the height of chat-messages to match canvas height
-    chatMessages.style.height = canvasHeight - 20 + "px";
-  }
-
-  // Initial Sync of Chat height
-  syncChatHeight();
-
-
-  function getMousePos(e) {
-    const rect = canvas.getBoundingClientRect();
-    let x, y;
-
-    if (e.touches && e.touches.length > 0) {
-      x = e.touches[0].clientX - rect.left;
-      y = e.touches[0].clientY - rect.top;
-    } else {
-      x = e.clientX - rect.left;
-      y = e.clientY - rect.top;
-    }
-
-    // Adjust for canvas scaling
-    x *= canvas.width / rect.width;
-    y *= canvas.height / rect.height;
-
-    return { x, y };
-  }
-
-  function startDrawing(e) {
-    drawing = true;
-    draw(e); // Draw point
-  }
-
-  function stopDrawing() {
-    drawing = false;
-    ctx.beginPath();
-    clientGame.sendDrawAction('pen', null, null, penColor, 0);  // Trenne Linie für Server
-  }
-
-  function draw(e) {
-    if (!drawing) return;
-
-    e.preventDefault(); // Prevent scrolling on touch devices
-
-    ctx.lineWidth = penSize + (penSize * 1.3); // Local Pen-Size adjusted to Server representation
-    ctx.lineCap = "round";
-    ctx.strokeStyle = penColor;
-
-    const pos = getMousePos(e);
-
-    ctx.lineTo(pos.x, pos.y);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(pos.x, pos.y);
-
-    // Send draw action to server with scaled coordinates
-    const scaledX = (pos.x / canvas.width) * 600;
-    const scaledY = (pos.y / canvas.height) * 400;
-    clientGame.sendDrawAction(
-      tool,
-      Math.round(scaledX),
-      Math.round(scaledY),
-      penColor,
-      penSize
-    );
-  }
-
-  // Mouse position for debugging
-  const mousePositionDiv = document.getElementById("mousePosition");
-
-  // Update mouse position on mouse move
-  canvas.addEventListener("mousemove", updateMousePosition);
-  canvas.addEventListener("mouseenter", updateMousePosition);
-  canvas.addEventListener("mouseleave", clearMousePosition);
-
-  canvas.addEventListener("mousedown", () => {
-    mousePositionDiv.style.background = "#1af601";
-  });
-
-  canvas.addEventListener("mouseup", () => {
-    mousePositionDiv.style.background = "#fff";
-  });
-
-  canvas.addEventListener("mouseleave", () => {
-    mousePositionDiv.style.background = "#fff";
-  });
-
-  // Update mouse position on touch move
-  canvas.addEventListener("touchmove", updateMousePosition);
-  canvas.addEventListener("touchstart", updateMousePosition);
-  canvas.addEventListener("touchend", clearMousePosition);
-
-  function updateMousePosition(e) {
-    const pos = getMousePos(e);
-
-    // Calculate scaled positions based on 600x400 grid
-    const scaledX = (pos.x / canvas.width) * 600;
-    const scaledY = (pos.y / canvas.height) * 400;
-
-    // Round to two decimal places
-    const roundedX = Math.round(scaledX * 100) / 100;
-    const roundedY = Math.round(scaledY * 100) / 100;
-
-    // Update the text content with formatted string
-    mousePositionDiv.textContent = `Color: ${penColor}, PenSize: ${penSize},  X: ${roundedX}, Y: ${roundedY}`;
-  }
-
-  function clearMousePosition() {
-    mousePositionDiv.textContent = "";
-  }
-
-  // Dummy data für users
+  /** @type {User[]} */
   const users = [
     { name: "Player1", points: 0 },
     { name: "Player2", points: 20 },
     { name: "Player3", points: 15 },
   ];
 
-  // Render User
+  /**
+   * Renders the list of users on the screen.
+   */
   function renderUsers() {
     const usersContainer = document.querySelector(".users-container");
-    usersContainer.innerHTML = ""; // Clear existing content
+    usersContainer.innerHTML = "";
 
     users.forEach((user) => {
       const userDiv = document.createElement("div");
@@ -315,15 +305,16 @@ window.addEventListener("load", () => {
 
       userDiv.appendChild(nameDiv);
       userDiv.appendChild(pointsDiv);
-
       usersContainer.appendChild(userDiv);
     });
   }
 
-  // Init Users
   renderUsers();
 
-  // chat
+  // -------------------------------
+  // Chat Functionality
+  // -------------------------------
+
   const sendButton = document.getElementById("sendButton");
   const chatInput = document.getElementById("chatMessage");
   const chatMessages = document.querySelector(".chat-messages");
@@ -332,18 +323,16 @@ window.addEventListener("load", () => {
     const message = chatInput.value.trim();
     if (message !== "") {
       const messageDiv = document.createElement("div");
-      messageDiv.textContent = 'Player1: ' + message; // Username ist hier hardcoded erstmal
+      messageDiv.textContent = `Player1: ${message}`;
       chatMessages.appendChild(messageDiv);
       chatInput.value = "";
       chatMessages.scrollTop = chatMessages.scrollHeight;
     }
   });
 
-  // Send message on Enter key press
   chatInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
       sendButton.click();
     }
   });
 });
-
