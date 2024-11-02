@@ -30,46 +30,6 @@ body {
     box-sizing: border-box;
 }
 
-@media (max-width: 850px) {
-    .row {
-        flex-direction: column;
-        margin: 0 10px;
-        gap: 10px;
-    }
-
-    .column {
-        width: 100%;
-        padding: 0;
-    }
-
-    #drawingCanvas {
-        width: 100%;
-        height: auto;
-    }
-
-    .chat-messages {
-        height: 50%;
-    }
-
-    .toolbar {
-        width: 90vw;
-        flex-wrap: wrap;
-        gap: 5px;
-    }
-
-    /* Reposition users-container below the canvas */
-    .users-column {
-        order: 3;
-        /* Adjust order to position below */
-    }
-
-    /* Optionally, adjust chat-column order */
-    .chat-column {
-        order: 2;
-        /* Position chat above users if desired */
-    }
-}
-
 /* Canvas */
 #drawingCanvas {
     display: block;
@@ -298,5 +258,68 @@ body {
 
     100% {
         transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 850px) {
+
+    .head {
+        margin: 20px 20px 10px;
+    }
+
+    /* Main container to organize elements in a vertical column */
+    .row {
+        display: flex;
+        flex-wrap: wrap;
+        margin: 0;
+        gap: 10px;
+    }
+
+    /* Full-width column sections */
+    .column {
+        padding: 0;
+    }
+
+    /* Canvas sizing */
+    #drawingCanvas {
+        width: 100%;
+        height: auto;
+    }
+
+    .canvas-column {
+        min-width: 100%;
+    }
+
+    /* Chat messages section with limited height */
+    .chat-messages {
+        height: 50%;
+    }
+
+    /* Toolbar with wrap and spacing adjustments */
+    .toolbar {
+        width: 90vw;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+
+    /* User container positioned below canvas */
+    .users-column {
+        order: 2;
+        width: 50%;
+    }
+
+    /* Chat column positioned below users, optionally adjustable */
+    .chat-column {
+        order: 3;
+        width: 50%;
+    }
+
+    .chat-input {
+        margin-top: 0%;
+    }
+
+    #sendButton {
+        display: none;
     }
 }
