@@ -43,7 +43,6 @@ module.exports = class ClientGame {
         // Event handler for receiving messages from the server
         this.socket.onmessage = (event) => {
             let data = JSON.parse(event.data);
-            console.log("Message received:", data);
 
             if (data.type === 'pl') { // 'pl' = PointList
                 this.updateWithPoints(data.data);
@@ -237,8 +236,6 @@ module.exports = class ClientGame {
         let message = new Message('action', action);
 
         let _message = JSON.stringify(message);
-
-        console.log("Sending Action:", _message);
 
         this.send(_message);
     }

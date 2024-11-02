@@ -9,6 +9,10 @@
 // Import the ClientGame module
 const ClientGame = require("./clientgame");
 
+// Import interface tools
+const { renderUsers, initializeChat } = require('./components/userInterface');
+
+
 /** 
  * @type {ClientGame} 
  */
@@ -32,11 +36,11 @@ window.addEventListener("load", () => {
   resizeCanvas();
   window.addEventListener("resize", resizeCanvasEvent);
 
-  function resizeCanvasEvent (){
+  function resizeCanvasEvent() {
     resizeCanvas();
     clientGame.sendGetCanvasAction();
   }
-  
+
   /**
    * Resizes the canvas based on the window size.
    */
@@ -65,7 +69,7 @@ window.addEventListener("load", () => {
   function syncChatHeight() {
     const chatMessages = document.querySelector(".chat-messages");
     const canvasHeight = canvas.clientHeight;
-  
+
     // Check if the screen width is less than or equal to 850px (mobile)
     if (window.innerWidth <= 850) {
       // Set chat height to half of the current calculated height for mobile
@@ -75,7 +79,7 @@ window.addEventListener("load", () => {
       chatMessages.style.height = `${canvasHeight - 20}px`;
     }
   }
-  
+
   // Call syncChatHeight initially and on window resize
   syncChatHeight();
   window.addEventListener("resize", syncChatHeight);
@@ -275,16 +279,16 @@ window.addEventListener("load", () => {
     clientGame.sendDrawAction(tool, Math.round(scaledX), Math.round(scaledY), penColor, penSize);
   }
 
-    // Mouse events
-    canvas.addEventListener('mousedown', startDrawing);
-    canvas.addEventListener('mouseup', stopDrawing);
-    canvas.addEventListener('mousemove', draw);
-    canvas.addEventListener('mouseout', stopDrawing);
+  // Mouse events
+  canvas.addEventListener('mousedown', startDrawing);
+  canvas.addEventListener('mouseup', stopDrawing);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseout', stopDrawing);
 
-    // Touch events
-    canvas.addEventListener('touchstart', startDrawing);
-    canvas.addEventListener('touchend', stopDrawing);
-    canvas.addEventListener('touchmove', draw);
+  // Touch events
+  canvas.addEventListener('touchstart', startDrawing);
+  canvas.addEventListener('touchend', stopDrawing);
+  canvas.addEventListener('touchmove', draw);
 
   // -------------------------------
   // User Rendering (Dummy Data)
@@ -297,32 +301,7 @@ window.addEventListener("load", () => {
     { name: "Player3", points: 15 },
   ];
 
-  /**
-   * Renders the list of users on the screen.
-   */
-  function renderUsers() {
-    const usersContainer = document.querySelector(".users-container");
-    usersContainer.innerHTML = "";
-
-    users.forEach((user) => {
-      const userDiv = document.createElement("div");
-      userDiv.classList.add("user");
-
-      const nameDiv = document.createElement("div");
-      nameDiv.classList.add("user-name");
-      nameDiv.textContent = user.name;
-
-      const pointsDiv = document.createElement("div");
-      pointsDiv.classList.add("user-points");
-      pointsDiv.textContent = `${user.points} Punkte`;
-
-      userDiv.appendChild(nameDiv);
-      userDiv.appendChild(pointsDiv);
-      usersContainer.appendChild(userDiv);
-    });
-  }
-
-  renderUsers();
+  renderUsers(users);
 
   // -------------------------------
   // Chat Functionality
@@ -332,20 +311,5 @@ window.addEventListener("load", () => {
   const chatInput = document.getElementById("chatMessage");
   const chatMessages = document.querySelector(".chat-messages");
 
-  sendButton.addEventListener("click", () => {
-    const message = chatInput.value.trim();
-    if (message !== "") {
-      const messageDiv = document.createElement("div");
-      messageDiv.textContent = `Player1: ${message}`;
-      chatMessages.appendChild(messageDiv);
-      chatInput.value = "";
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
-  });
-
-  chatInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      sendButton.click();
-    }
-  });
+  initializeChat(sendButton, chatInput, chatMessages);
 });
