@@ -65,8 +65,8 @@ window.addEventListener("load", () => {
     const chatMessages = document.querySelector(".chat-messages");
     const canvasHeight = canvas.clientHeight;
   
-    // Check if the screen width is less than or equal to 768px (mobile)
-    if (window.innerWidth <= 768) {
+    // Check if the screen width is less than or equal to 850px (mobile)
+    if (window.innerWidth <= 850) {
       // Set chat height to half of the current calculated height for mobile
       chatMessages.style.height = `${(canvasHeight - 20) / 2}px`;
     } else {

@@ -30,7 +30,7 @@ body {
     box-sizing: border-box;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 850px) {
     .row {
         flex-direction: column;
         margin: 0 10px; /* Add left and right margin for mobile */
