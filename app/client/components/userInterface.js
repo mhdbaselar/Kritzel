@@ -1,8 +1,17 @@
 // components/userInterface.js
 
+"use strict";
+
 // -------------------------------
 // user sidebar rendering
 // -------------------------------
+
+/**
+ * Represents a user.
+ * @typedef {Object} User
+ * @property {string} name - The name of the user.
+ * @property {number} points - The points of the user.
+ */
 
 /**
  * Renders the list of users on the screen.
@@ -75,10 +84,31 @@ function initializeChat(sendButton, chatInputDiv, chatMessages) {
     // Event listener for the send button click
     sendButton.addEventListener("click", sendMessage);
 
-    // Since chatInputDiv is not contenteditable, we don't need to handle physical Enter key presses
-    // All message sending is handled via the virtual keyboard's Enter key
+    // If chatInputDiv is contenteditable, add keydown listener for Enter key
+    function handleKeyDown(e) {
+        if (e.key === "Enter") {
+            e.preventDefault(); // Prevent default behavior (e.g., adding newline)
+            sendMessage();
+        }
+    }
 
-    return sendMessage;
+    // Function to add keydown listener
+    function addKeydownListener() {
+        chatInputDiv.addEventListener("keydown", handleKeyDown);
+    }
+
+    // Function to remove keydown listener
+    function removeKeydownListener() {
+        chatInputDiv.removeEventListener("keydown", handleKeyDown);
+    }
+
+    // Initialize based on current contenteditable state
+    if (chatInputDiv.isContentEditable) {
+        addKeydownListener();
+    }
+
+    // Return functions to manage listeners
+    return { sendMessage, addKeydownListener, removeKeydownListener };
 }
 
 

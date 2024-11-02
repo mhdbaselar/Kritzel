@@ -14,6 +14,7 @@ const Keyboard = require('simple-keyboard').default;
  */
 const clientGame = new ClientGame();
 
+// Open WebSocket connection
 clientGame.openWebSocket();
 
 window.addEventListener("load", () => {
@@ -26,7 +27,7 @@ window.addEventListener("load", () => {
   const ASPECT_RATIO = 3 / 2; // Width : Height ratio = 3:2
 
   resizeCanvas();
-  window.addEventListener("resize", resizeCanvasEvent);
+  window.addEventListener("resize", debounce(resizeCanvasEvent, 200));
 
   function resizeCanvasEvent() {
     resizeCanvas();
@@ -55,6 +56,15 @@ window.addEventListener("load", () => {
     syncChatHeight();
   }
 
+  // Debounce function to limit the rate at which a function can fire.
+  function debounce(func, wait) {
+    let timeout;
+    return function (...args) {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+  }
+
   function syncChatHeight() {
     const chatMessages = document.querySelector(".chat-messages");
     const canvasHeight = canvas.clientHeight;
@@ -67,7 +77,7 @@ window.addEventListener("load", () => {
   }
 
   syncChatHeight();
-  window.addEventListener("resize", syncChatHeight);
+  window.addEventListener("resize", debounce(syncChatHeight, 200));
 
   // -------------------------------
   // Drawing State Variables
@@ -246,8 +256,8 @@ window.addEventListener("load", () => {
   const chatInputDiv = document.getElementById("chatMessage"); // This is now a <div>
   const chatMessages = document.querySelector(".chat-messages");
 
-  // Initialize chat and capture sendMessage function
-  const sendMessage = initializeChat(sendButton, chatInputDiv, chatMessages);
+  // Initialize chat and capture sendMessage function and listener handlers
+  const chat = initializeChat(sendButton, chatInputDiv, chatMessages);
 
   // -------------------------------
   // Initialize Virtual Keyboard
@@ -295,6 +305,7 @@ window.addEventListener("load", () => {
   }
 
   let capsPressed = false;
+
   /**
    * Function to handle key presses on the virtual keyboard
    * @param {string} button - The button that was pressed
@@ -309,10 +320,10 @@ window.addEventListener("load", () => {
         console.log("Cannot send empty message");
         return;
       }
-      sendMessage();
+      chat.sendMessage();
       keyboard.clearInput();
       chatInputDiv.textContent = ""; // Clear the chat input
-      keyboardContainer.style.display = "none"; // Hide keyboard after sending
+      hideKeyboard(); // Hide keyboard after sending
       chatInputDiv.blur(); // Remove focus from input
       return;
     }
@@ -363,8 +374,25 @@ window.addEventListener("load", () => {
     }
   }
 
+  /**
+   * Function to show the virtual keyboard
+   */
+  function showKeyboard() {
+    if (isMobile()) { // Mobile check
+      keyboardContainer.style.display = "block";
+      keyboard.setInput(chatInputDiv.textContent); // Initialize keyboard input with current chat input value
+    }
+  }
+
+  /**
+   * Function to hide the virtual keyboard
+   */
+  function hideKeyboard() {
+    keyboardContainer.style.display = "none";
+  }
+
   // -------------------------------
-  // Prevent the native keyboard from showing on mobile
+  // Device Detection and Chat Input Handling
   // -------------------------------
 
   /**
@@ -375,35 +403,73 @@ window.addEventListener("load", () => {
     return window.innerWidth <= 850;
   }
 
-  // Handle touch/click events on the chat input div
-  chatInputDiv.addEventListener("click", (event) => {
+  /**
+   * Function to set the chat input's editable state based on device
+   */
+  function setChatInputEditable() {
+    if (isMobile()) {
+      chatInputDiv.setAttribute("contenteditable", "false");
+      chatInputDiv.classList.remove("editable");
+      // Optionally, clear any physical input
+      chatInputDiv.textContent = "";
+      chat.removeKeydownListener();
+    } else {
+      chatInputDiv.setAttribute("contenteditable", "true");
+      chatInputDiv.classList.add("editable");
+      chat.addKeydownListener();
+    }
+  }
+
+  /**
+   * Function to handle chat input click/focus
+   */
+  function handleChatInputClick(event) {
     if (isMobile()) {
       event.preventDefault(); // Prevent any default behavior
       showKeyboard();
-    }
-  });
-
-  /**
-   * Shows the virtual keyboard.
-   */
-  function showKeyboard() {
-    if (isMobile()) { // Mobile check
-      keyboardContainer.style.display = "block";
-      keyboard.setInput(chatInputDiv.textContent); // Initialize keyboard input with current chat input value
+    } else {
+      // For desktop, focus the chat input div to allow typing
+      chatInputDiv.focus();
     }
   }
+
+  // Initial setup
+  setChatInputEditable();
+  if (isMobile()) {
+    hideKeyboard(); // Ensure it's hidden initially on mobile
+  }
+
+  // Event listener for chat input click/focus
+  chatInputDiv.addEventListener("click", handleChatInputClick);
+  chatInputDiv.addEventListener("focus", handleChatInputClick);
 
   // Hide the keyboard when tapping outside the keyboard or input
   document.addEventListener("click", (event) => {
     if (!keyboardContainer.contains(event.target) && event.target !== chatInputDiv) {
-      keyboardContainer.style.display = "none";
+      hideKeyboard();
     }
   });
 
-  // Update virtual keyboard's visibility on window resize
-  window.addEventListener("resize", () => {
-    if (!isMobile()) {
-      keyboardContainer.style.display = "none";
+  // Handle window resize to toggle editable state and keyboard visibility
+  window.addEventListener("resize", debounce(() => {
+    const wasMobile = chatInputDiv.getAttribute("contenteditable") === "false";
+    setChatInputEditable();
+    const isNowMobile = isMobile();
+
+    if (wasMobile !== isNowMobile) {
+      if (isNowMobile) {
+        hideKeyboard();
+      } else {
+        hideKeyboard();
+      }
     }
-  });
+  }, 200));
+
+  // -------------------------------
+  // Finalizing and Ensuring Focus
+  // -------------------------------
+  // Optional: Automatically focus the chat input on desktop
+  if (!isMobile()) {
+    chatInputDiv.focus();
+  }
 });
