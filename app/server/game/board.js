@@ -88,9 +88,7 @@ module.exports = class Board {
     fill(x, y, color){
         let previousColor = this.#canvas[y][x];
         if(color != previousColor){
-            let pointList = this.iterativefill(x, y, color, previousColor);
-            console.log(pointList);
-            this.#points = this.#points.concat(pointList);
+            this.#points = this.#points.concat(this.iterativefill(x, y, color, previousColor));
         }   
     }
 
