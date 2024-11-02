@@ -1,3 +1,4 @@
+// components/userInterface.js
 
 // -------------------------------
 // user sidebar rendering
@@ -6,7 +7,7 @@
 /**
  * Renders the list of users on the screen.
  * @param {User[]} users 
-*/
+ */
 function renderUsers(users) {
     const usersContainer = document.querySelector(".users-container");
     usersContainer.innerHTML = "";
@@ -35,24 +36,35 @@ function renderUsers(users) {
 // -------------------------------
 /**
  * Initializes the chat functionality by setting up event listeners
- * for sending messages via the send button and the Enter key.
+ * for sending messages via the send button and the Enter key from the virtual keyboard.
  * 
  * @param {HTMLElement} sendButton - The send button element.
- * @param {HTMLInputElement} chatInput - The chat input element.
+ * @param {HTMLElement} chatInputDiv - The chat input <div>.
  * @param {HTMLElement} chatMessages - The container for chat messages.
  * @returns {Function} sendMessage - The function to send messages.
  */
-function initializeChat(sendButton, chatInput, chatMessages) {
+function initializeChat(sendButton, chatInputDiv, chatMessages) {
     /**
      * Sends a chat message if the input is not empty.
      */
     function sendMessage() {
-        const message = chatInput.value.trim();
+        const message = chatInputDiv.textContent.trim();
         if (message !== "") {
             const messageDiv = document.createElement("div");
-            messageDiv.textContent = `Player1: ${message}`;
+            messageDiv.classList.add("message");
+
+            const senderSpan = document.createElement("span");
+            senderSpan.classList.add("message-sender");
+            senderSpan.textContent = "Player1: ";
+
+            const textSpan = document.createElement("span");
+            textSpan.classList.add("message-text");
+            textSpan.textContent = message;
+
+            messageDiv.appendChild(senderSpan);
+            messageDiv.appendChild(textSpan);
             chatMessages.appendChild(messageDiv);
-            chatInput.value = "";
+            chatInputDiv.textContent = "";
             chatMessages.scrollTop = chatMessages.scrollHeight;
 
             // Optionally, send the message to the server or WebSocket
@@ -63,13 +75,8 @@ function initializeChat(sendButton, chatInput, chatMessages) {
     // Event listener for the send button click
     sendButton.addEventListener("click", sendMessage);
 
-    // Event listener for Enter key on the physical keyboard
-    chatInput.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-            e.preventDefault(); // Prevent default behavior (e.g., form submission)
-            sendMessage();
-        }
-    });
+    // Since chatInputDiv is not contenteditable, we don't need to handle physical Enter key presses
+    // All message sending is handled via the virtual keyboard's Enter key
 
     return sendMessage;
 }

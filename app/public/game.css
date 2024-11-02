@@ -352,3 +352,37 @@ body {
     color: white;
     /* White text for contrast */
 }
+
+.chat-input-div {
+    flex: 1;
+    padding: 8px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #ffffff;
+    cursor: text;
+    user-select: none;
+    outline: none;
+    position: relative;
+}
+
+/* Placeholder styling */
+.chat-input-div::before {
+    content: attr(placeholder);
+    color: #888;
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.chat-input-div:not(:empty)::before {
+    content: '';
+}
+
+/* Focus styling */
+.chat-input-div:focus {
+    border-color: #007BFF;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}

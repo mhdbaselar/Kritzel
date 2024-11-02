@@ -7,6 +7,8 @@ const { renderUsers, initializeChat } = require('./components/userInterface');
 const { initializeToolbar } = require('./components/toolbar');
 const Keyboard = require('simple-keyboard').default;
 
+// Initialize simple-keyboard's CSS (if using a bundler that supports CSS imports)
+
 /** 
  * @type {ClientGame} 
  */
@@ -241,9 +243,10 @@ window.addEventListener("load", () => {
   // Chat Functionality
   // -------------------------------
   const sendButton = document.getElementById("sendButton");
-  const chatInputDiv = document.getElementById("chatMessage"); // This should be a <div> in HTML
+  const chatInputDiv = document.getElementById("chatMessage"); // This is now a <div>
   const chatMessages = document.querySelector(".chat-messages");
 
+  // Initialize chat and capture sendMessage function
   const sendMessage = initializeChat(sendButton, chatInputDiv, chatMessages);
 
   // -------------------------------
@@ -261,22 +264,24 @@ window.addEventListener("load", () => {
     theme: "hg-theme-default hg-layout-default",
     layout: {
       default: [
-        "q w e r t z u i o p ü +",
+        "q w e r t z u i o p ü + {bksp}",
         "a s d f g h j k l ö ä #",
         "{capslock} y x c v b n m , . -",
-        "{space} {enter}"
+        "{back} {space} {enter}"
       ],
       uppercase: [
-        "Q W E R T Z U I O P Ü +",
+        "Q W E R T Z U I O P Ü + {bksp}",
         "A S D F G H J K L Ö Ä #",
         "{capslock} Y X C V B N M , . -",
-        "{space} {enter}"
+        "{back} {space} {enter}"
       ]
     },
     display: {
+      "{bksp}": "⌫",
       "{enter}": "Enter",
       "{capslock}": "Caps",
-      "{space}": "Space"
+      "{space}": "Space",
+      "{back}": "←" // Back arrow symbol
     }
   });
 
@@ -285,6 +290,7 @@ window.addEventListener("load", () => {
    * @param {string} input - The current input from the keyboard
    */
   function onChange(input) {
+    console.log("Input changed:", input);
     chatInputDiv.textContent = input;
   }
 
@@ -294,13 +300,34 @@ window.addEventListener("load", () => {
    * @param {string} button - The button that was pressed
    */
   function onKeyPress(button) {
-    console.log("Button pressed", button);
+    console.log("Button pressed:", button);
 
     if (button === "{enter}") {
+      console.log("Enter key pressed");
+      const message = chatInputDiv.textContent.trim();
+      if (message === "") {
+        console.log("Cannot send empty message");
+        return;
+      }
       sendMessage();
       keyboard.clearInput();
+      chatInputDiv.textContent = ""; // Clear the chat input
       keyboardContainer.style.display = "none"; // Hide keyboard after sending
       chatInputDiv.blur(); // Remove focus from input
+      return;
+    }
+
+    if (button === "{bksp}") {
+      console.log("Backspace key pressed");
+      // No additional handling needed; onChange will update the input
+      return;
+    }
+
+    if (button === "{back}") {
+      console.log("Back button pressed");
+      // Implement back navigation logic here
+      // For example, navigate to a previous page or close the chat
+      window.history.back(); // Example: Go back to the previous page
       return;
     }
 
@@ -309,10 +336,13 @@ window.addEventListener("load", () => {
       return;
     }
 
-    if (capsPressed) {
+    // If Caps Lock was pressed, toggle it off after the next key press
+    if (capsPressed && button !== "{capslock}") {
       toggleCapsLock();
       const capsButton = keyboard.getButtonElement("{capslock}");
-      capsButton.classList.remove("active-capslock");
+      if (capsButton) {
+        capsButton.classList.remove("active-capslock");
+      }
       capsPressed = false;
     }
   }
