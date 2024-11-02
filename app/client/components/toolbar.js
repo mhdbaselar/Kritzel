@@ -1,82 +1,102 @@
-let penSize;
-let penColor;
-let ctx; // canvas context
-let penSizeButtons = [];
+// /components/toolbar.js
+"use strict";
 
 /**
- * Initializes the pen size buttons and settings.
- * @param {object} config - Configuration object.
- * @param {number} config.initialPenSize - The default pen size.
- * @param {string} config.initialPenColor - The default pen color.
- * @param {CanvasRenderingContext2D} config.canvasContext - The canvas context.
+ * Initializes pen size buttons by attaching event listeners and setting up initial states.
+ * @param {number[]} sizes - An array of pen sizes to initialize.
+ * @param {function} onPenSizeChange - Callback function to handle pen size changes.
+ * @returns {HTMLElement[]} - Array of valid pen size button elements.
  */
-function initializePenModule({ initialPenSize, initialPenColor, canvasContext }) {
-    penSize = initialPenSize;
-    penColor = initialPenColor;
-    ctx = canvasContext;
+function initializePenSizeButtons(sizes, onPenSizeChange) {
+    const penSizeButtons = [];
 
-    const penSizes = [
-        { size: 2, element: document.getElementById("penSize2") },
-        { size: 3, element: document.getElementById("penSize3") },
-        { size: 6, element: document.getElementById("penSize6") },
-    ];
+    sizes.forEach(size => {
+        const button = document.getElementById(`penSize${size}`);
+        if (!button) {
+            console.error(`Pen size button with ID "penSize${size}" not found.`);
+            return;
+        }
 
-    const validPenSizes = penSizes.filter(ps => ps.element);
+        button.addEventListener("click", () => {
+            onPenSizeChange(size, button);
+        });
 
-    if (validPenSizes.length !== penSizes.length) {
-        console.error("One or more pen size buttons not found.");
+        penSizeButtons.push(button);
+    });
+
+    if (penSizeButtons.length !== sizes.length) {
+        console.error("One or more pen size buttons were not initialized.");
     }
 
-    penSizeButtons = validPenSizes.map(ps => ps.element);
+    return penSizeButtons;
+}
 
-    validPenSizes.forEach(ps => {
-        ps.element.addEventListener("click", () => {
-            updatePenSettings(ps.size);
-            updateSelectedPenSizeButton(ps.element);
+/**
+ * Initializes color buttons by attaching event listeners.
+ * @param {function} onPenColorChange - Callback function to handle pen color changes.
+ * @returns {NodeListOf<Element>} - NodeList of color button elements.
+ */
+function initializeColorButtons(onPenColorChange) {
+    const colorButtons = document.querySelectorAll('.color-button');
+
+    colorButtons.forEach(button => {
+        button.addEventListener('click', (e) => {
+            const color = e.target.getAttribute('data-color');
+            if (color) {
+                onPenColorChange(color, button);
+            } else {
+                console.error("Color button missing 'data-color' attribute.");
+            }
         });
     });
 
-    const defaultPenSizeButton = penSizes.find(ps => ps.size === penSize).element;
-    updateSelectedPenSizeButton(defaultPenSizeButton);
-    updateSelectedPenButtonColor(penColor);
+    return colorButtons;
 }
 
 /**
- * Updates the pen settings (size and color).
+ * Initializes tool selection buttons by attaching event listeners.
+ * @param {object} tools - An object mapping tool names to their button elements.
+ * @param {function} onToolChange - Callback function to handle tool changes.
  */
-function updatePenSettings(penSize) {
-    ctx.lineWidth = penSize;
-    ctx.strokeStyle = penColor;
-    console.log(`Pen settings updated: Size=${penSize}, Color=${penColor}`);
-}
-
-/**
- * Updates the selected pen size button.
- * @param {HTMLElement} selectedButton - The button element to select.
- */
-function updateSelectedPenSizeButton(selectedButton) {
-    penSizeButtons.forEach(button => button.classList.remove("selected"));
-    selectedButton.classList.add("selected");
-    updateSelectedPenButtonColor(penColor);
-    console.log(penColor)
-}
-
-/**
- * Updates the color of the selected pen size button.
- * @param {string} selectedColor - The color to apply to the selected button.
- */
-function updateSelectedPenButtonColor(selectedColor) {
-    const selectedButton = document.querySelector(".pen-size-btn.selected");
-    penSizeButtons.forEach(button => (button.style.backgroundColor = "#ffffff"));
-    if (selectedButton) {
-        selectedButton.style.backgroundColor = selectedColor;
+function initializeToolSelection(tools, onToolChange) {
+    // Initialize the default selected tool
+    if (tools.pen) {
+        tools.pen.classList.add("selected-tool");
+    } else {
+        console.error('Pen tool button with ID "penTool" not found.');
     }
-    penColor = selectedColor;
+
+    Object.keys(tools).forEach(toolName => {
+        const toolButton = tools[toolName];
+        if (toolButton) {
+            toolButton.addEventListener("click", () => {
+                onToolChange(toolName, toolButton);
+            });
+        } else {
+            console.error(`Tool button for "${toolName}" not found.`);
+        }
+    });
 }
 
-// Expose the initialization and update functions
+/**
+ * Initializes the clear canvas button by attaching an event listener.
+ * @param {HTMLElement} clearButton - The clear canvas button element.
+ * @param {function} onClearCanvas - Callback function to handle clear canvas action.
+ */
+function initializeClearCanvasButton(clearButton, onClearCanvas) {
+    if (!clearButton) {
+        console.error('Clear Canvas button with ID "clearCanvas" not found.');
+        return;
+    }
+
+    clearButton.addEventListener("click", () => {
+        onClearCanvas();
+    });
+}
+
 module.exports = {
-    initializePenModule,
-    updatePenSettings,
-    updateSelectedPenButtonColor
+    initializePenSizeButtons,
+    initializeColorButtons,
+    initializeToolSelection,
+    initializeClearCanvasButton,
 };
