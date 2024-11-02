@@ -410,16 +410,35 @@ window.addEventListener("load", () => {
     }
 
   }
-
+  // -------------------------------
   // Prevent the native keyboard from showing on mobile
+  // -------------------------------
+
+  /**
+   * Function to detect if the device is mobile based on viewport width
+   * @returns {boolean} - True if mobile, false otherwise
+   */
+  function isMobile() {
+    return window.innerWidth <= 850;
+  }
+
+  // Set the chat input to readonly and inputmode="none" on mobile devices
+  if (isMobile()) {
+    chatInput.setAttribute("readonly", true);
+    chatInput.setAttribute("inputmode", "none");
+  }
+
+  // Event listener for focus on chat input
   chatInput.addEventListener("focus", (event) => {
-    event.preventDefault(); // Prevents the input from getting focus and showing the mobile keyboard
-    showKeyboard();
+    if (isMobile()) {
+      event.preventDefault(); // Prevents the input from getting focus and showing the mobile keyboard
+      showKeyboard();
+    }
   });
 
   // Show the virtual keyboard only on mobile
   function showKeyboard() {
-    if (window.innerWidth <= 850) { // Mobile check
+    if (isMobile()) { // Mobile check
       keyboardContainer.style.display = "block";
       keyboard.setInput(chatInput.value); // Initialize keyboard input with current chat input value
     }
@@ -431,4 +450,25 @@ window.addEventListener("load", () => {
       keyboardContainer.style.display = "none";
     }
   });
+
+  // Update readonly and inputmode attributes on window resize
+  window.addEventListener("resize", () => {
+    if (isMobile()) {
+      chatInput.setAttribute("readonly", true);
+      chatInput.setAttribute("inputmode", "none");
+    } else {
+      chatInput.removeAttribute("readonly");
+      chatInput.removeAttribute("inputmode");
+    }
+  });
+
+  // -------------------------------
+  // Handle Virtual Keyboard Input
+  // -------------------------------
+
+  // Update the chat input value whenever the virtual keyboard input changes
+  keyboard.on("change", input => onChange(input));
+
+  // Update the chat input value and handle Caps Lock whenever a key is pressed
+  keyboard.on("keyPress", button => onKeyPress(button));
 });
