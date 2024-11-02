@@ -1,13 +1,13 @@
 "use strict"
 
 module.exports = class Board {
-    #canvas;
+    #canvas;           // 2D with hexadecimal colors codes
     #rows;
     #columns;
-    #initialColor;
+    #initialColor;      // hexadecimal color at start
     #backgroundColor;
-    #previousPoint;
-    #points;
+    #previousPoint;     // previous point for line generation
+    #points;            // transfer points list
 
     /**
      * Constructor to instanciate Board
@@ -27,7 +27,7 @@ module.exports = class Board {
 
         this.#previousPoint = {x0 : null, y0 : null};
 
-        this.#points[0] = {x: 0, y: 0, color: '#FFFFFF'}
+        this.#points = [];
         
         this.clear();
     }
@@ -48,6 +48,13 @@ module.exports = class Board {
         this.#previousPoint = { x0 : x, y0 : y};
     }
 
+    /**
+     * Erase an hexadecimal color code to given coordinate with given thickness in each direction to background color
+     * @param {int} x coordinate
+     * @param {int} y coordinate
+     * @param {string} color hexadecimal color code
+     * @param {int} thickness thickness
+     */
     erase(x, y, thickness){
         if(x != null || y != null) {
             let x0 = this.#previousPoint.x0;
@@ -57,22 +64,86 @@ module.exports = class Board {
         this.#previousPoint = { x0 : x, y0 : y};
     }
 
+    /**
+     * Clear the whole Canvas | Sets the initial color to all positions in the 2D array
+     */
     clear(){
         this.#setWholeBoard(this.#initialColor);
     }
 
-    fill(color){
+    /**
+     * Fills the whole Canvas with one color | Sets a color to all positions in the 2D array
+     * @param {string} color 
+     */
+    fillBackground(color){
         this.#setWholeBoard(color);
     }
 
+    /**
+     * Fills the area where the point (x,y) is located with one color
+     * @param {int} x coordinate
+     * @param {int} y coordinate
+     * @param {string} color hexadecimal color code
+     */
+    fill(x, y, color){
+        let previousColor = this.#canvas[y][x];
+        if(color != previousColor){
+            this.#points = this.#points.concat(this.iterativefill(x, y, color, previousColor));
+        }   
+    }
+
+    /**
+     * Fills the area where the point (x,y) is located with one color (iterative)
+     * @param {int} x coordinate
+     * @param {int} y coordinate
+     * @param {string} color hexadecimal color code 
+     * @param {string} previousColor previous color from fill mouse click 
+     * @returns list of points
+     */
+    iterativefill(x, y, color, previousColor){
+        let points = [];
+        let pointStack = [{x: x, y: y}];
+        
+        while(pointStack.length > 0){
+            let point = pointStack.pop(); 
+
+            if (point.y >= 0 && point.y < this.#rows) {
+                if (point.x >= 0 && point.x < this.#columns) {
+                    if(previousColor == this.#canvas[point.y][point.x]) {
+                        
+                        this.#canvas[point.y][point.x] = color;
+                        points.push({x: point.x, y: point.y, color: color});
+
+                        pointStack.push({x: point.x+1, y: point.y});    // check right
+                        pointStack.push({x: point.x-1, y: point.y});    // check left
+                        pointStack.push({x: point.x, y: point.y+1});    // check down
+                        pointStack.push({x: point.x, y: point.y-1});    // check up
+                    }
+                }
+            }
+        }  
+        return points;
+    }
+
+    /**
+     * Returns the current canvas (2D-array)
+     * @returns this.#canvas - 2D-array
+     */
     getBoard(){
         return this.#canvas;
     }
 
+    /**
+     * Returns the current transfer points list
+     * @returns this.#points - list of all points to be transmitted to the clients
+     */
     getPoints(){
         return this.#points;
     }
 
+    /**
+     * Clear the transfer points list (this.#points)
+     */
     setPointsEmpty() {
         this.#points = [];
     }
@@ -81,6 +152,16 @@ module.exports = class Board {
     //------------HELP FUNCTIONS-----------
     //-------------------------------------
 
+    /**
+     * Creates a line from a start point to an end point
+     * @param {int} x0 previous x coordinate
+     * @param {int} y0 previous y coordinate
+     * @param {int} x1 current x coordinate
+     * @param {int} y1 current y coordinate
+     * @param {string} color hexadecimal color code
+     * @param {int} thickness thickness of the line
+     * @returns list of line points
+     */
     #drawLine(x0, y0, x1, y1, color, thickness) {
         let points = [];
         if(x0 == null || y0 == null){
@@ -114,6 +195,14 @@ module.exports = class Board {
         return points;
     }
 
+    /**
+     * Creates a point
+     * @param {int} x x
+     * @param {int} y 
+     * @param {string} color hexadecimal color code
+     * @param {int} thickness thickness of the point
+     * @returns list of pixels from the point
+     */
     #drawPoint(x, y, color, thickness){
         let points = []
         for (let yt = -thickness + 1; yt < thickness; yt++) {
@@ -131,6 +220,10 @@ module.exports = class Board {
         return points;
     }
 
+    /**
+     * Sets a hexadecimal color code to all positions in the 2D array (this.#canvas)
+     * @param {string} color hexadecimal color code
+     */
     #setWholeBoard(color){
         this.#backgroundColor = color;
         for (let j = 0; j < this.#rows; j++) {

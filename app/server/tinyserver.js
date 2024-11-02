@@ -5,53 +5,76 @@
 //
 //-----------------------
 
-const http = require('http')
-const url = require('url')
-const fs = require('fs')
-const path = require('path')
-const ws = require('ws')
+const http = require('http');
+const url = require('url');
+const fs = require('fs');
+const path = require('path');
+const ws = require('ws');
 
 module.exports = class TinyServer {
 
+    /**
+     * Constructor to instanciate the WebsocketServer
+     * @param {int} port port number
+     * @param {function} wsCallback receive function
+     */
     constructor(port, wsCallback) {
-        this.wsCallback = wsCallback
-        this.server = http.createServer(this.processHttpRequest.bind(this))
-        this.websocketServer = new ws.WebSocketServer({ server: this.server, clientTracking: true })
-        this.websocketServer.on('connection', this.connectWs.bind(this))
+        this.wsCallback = wsCallback;
+        this.server = http.createServer(this.processHttpRequest.bind(this));
+        this.websocketServer = new ws.WebSocketServer({ server: this.server, clientTracking: true });
+        this.websocketServer.on('connection', this.connectWs.bind(this));
         this.server.listen(port, () => {
-            console.log(`tinyserver running at http://127.0.0.1:${port}/`)
-        })
+            console.log(`tinyserver running at http://127.0.0.1:${port}/`);
+        });
     }
 
+    /**
+     * Configures the connection to the connecting client
+     * @param {WebSocket} websocket websocket - client
+     */
     connectWs(websocket) {
-        websocket.on('error', console.error)
-        websocket.on('message', (data) => { this.processWsRequest(data)})
-        websocket.on('close', () => { console.log('close'); })
+        websocket.on('error', console.error);
+        websocket.on('message', (data) => { this.processWsRequest(data)});
+        websocket.on('close', () => { console.log('close'); });
     }
 
+    /**
+     * Recieves and processes a message from the client 
+     * @param {string} data client request
+     */
     processWsRequest(data) {
-        if (this.wsCallback) this.wsCallback(data)
+        if (this.wsCallback) this.wsCallback(data);
     }
 
+    /**
+     * Sends a message to all clients 
+     * @param {string} data server response
+     * @param {boolean} isBinary is data binary
+     */
     broadcastWsMessage(data, isBinary) {
         this.websocketServer.clients.forEach(function each(client) {
             if (client.readyState === ws.OPEN) {
                 client.send(data, { binary: isBinary });
             }
-        })
+        });
     }
 
+    /**
+     * Handles HTTP requests (url-request) and generates a response (HTML)
+     * @param {*} req request
+     * @param {*} res response
+     */
     processHttpRequest(req, res) {
-        let parts = url.parse(req.url, true)
+        let parts = url.parse(req.url, true);
 
-        let filePath = parts.pathname ? parts.pathname.substring(1) : ""
-        if (filePath === null || filePath === '') filePath = 'index.html'
+        let filePath = parts.pathname ? parts.pathname.substring(1) : "";
+        if (filePath === null || filePath === '') filePath = 'index.html';
 
         let now = new Date;
-        console.log(now.toLocaleString('de-DE') + ': request for ' + req.url)
+        console.log(now.toLocaleString('de-DE') + ': request for ' + req.url);
 
         fs.readFile('./public/' + filePath, (err, data) => {
-            res.statusCode = 200
+            res.statusCode = 200;
             switch (path.extname(filePath)) {
                 case ".html":
                 case ".htm": res.setHeader('Content-Type', 'text/html'); break
@@ -59,8 +82,8 @@ module.exports = class TinyServer {
                 case ".png": res.setHeader('Content-Type', 'image/png'); break
                 case ".gif": res.setHeader('Content-Type', 'image/gif'); break
             }
-            res.end(data)
-        })
+            res.end(data);
+        });
     }
 
 }
