@@ -1,11 +1,12 @@
 FROM node:21
 
-WORKDIR /app
+WORKDIR /app# Copy package files first to install dependencies
+COPY app/package*.json ./
 
-# Install global dependencies
-RUN npm install -g nodemon browserify
+# Install dependencies globally and locally
+RUN npm install && npm install -g nodemon browserify watchify
 
-# Copy app and entrypoint script
+# Copy the rest of the application code and entrypoint script
 COPY app/. .
 COPY entrypoint.sh /scripts/entrypoint.sh
 

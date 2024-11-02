@@ -61,16 +61,23 @@ window.addEventListener("load", () => {
     syncChatHeight();
   }
 
-  /**
-   * Syncs chat height to canvas height.
-   */
   function syncChatHeight() {
     const chatMessages = document.querySelector(".chat-messages");
     const canvasHeight = canvas.clientHeight;
-    chatMessages.style.height = `${canvasHeight - 20}px`;
+  
+    // Check if the screen width is less than or equal to 768px (mobile)
+    if (window.innerWidth <= 768) {
+      // Set chat height to half of the current calculated height for mobile
+      chatMessages.style.height = `${(canvasHeight - 20) / 2}px`;
+    } else {
+      // Set chat height to match canvas height for larger screens
+      chatMessages.style.height = `${canvasHeight - 20}px`;
+    }
   }
-
+  
+  // Call syncChatHeight initially and on window resize
   syncChatHeight();
+  window.addEventListener("resize", syncChatHeight);
 
   // -------------------------------
   // Drawing State Variables

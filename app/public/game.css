@@ -30,6 +30,25 @@ body {
     box-sizing: border-box;
 }
 
+@media (max-width: 768px) {
+    .row {
+        flex-direction: column;
+        margin: 0 10px; /* Add left and right margin for mobile */
+        gap: 10px; /* Space between stacked elements */
+    }
+    .column {
+        width: 100%;
+        padding: 0;
+    }
+    #drawingCanvas {
+        width: 100%;
+        height: auto;
+    }
+    .chat-messages {
+        height: 50%; /* Reduce chat height by 50% on mobile */
+    }
+}
+
 /* Canvas */
 #drawingCanvas {
     display: block;
