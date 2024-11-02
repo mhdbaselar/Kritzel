@@ -14,6 +14,7 @@ deploy_to_vps:
     - ssh -i ~/.ssh/id_rsa root@87.106.216.52 'mkdir -p /var/www/kritzel'
     - scp -i ~/.ssh/id_rsa -r ./* root@87.106.216.52:/var/www/kritzel
     - ssh -i ~/.ssh/id_rsa root@87.106.216.52 'cd /var/www/kritzel && docker-compose up -d --build'
+    - ssh -i ~/.ssh/id_rsa root@87.106.216.52 'docker image prune -f'
   environment:
     name: production
     url: http://87.106.216.52
