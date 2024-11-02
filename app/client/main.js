@@ -16,6 +16,9 @@ const { renderUsers, initializeChat } = require('./components/userInterface');
 // Import toolbar functionalities
 const { initializeToolbar } = require('./components/toolbar');
 
+// Import simple-keyboard
+const Keyboard = require('simple-keyboard').default;
+
 /** 
  * @type {ClientGame} 
  */
@@ -27,7 +30,6 @@ window.addEventListener("load", () => {
   // -------------------------------
   // Canvas Setup and Resizing
   // -------------------------------
-
   /** @type {HTMLCanvasElement} */
   const canvas = document.getElementById("drawingCanvas");
   /** @type {CanvasRenderingContext2D} */
@@ -90,7 +92,6 @@ window.addEventListener("load", () => {
   // -------------------------------
   // Drawing State Variables
   // -------------------------------
-
   /** @type {boolean} */
   let drawing = false;
   /** @type {string} */
@@ -103,7 +104,6 @@ window.addEventListener("load", () => {
   // -------------------------------
   // Toolbar Initialization
   // -------------------------------
-
   /**
    * Callback when pen size changes.
    * @param {number} newSize - The new pen size.
@@ -227,7 +227,6 @@ window.addEventListener("load", () => {
   // -------------------------------
   // Drawing Functions
   // -------------------------------
-
   /**
    * Gets the mouse or touch position relative to the canvas.
    * @param {MouseEvent | TouchEvent} e - The event to get the position from.
@@ -308,7 +307,6 @@ window.addEventListener("load", () => {
   // -------------------------------
   // User Rendering (Dummy Data)
   // -------------------------------
-
   /** @type {User[]} */
   const users = [
     { name: "Player1", points: 0 },
@@ -321,10 +319,116 @@ window.addEventListener("load", () => {
   // -------------------------------
   // Chat Functionality
   // -------------------------------
-
   const sendButton = document.getElementById("sendButton");
   const chatInput = document.getElementById("chatMessage");
   const chatMessages = document.querySelector(".chat-messages");
 
-  initializeChat(sendButton, chatInput, chatMessages);
+  // Initialize chat and capture sendMessage function
+  const sendMessage = initializeChat(sendButton, chatInput, chatMessages);
+
+  // -------------------------------
+  // Initialize Virtual Keyboard
+  // -------------------------------
+  const keyboardContainer = document.querySelector(".simple-keyboard");
+
+  // Hide keyboard initially
+  keyboardContainer.style.display = "none";
+
+  // Initialize simple-keyboard with default and uppercase layouts
+  const keyboard = new Keyboard({
+    onChange: input => onChange(input),
+    onKeyPress: button => onKeyPress(button),
+    theme: "hg-theme-default hg-layout-default",
+    layout: {
+      default: [
+        "q w e r t z u i o p ü +",
+        "a s d f g h j k l ö ä #",
+        "{capslock} y x c v b n m , . -",
+        "{space} {enter}"
+      ],
+      uppercase: [
+        "Q W E R T Z U I O P Ü +",
+        "A S D F G H J K L Ö Ä #",
+        "{capslock} Y X C V B N M , . -",
+        "{space} {enter}"
+      ]
+    },
+    display: {
+      "{enter}": "Enter",
+      "{capslock}": "Caps",
+      "{space}": "Space"
+    }
+  });
+
+  /**
+   * Function to handle changes in the virtual keyboard input
+   * @param {string} input - The current input from the keyboard
+   */
+  function onChange(input) {
+    chatInput.value = input;
+  }
+
+  let capsPressed = false;
+  /**
+   * Function to handle key presses on the virtual keyboard
+   * @param {string} button - The button that was pressed
+  */
+  function onKeyPress(button) {
+    console.log("Button pressed", button);
+
+    if (button === "{enter}") {
+      sendMessage();
+      keyboard.clearInput();
+      return;
+    }
+
+    if (button === "{capslock}") {
+      toggleCapsLock();
+      return;
+    }
+    if (capsPressed) {
+      toggleCapsLock();
+      const capsButton = keyboard.getButtonElement("{capslock}");
+      capsButton.classList.remove("active-capslock");
+      capsPressed = false;
+    }
+  }
+
+  /**
+   * Toggles Caps Lock by switching between 'default' and 'uppercase' layouts
+   */
+  function toggleCapsLock() {
+    const currentLayout = keyboard.options.layoutName;
+    const newLayout = currentLayout === "default" ? "uppercase" : "default";
+    keyboard.setOptions({ layoutName: newLayout });
+
+    // Update the Caps Lock key's appearance
+    const capsButton = keyboard.getButtonElement("{capslock}");
+    if (capsButton) {
+      capsPressed = true;
+      capsButton.classList.toggle("active-capslock");
+    }
+
+  }
+
+  // Prevent the native keyboard from showing on mobile
+  chatInput.addEventListener("focus", (event) => {
+    event.preventDefault(); // Prevents the input from getting focus and showing the mobile keyboard
+    showKeyboard();
+  });
+
+  // Show the virtual keyboard only on mobile
+  function showKeyboard() {
+    if (window.innerWidth <= 850) { // Mobile check
+      keyboardContainer.style.display = "block";
+      keyboard.setInput(chatInput.value); // Initialize keyboard input with current chat input value
+    }
+  }
+
+  // Hide the keyboard when tapping outside the keyboard or input
+  document.addEventListener("click", (event) => {
+    if (!keyboardContainer.contains(event.target) && event.target !== chatInput) {
+      keyboardContainer.style.display = "none";
+    }
+  });
 });

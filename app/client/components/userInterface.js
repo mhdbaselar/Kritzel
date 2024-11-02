@@ -34,13 +34,19 @@ function renderUsers(users) {
 // Chat functionality
 // -------------------------------
 /**
- * Initializes the chat functionality.
- * @param {HTMLElement} sendButton - The button element for sending messages.
- * @param {HTMLElement} chatInput - The input element for typing messages.
- * @param {HTMLElement} chatMessages - The container for displaying chat messages.
+ * Initializes the chat functionality by setting up event listeners
+ * for sending messages via the send button and the Enter key.
+ * 
+ * @param {HTMLElement} sendButton - The send button element.
+ * @param {HTMLInputElement} chatInput - The chat input element.
+ * @param {HTMLElement} chatMessages - The container for chat messages.
+ * @returns {Function} sendMessage - The function to send messages.
  */
 function initializeChat(sendButton, chatInput, chatMessages) {
-    sendButton.addEventListener("click", () => {
+    /**
+     * Sends a chat message if the input is not empty.
+     */
+    function sendMessage() {
         const message = chatInput.value.trim();
         if (message !== "") {
             const messageDiv = document.createElement("div");
@@ -48,14 +54,25 @@ function initializeChat(sendButton, chatInput, chatMessages) {
             chatMessages.appendChild(messageDiv);
             chatInput.value = "";
             chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Optionally, send the message to the server or WebSocket
+            // clientGame.sendChatMessage(message);
+        }
+    }
+
+    // Event listener for the send button click
+    sendButton.addEventListener("click", sendMessage);
+
+    // Event listener for Enter key on the physical keyboard
+    chatInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+            e.preventDefault(); // Prevent default behavior (e.g., form submission)
+            sendMessage();
         }
     });
 
-    chatInput.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-            sendButton.click();
-        }
-    });
+    return sendMessage;
 }
+
 
 module.exports = { renderUsers, initializeChat };
