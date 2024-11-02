@@ -73,7 +73,7 @@ module.exports = class Board {
 
     /**
      * Fills the whole Canvas with one color | Sets a color to all positions in the 2D array
-     * @param {*} color 
+     * @param {string} color 
      */
     fillBackground(color){
         this.#setWholeBoard(color);
@@ -99,7 +99,7 @@ module.exports = class Board {
      * @param {int} x coordinate
      * @param {int} y coordinate
      * @param {string} color hexadecimal color code 
-     * @param {*} previousColor previous color from fill mouse click 
+     * @param {string} previousColor previous color from fill mouse click 
      * @returns list of points
      */
     iterativefill(x, y, color, previousColor){
