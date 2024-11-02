@@ -1,4 +1,3 @@
-
 // -------------------------------
 // user sidebar rendering
 // -------------------------------
@@ -36,13 +35,13 @@ function renderUsers(users) {
 /**
  * Initializes the chat functionality by setting up event listeners
  * for sending messages via the send button and the Enter key.
- * 
+ * @param {ClientGame} clientGame clientGame interface
  * @param {HTMLElement} sendButton - The send button element.
  * @param {HTMLInputElement} chatInput - The chat input element.
  * @param {HTMLElement} chatMessages - The container for chat messages.
  * @returns {Function} sendMessage - The function to send messages.
  */
-function initializeChat(sendButton, chatInput, chatMessages) {
+function initializeChat(clientGame, sendButton, chatInput, chatMessages) {
     /**
      * Sends a chat message if the input is not empty.
      */
@@ -54,9 +53,9 @@ function initializeChat(sendButton, chatInput, chatMessages) {
             chatMessages.appendChild(messageDiv);
             chatInput.value = "";
             chatMessages.scrollTop = chatMessages.scrollHeight;
-
+            
             // Optionally, send the message to the server or WebSocket
-            // clientGame.sendChatMessage(message);
+            clientGame.sendChatAction(message);
         }
     }
 

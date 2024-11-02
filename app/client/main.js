@@ -324,7 +324,7 @@ window.addEventListener("load", () => {
   const chatMessages = document.querySelector(".chat-messages");
 
   // Initialize chat and capture sendMessage function
-  const sendMessage = initializeChat(sendButton, chatInput, chatMessages);
+  const sendMessage = initializeChat(clientGame, sendButton, chatInput, chatMessages);
 
   // -------------------------------
   // Initialize Virtual Keyboard

@@ -33,17 +33,29 @@ module.exports = class TinyServer {
      * @param {WebSocket} websocket websocket - client
      */
     connectWs(websocket) {
+        websocket.uid = this.getUniqueID();
         websocket.on('error', console.error);
-        websocket.on('message', (data) => { this.processWsRequest(data)});
+        websocket.on('message', (data) => { this.processWsRequest(websocket.uid, data)});
         websocket.on('close', () => { console.log('close'); });
+    }
+
+    /**
+     * Generates a unique client ID
+     * @returns unique client ID
+     */
+    getUniqueID() {
+        function s4() {
+            return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+        }
+        return s4() + s4() + '-' + s4();
     }
 
     /**
      * Recieves and processes a message from the client 
      * @param {string} data client request
      */
-    processWsRequest(data) {
-        if (this.wsCallback) this.wsCallback(data);
+    processWsRequest(uid, data) {
+        if (this.wsCallback) this.wsCallback(uid, data);
     }
 
     /**
@@ -54,6 +66,16 @@ module.exports = class TinyServer {
     broadcastWsMessage(data, isBinary) {
         this.websocketServer.clients.forEach(function each(client) {
             if (client.readyState === ws.OPEN) {
+                //console.log(client.uid);
+                client.send(data, { binary: isBinary });
+            }
+        });
+    }
+
+    broadcastWsMessage2(uid, data, isBinary) {
+        this.websocketServer.clients.forEach(function each(client) {
+            if (client.readyState === ws.OPEN && client.uid != uid) {
+                //console.log(client.uid);
                 client.send(data, { binary: isBinary });
             }
         });

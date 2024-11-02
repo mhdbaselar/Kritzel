@@ -1,21 +1,26 @@
 "use strict"
 
 const Board = require('./game/board');
+const Chat = require('./game/chat');
 
 module.exports = class ServerGame {
     /**@type {Board} */
     #board;
     /**@type {boolean} */
     #isSendPointList;
+    #chat;
+    #server;
 
     /**
      * Constructor to instanciate the server game logic
      * @param {function} tickCallback send function
      */
-    constructor(tickCallback) {
+    constructor(server, tickCallback) {
+        this.#server = server;
         this.tickCallback = tickCallback;
         this.intervalReference = null;
         this.#board = null;
+        this.#chat = null;
         this.#isSendPointList = null;
     }
 
@@ -24,6 +29,7 @@ module.exports = class ServerGame {
      */
     start() {
         this.#board = new Board(600, 400, '#FFFFFF'); 
+        this.#chat = new Chat();
 
         this.intervalReference = setInterval(this.tick.bind(this), 100);
     }
@@ -71,7 +77,7 @@ module.exports = class ServerGame {
      * Get and process a client message 
      * @param {Message} message client request
      */
-    processInput(message){
+    processInput(uid, message){
         let _message = JSON.parse(message);
 
         if(_message.messageType == 'action'){
@@ -102,8 +108,16 @@ module.exports = class ServerGame {
                 this.#isSendPointList = false;
             }
                 
-        } else if (_message.messageType = 'getCanvasAction'){
+        } else if (_message.messageType == 'getCanvasAction'){
             this.#isSendPointList = false;
+        } else if (_message.messageType == 'chatAction'){
+            let chatAction = _message.messageBody;
+            let chatMsg = chatAction.message;
+
+            this.#chat.addMessage(uid, chatMsg);
+
+            let jsonMessage = JSON.stringify({type : 'chatMsg', data : chatMsg, uid : uid});
+            this.#server.broadcastWsMessage2(uid, jsonMessage, false);
         }
     }
 }

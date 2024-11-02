@@ -3,6 +3,7 @@
 
 const Action = require('./class/action');
 const Message = require('./class/message');
+const ChatAction = require('./class/chatAction');
 
 module.exports = class ClientGame {
 
@@ -43,13 +44,21 @@ module.exports = class ClientGame {
         // Event handler for receiving messages from the server
         this.socket.onmessage = (event) => {
             let data = JSON.parse(event.data);
-
-            if (data.type === 'pl') { // 'pl' = PointList
+            
+            if (data.type == 'chatMsg'){
+                console.log(`${data.uid}: ${data.data}`);   // Chat output console.log
+                this.updateChat(data.data);
+            } else if (data.type === 'pl') { // 'pl' = PointList
                 this.updateWithPoints(data.data);
             } else if (data.type === '2d') { // '2d' = Canvas data
                 this.update(data.data);
             }
         };
+    }
+
+
+    updateChat(data){
+        
     }
 
     /**
@@ -266,6 +275,12 @@ module.exports = class ClientGame {
      */
     sendGetCanvasAction() {
         let message = new Message('getCanvasAction', null);
+        this.send(JSON.stringify(message));
+    }
+
+    sendChatAction(chatMessage){
+        let action = new ChatAction(chatMessage);
+        let message = new Message('chatAction', action);
         this.send(JSON.stringify(message));
     }
 
