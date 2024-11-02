@@ -34,9 +34,7 @@ body {
     .row {
         flex-direction: column;
         margin: 0 10px;
-        /* Add left and right margin for mobile */
         gap: 10px;
-        /* Space between stacked elements */
     }
 
     .column {
@@ -51,16 +49,24 @@ body {
 
     .chat-messages {
         height: 50%;
-        /* Reduce chat height by 50% on mobile */
     }
 
     .toolbar {
         width: 90vw;
-        /* Make the toolbar take up more width */
         flex-wrap: wrap;
-        /* Allow toolbar items to wrap */
         gap: 5px;
-        /* Reduce gap between items for mobile */
+    }
+
+    /* Reposition users-container below the canvas */
+    .users-column {
+        order: 3;
+        /* Adjust order to position below */
+    }
+
+    /* Optionally, adjust chat-column order */
+    .chat-column {
+        order: 2;
+        /* Position chat above users if desired */
     }
 }
 
