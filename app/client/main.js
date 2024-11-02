@@ -1,22 +1,10 @@
 // main.js
 "use strict";
 
-/**
- * @typedef {Object} User
- * @property {string} name - The name of the user.
- * @property {number} points - The points scored by the user.
- */
-
-// Import the ClientGame module
+// Import necessary modules
 const ClientGame = require("./clientgame");
-
-// Import interface tools
 const { renderUsers, initializeChat } = require('./components/userInterface');
-
-// Import toolbar functionalities
 const { initializeToolbar } = require('./components/toolbar');
-
-// Import simple-keyboard
 const Keyboard = require('simple-keyboard').default;
 
 /** 
@@ -30,12 +18,9 @@ window.addEventListener("load", () => {
   // -------------------------------
   // Canvas Setup and Resizing
   // -------------------------------
-  /** @type {HTMLCanvasElement} */
   const canvas = document.getElementById("drawingCanvas");
-  /** @type {CanvasRenderingContext2D} */
   const ctx = canvas.getContext("2d");
 
-  /** @constant {number} */
   const ASPECT_RATIO = 3 / 2; // Width : Height ratio = 3:2
 
   resizeCanvas();
@@ -46,9 +31,6 @@ window.addEventListener("load", () => {
     clientGame.sendGetCanvasAction();
   }
 
-  /**
-   * Resizes the canvas based on the window size.
-   */
   function resizeCanvas() {
     const parentWidth = canvas.parentElement.clientWidth;
     const newWidth = parentWidth;
@@ -75,87 +57,54 @@ window.addEventListener("load", () => {
     const chatMessages = document.querySelector(".chat-messages");
     const canvasHeight = canvas.clientHeight;
 
-    // Check if the screen width is less than or equal to 850px (mobile)
     if (window.innerWidth <= 850) {
-      // Set chat height to half of the current calculated height for mobile
       chatMessages.style.height = `${(canvasHeight - 20) / 2}px`;
     } else {
-      // Set chat height to match canvas height for larger screens
       chatMessages.style.height = `${canvasHeight - 20}px`;
     }
   }
 
-  // Call syncChatHeight initially and on window resize
   syncChatHeight();
   window.addEventListener("resize", syncChatHeight);
 
   // -------------------------------
   // Drawing State Variables
   // -------------------------------
-  /** @type {boolean} */
   let drawing = false;
-  /** @type {string} */
   let tool = 'pen';
-  /** @type {string} */
   let penColor = '#000';
-  /** @type {number} */
   let penSize = 3;
 
   // -------------------------------
   // Toolbar Initialization
   // -------------------------------
-  /**
-   * Callback when pen size changes.
-   * @param {number} newSize - The new pen size.
-   * @param {HTMLElement} button - The button element that was clicked.
-   */
   function onPenSizeChange(newSize, button) {
     penSize = newSize;
     updatePenSettings();
     updateSelectedPenSizeButton(button);
   }
 
-  /**
-   * Callback when pen color changes.
-   * @param {string} newColor - The new pen color.
-   * @param {HTMLElement} button - The button element that was clicked.
-   */
   function onPenColorChange(newColor, button) {
     penColor = newColor;
     updatePenSettings();
     updateSelectedColorButton(button);
   }
 
-  /**
-   * Callback when tool changes.
-   * @param {string} selectedTool - The tool to select ('pen', 'eraser', 'fill').
-   * @param {HTMLElement} button - The tool button element that was clicked.
-   */
   function onToolChange(selectedTool, button) {
     selectTool(selectedTool);
   }
 
-  /**
-   * Callback when clear canvas is triggered.
-   */
   function onClearCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     clientGame.sendClearAction();
   }
 
-  /**
-   * Updates the pen settings (size and color) on the canvas context.
-   */
   function updatePenSettings() {
     ctx.lineWidth = penSize;
     ctx.strokeStyle = penColor;
     console.log(`Pen settings updated: Size=${penSize}, Color=${penColor}`);
   }
 
-  /**
-   * Updates the selected pen size button UI.
-   * @param {HTMLElement} selectedButton - The button element to mark as selected.
-   */
   function updateSelectedPenSizeButton(selectedButton) {
     const penSizeButtons = document.querySelectorAll('.pen-size-btn');
     penSizeButtons.forEach(button => {
@@ -169,10 +118,6 @@ window.addEventListener("load", () => {
     });
   }
 
-  /**
-   * Updates the selected color button UI.
-   * @param {HTMLElement} selectedButton - The color button element to mark as selected.
-   */
   function updateSelectedColorButton(selectedButton) {
     const colorButtons = document.querySelectorAll('.color-button');
     colorButtons.forEach(button => {
@@ -186,10 +131,6 @@ window.addEventListener("load", () => {
     });
   }
 
-  /**
-   * Selects a drawing tool.
-   * @param {string} selectedTool - The tool to select ('pen', 'eraser', 'fill').
-   */
   function selectTool(selectedTool) {
     const toolButtons = document.querySelectorAll('.tool-button');
     toolButtons.forEach(button => {
@@ -203,7 +144,6 @@ window.addEventListener("load", () => {
     console.log(`Tool selected: ${tool}`);
   }
 
-  // Initialize toolbar with callbacks
   initializeToolbar({
     onPenSizeChange,
     onPenColorChange,
@@ -211,9 +151,7 @@ window.addEventListener("load", () => {
     onClearCanvas,
   });
 
-  // -------------------------------
   // Initialize the default selected pen size button
-  // -------------------------------
   const penSizeButtons = document.querySelectorAll('.pen-size-btn');
   const defaultPenSizeButton = Array.from(penSizeButtons).find(ps => parseInt(ps.dataset.size, 10) === penSize);
   if (defaultPenSizeButton) {
@@ -227,11 +165,6 @@ window.addEventListener("load", () => {
   // -------------------------------
   // Drawing Functions
   // -------------------------------
-  /**
-   * Gets the mouse or touch position relative to the canvas.
-   * @param {MouseEvent | TouchEvent} e - The event to get the position from.
-   * @returns {{x: number, y: number}} The x and y coordinates on the canvas.
-   */
   function getPointerPosition(e) {
     const rect = canvas.getBoundingClientRect();
     let x, y;
@@ -250,28 +183,17 @@ window.addEventListener("load", () => {
     return { x, y };
   }
 
-  /**
-   * Starts drawing on the canvas.
-   * @param {MouseEvent | TouchEvent} e - The event to start drawing from.
-   */
   function startDrawing(e) {
     drawing = true;
     draw(e);
   }
 
-  /**
-   * Stops drawing on the canvas.
-   */
   function stopDrawing() {
     drawing = false;
     ctx.beginPath();
     clientGame.sendDrawAction('pen', null, null, penColor, 0);
   }
 
-  /**
-   * Draws on the canvas.
-   * @param {MouseEvent | TouchEvent} e - The event to draw from.
-   */
   function draw(e) {
     if (!drawing) return;
 
@@ -307,7 +229,6 @@ window.addEventListener("load", () => {
   // -------------------------------
   // User Rendering (Dummy Data)
   // -------------------------------
-  /** @type {User[]} */
   const users = [
     { name: "Player1", points: 0 },
     { name: "Player2", points: 20 },
@@ -320,11 +241,10 @@ window.addEventListener("load", () => {
   // Chat Functionality
   // -------------------------------
   const sendButton = document.getElementById("sendButton");
-  const chatInput = document.getElementById("chatMessage");
+  const chatInputDiv = document.getElementById("chatMessage"); // This should be a <div> in HTML
   const chatMessages = document.querySelector(".chat-messages");
 
-  // Initialize chat and capture sendMessage function
-  const sendMessage = initializeChat(sendButton, chatInput, chatMessages);
+  const sendMessage = initializeChat(sendButton, chatInputDiv, chatMessages);
 
   // -------------------------------
   // Initialize Virtual Keyboard
@@ -334,7 +254,7 @@ window.addEventListener("load", () => {
   // Hide keyboard initially
   keyboardContainer.style.display = "none";
 
-  // Initialize simple-keyboard with default and uppercase layouts
+  // Initialize simple-keyboard with event handlers within the constructor
   const keyboard = new Keyboard({
     onChange: input => onChange(input),
     onKeyPress: button => onKeyPress(button),
@@ -365,20 +285,22 @@ window.addEventListener("load", () => {
    * @param {string} input - The current input from the keyboard
    */
   function onChange(input) {
-    chatInput.value = input;
+    chatInputDiv.textContent = input;
   }
 
   let capsPressed = false;
   /**
    * Function to handle key presses on the virtual keyboard
    * @param {string} button - The button that was pressed
-  */
+   */
   function onKeyPress(button) {
     console.log("Button pressed", button);
 
     if (button === "{enter}") {
       sendMessage();
       keyboard.clearInput();
+      keyboardContainer.style.display = "none"; // Hide keyboard after sending
+      chatInputDiv.blur(); // Remove focus from input
       return;
     }
 
@@ -386,6 +308,7 @@ window.addEventListener("load", () => {
       toggleCapsLock();
       return;
     }
+
     if (capsPressed) {
       toggleCapsLock();
       const capsButton = keyboard.getButtonElement("{capslock}");
@@ -408,8 +331,8 @@ window.addEventListener("load", () => {
       capsPressed = true;
       capsButton.classList.toggle("active-capslock");
     }
-
   }
+
   // -------------------------------
   // Prevent the native keyboard from showing on mobile
   // -------------------------------
@@ -422,53 +345,35 @@ window.addEventListener("load", () => {
     return window.innerWidth <= 850;
   }
 
-  // Set the chat input to readonly and inputmode="none" on mobile devices
-  if (isMobile()) {
-    chatInput.setAttribute("readonly", true);
-    chatInput.setAttribute("inputmode", "none");
-  }
-
-  // Event listener for focus on chat input
-  chatInput.addEventListener("focus", (event) => {
+  // Handle touch/click events on the chat input div
+  chatInputDiv.addEventListener("click", (event) => {
     if (isMobile()) {
-      event.preventDefault(); // Prevents the input from getting focus and showing the mobile keyboard
+      event.preventDefault(); // Prevent any default behavior
       showKeyboard();
     }
   });
 
-  // Show the virtual keyboard only on mobile
+  /**
+   * Shows the virtual keyboard.
+   */
   function showKeyboard() {
     if (isMobile()) { // Mobile check
       keyboardContainer.style.display = "block";
-      keyboard.setInput(chatInput.value); // Initialize keyboard input with current chat input value
+      keyboard.setInput(chatInputDiv.textContent); // Initialize keyboard input with current chat input value
     }
   }
 
   // Hide the keyboard when tapping outside the keyboard or input
   document.addEventListener("click", (event) => {
-    if (!keyboardContainer.contains(event.target) && event.target !== chatInput) {
+    if (!keyboardContainer.contains(event.target) && event.target !== chatInputDiv) {
       keyboardContainer.style.display = "none";
     }
   });
 
-  // Update readonly and inputmode attributes on window resize
+  // Update virtual keyboard's visibility on window resize
   window.addEventListener("resize", () => {
-    if (isMobile()) {
-      chatInput.setAttribute("readonly", true);
-      chatInput.setAttribute("inputmode", "none");
-    } else {
-      chatInput.removeAttribute("readonly");
-      chatInput.removeAttribute("inputmode");
+    if (!isMobile()) {
+      keyboardContainer.style.display = "none";
     }
   });
-
-  // -------------------------------
-  // Handle Virtual Keyboard Input
-  // -------------------------------
-
-  // Update the chat input value whenever the virtual keyboard input changes
-  keyboard.on("change", input => onChange(input));
-
-  // Update the chat input value and handle Caps Lock whenever a key is pressed
-  keyboard.on("keyPress", button => onKeyPress(button));
 });
