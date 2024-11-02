@@ -71,8 +71,60 @@ module.exports = class Board {
         this.#setWholeBoard(this.#initialColor);
     }
 
-    fill(color){
+    /**
+     * Fills the whole Canvas with one color | Sets a color to all positions in the 2D array
+     * @param {*} color 
+     */
+    fillBackground(color){
         this.#setWholeBoard(color);
+    }
+
+    /**
+     * Fills the area where the point (x,y) is located with one color
+     * @param {int} x coordinate
+     * @param {int} y coordinate
+     * @param {string} color hexadecimal color code
+     */
+    fill(x, y, color){
+        let previousColor = this.#canvas[y][x];
+        if(color != previousColor){
+            let pointList = this.iterativefill(x, y, color, previousColor);
+            console.log(pointList);
+            this.#points = this.#points.concat(pointList);
+        }   
+    }
+
+    /**
+     * Fills the area where the point (x,y) is located with one color (iterative)
+     * @param {int} x coordinate
+     * @param {int} y coordinate
+     * @param {string} color hexadecimal color code 
+     * @param {*} previousColor previous color from fill mouse click 
+     * @returns list of points
+     */
+    iterativefill(x, y, color, previousColor){
+        let points = [];
+        let pointStack = [{x: x, y: y}];
+        
+        while(pointStack.length > 0){
+            let point = pointStack.pop(); 
+
+            if (point.y >= 0 && point.y < this.#rows) {
+                if (point.x >= 0 && point.x < this.#columns) {
+                    if(previousColor == this.#canvas[point.y][point.x]) {
+                        
+                        this.#canvas[point.y][point.x] = color;
+                        points.push({x: point.x, y: point.y, color: color});
+
+                        pointStack.push({x: point.x+1, y: point.y});    // check right
+                        pointStack.push({x: point.x-1, y: point.y});    // check left
+                        pointStack.push({x: point.x, y: point.y+1});    // check down
+                        pointStack.push({x: point.x, y: point.y-1});    // check up
+                    }
+                }
+            }
+        }  
+        return points;
     }
 
     /**
