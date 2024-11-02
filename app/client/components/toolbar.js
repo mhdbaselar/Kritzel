@@ -2,101 +2,84 @@
 "use strict";
 
 /**
- * Initializes pen size buttons by attaching event listeners and setting up initial states.
- * @param {number[]} sizes - An array of pen sizes to initialize.
- * @param {function} onPenSizeChange - Callback function to handle pen size changes.
- * @returns {HTMLElement[]} - Array of valid pen size button elements.
+ * Initializes the toolbar by setting up event listeners for pen size, color, tools, and clear canvas.
+ * @param {object} options - Configuration options with callback functions.
+ * @param {function} options.onPenSizeChange - Callback when pen size changes.
+ * @param {function} options.onPenColorChange - Callback when pen color changes.
+ * @param {function} options.onToolChange - Callback when tool changes.
+ * @param {function} options.onClearCanvas - Callback when clear canvas is triggered.
  */
-function initializePenSizeButtons(sizes, onPenSizeChange) {
-    const penSizeButtons = [];
-
-    sizes.forEach(size => {
-        const button = document.getElementById(`penSize${size}`);
-        if (!button) {
-            console.error(`Pen size button with ID "penSize${size}" not found.`);
+function initializeToolbar({ onPenSizeChange, onPenColorChange, onToolChange, onClearCanvas }) {
+    // Initialize Pen Size Buttons
+    const penSizeButtons = document.querySelectorAll('.pen-size-btn');
+    penSizeButtons.forEach(button => {
+        const size = parseInt(button.dataset.size, 10);
+        if (isNaN(size)) {
+            console.error(`Invalid data-size attribute on pen size button:`, button);
             return;
         }
-
-        button.addEventListener("click", () => {
+        button.addEventListener('click', () => {
             onPenSizeChange(size, button);
+            setActiveButton(button, penSizeButtons, 'selected');
         });
-
-        penSizeButtons.push(button);
     });
 
-    if (penSizeButtons.length !== sizes.length) {
-        console.error("One or more pen size buttons were not initialized.");
-    }
-
-    return penSizeButtons;
-}
-
-/**
- * Initializes color buttons by attaching event listeners.
- * @param {function} onPenColorChange - Callback function to handle pen color changes.
- * @returns {NodeListOf<Element>} - NodeList of color button elements.
- */
-function initializeColorButtons(onPenColorChange) {
+    // Initialize Color Buttons
     const colorButtons = document.querySelectorAll('.color-button');
-
     colorButtons.forEach(button => {
-        button.addEventListener('click', (e) => {
-            const color = e.target.getAttribute('data-color');
-            if (color) {
-                onPenColorChange(color, button);
-            } else {
-                console.error("Color button missing 'data-color' attribute.");
-            }
+        const color = button.dataset.color;
+        if (!color) {
+            console.error(`Missing data-color attribute on color button:`, button);
+            return;
+        }
+        button.addEventListener('click', () => {
+            onPenColorChange(color, button);
+            setActiveButton(button, colorButtons, 'selected');
         });
     });
 
-    return colorButtons;
-}
-
-/**
- * Initializes tool selection buttons by attaching event listeners.
- * @param {object} tools - An object mapping tool names to their button elements.
- * @param {function} onToolChange - Callback function to handle tool changes.
- */
-function initializeToolSelection(tools, onToolChange) {
-    // Initialize the default selected tool
-    if (tools.pen) {
-        tools.pen.classList.add("selected-tool");
-    } else {
-        console.error('Pen tool button with ID "penTool" not found.');
-    }
-
-    Object.keys(tools).forEach(toolName => {
-        const toolButton = tools[toolName];
-        if (toolButton) {
-            toolButton.addEventListener("click", () => {
-                onToolChange(toolName, toolButton);
-            });
-        } else {
-            console.error(`Tool button for "${toolName}" not found.`);
+    // Initialize Tool Buttons
+    const toolButtons = document.querySelectorAll('.tool-button');
+    toolButtons.forEach(button => {
+        const tool = button.dataset.tool;
+        if (!tool) {
+            console.error(`Missing data-tool attribute on tool button:`, button);
+            return;
         }
+        button.addEventListener('click', () => {
+            onToolChange(tool, button);
+            setActiveButton(button, toolButtons, 'selected-tool');
+        });
     });
+
+    // Initialize Clear Canvas Button
+    const clearCanvasButton = document.querySelector('.clear-canvas-btn');
+    if (clearCanvasButton) {
+        clearCanvasButton.addEventListener('click', () => {
+            onClearCanvas();
+            // Optionally, provide visual feedback for clearing action
+        });
+    } else {
+        console.error('Clear Canvas button with class "clear-canvas-btn" not found.');
+    }
 }
 
 /**
- * Initializes the clear canvas button by attaching an event listener.
- * @param {HTMLElement} clearButton - The clear canvas button element.
- * @param {function} onClearCanvas - Callback function to handle clear canvas action.
+ * Sets the active state for a group of buttons.
+ * @param {HTMLElement} activeButton - The button to set as active.
+ * @param {NodeListOf<Element>} buttonGroup - The group of buttons.
+ * @param {string} activeClass - The class to add to the active button.
  */
-function initializeClearCanvasButton(clearButton, onClearCanvas) {
-    if (!clearButton) {
-        console.error('Clear Canvas button with ID "clearCanvas" not found.');
-        return;
-    }
-
-    clearButton.addEventListener("click", () => {
-        onClearCanvas();
+function setActiveButton(activeButton, buttonGroup, activeClass) {
+    buttonGroup.forEach(button => {
+        if (button === activeButton) {
+            button.classList.add(activeClass);
+        } else {
+            button.classList.remove(activeClass);
+        }
     });
 }
 
 module.exports = {
-    initializePenSizeButtons,
-    initializeColorButtons,
-    initializeToolSelection,
-    initializeClearCanvasButton,
+    initializeToolbar,
 };
