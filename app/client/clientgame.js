@@ -6,49 +6,52 @@ const Message = require('./class/message');
 
 module.exports = class ClientGame {
 
-    constructor() {}
+    constructor() { }
 
     /**
      * Opens a WebSocket connection to the server.
      */
     openWebSocket() {
-        // Build WebSocket URL from current location
-        this.socket = new WebSocket("ws://" + location.host + location.pathname);
-        
+        // Determine WebSocket protocol based on current page protocol
+        const protocol = location.protocol === 'https:' ? 'wss://' : 'ws://';
+
+        // Build WebSocket URL with correct protocol
+        this.socket = new WebSocket(protocol + location.host + location.pathname);
+
         // Event handler for when the connection is opened
-        this.socket.onopen = (event) => { 
-            console.log("Socket opened"); 
-            this.sendGetCanvasAction(); 
+        this.socket.onopen = (event) => {
+            console.log("Socket opened");
+            this.sendGetCanvasAction();
         };
-        
+
         // Event handler for when the connection is closed
-        this.socket.onclose = (event) => { 
-            console.log("Socket closed"); 
+        this.socket.onclose = (event) => {
+            console.log("Socket closed");
         };
-        
+
         // Event handler for any errors with the connection
-        this.socket.onerror = (event) => { 
-            console.log("Socket error: " + JSON.stringify(event)); 
+        this.socket.onerror = (event) => {
+            console.log("Socket error: " + JSON.stringify(event));
         };
-        
+
         // Event handler for receiving messages from the server
-        this.socket.onmessage = (event) => { 
+        this.socket.onmessage = (event) => {
             let data = JSON.parse(event.data);
             console.log("Message received:", data);
-            
+
             if (data.type === 'pl') { // 'pl' = PointList
                 this.updateWithPoints(data.data);
-            } else if (data.type === '2d'){ // '2d' = Canvas data
+            } else if (data.type === '2d') { // '2d' = Canvas data
                 this.update(data.data);
             }
         };
     }
-    
+
     /**
      * Updates the canvas with a list of drawn points received from the server.
      * @param {Array<{x: number, y: number, color: string, thickness: number}>} data 
      */
-    updateWithPoints(data){
+    updateWithPoints(data) {
         let canvasData = data;
         // Example: Point List
         //  [{x: 0, y: 0, color: '#FFFFFF'},
@@ -217,14 +220,14 @@ module.exports = class ClientGame {
      * @param {string} color - Color code in hexadecimal notation.
      * @param {number} thickness - Thickness of the draw action.
      */
-    sendDrawAction(tool = 'pen', x = 0, y = 0, color = '#000000', thickness = 3){
+    sendDrawAction(tool = 'pen', x = 0, y = 0, color = '#000000', thickness = 3) {
         let _tool = 'pen';
 
-        if(tool === 'pen') _tool = 'pen';
-        if(tool === 'eraser') _tool = 'eraser';
-        if(tool === 'fill') _tool = 'fill';
-        
-        let action = new Action(_tool, x , y, color, thickness);
+        if (tool === 'pen') _tool = 'pen';
+        if (tool === 'eraser') _tool = 'eraser';
+        if (tool === 'fill') _tool = 'fill';
+
+        let action = new Action(_tool, x, y, color, thickness);
         let message = new Message('action', action);
 
         let _message = JSON.stringify(message);
@@ -233,12 +236,12 @@ module.exports = class ClientGame {
 
         this.send(_message);
     }
-    
+
     /**
      * Asks the server to clear the whole board.
      */
-    sendClearAction(){
-        let action = new Action('clear', 0 , 0, '', 0);
+    sendClearAction() {
+        let action = new Action('clear', 0, 0, '', 0);
         let message = new Message('action', action);
 
         this.send(JSON.stringify(message));
@@ -248,8 +251,8 @@ module.exports = class ClientGame {
      * Asks the server to fill the whole board into one color.
      * @param {string} color  color code in hexadecimal notation.
      */
-    sendFillAction(color = '#000000'){
-        let action = new Action('fill', 0 , 0, color, 0);
+    sendFillAction(color = '#000000') {
+        let action = new Action('fill', 0, 0, color, 0);
         let message = new Message('action', action);
 
         this.send(JSON.stringify(message));
@@ -258,7 +261,7 @@ module.exports = class ClientGame {
     /**
      * Requests the server to send the current Canvas data.
      */
-    sendGetCanvasAction(){
+    sendGetCanvasAction() {
         let message = new Message('getCanvasAction', null);
         this.send(JSON.stringify(message));
     }
@@ -266,7 +269,7 @@ module.exports = class ClientGame {
     //------------------------------------- 
     //-----------HELP FUNCTIONS------------
     //-------------------------------------
-    
+
     /**
      * Sends a message over the WebSocket.
      * @param {string} message 
