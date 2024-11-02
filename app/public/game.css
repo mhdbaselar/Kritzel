@@ -47,6 +47,11 @@ body {
     .chat-messages {
         height: 50%; /* Reduce chat height by 50% on mobile */
     }
+    .toolbar {
+        width: 90vw; /* Make the toolbar take up more width */
+        flex-wrap: wrap; /* Allow toolbar items to wrap */
+        gap: 5px; /* Reduce gap between items for mobile */
+    }
 }
 
 /* Canvas */
@@ -198,4 +203,33 @@ body {
     background-color: #00ff00;
     transform: scale(1.1);
     outline: 3px solid #1d2194;
+}
+
+/* Fullscreen overlay */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #000350; /* Fullscreen color */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000; /* Ensure it’s on top */
+}
+
+/* Spinner styling */
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }

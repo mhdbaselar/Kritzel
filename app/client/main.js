@@ -13,6 +13,7 @@ const ClientGame = require("./clientgame");
  * @type {ClientGame} 
  */
 const clientGame = new ClientGame();
+
 clientGame.openWebSocket();
 
 window.addEventListener("load", () => {

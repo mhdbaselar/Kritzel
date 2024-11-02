@@ -15,6 +15,9 @@ module.exports = class ClientGame {
         // Determine WebSocket protocol based on current page protocol
         const protocol = location.protocol === 'https:' ? 'wss://' : 'ws://';
 
+        // Show loadingOverlay
+        const loadingOverlay = document.getElementById("loadingOverlay");
+
         // Build WebSocket URL with correct protocol
         this.socket = new WebSocket(protocol + location.host + location.pathname);
 
@@ -22,16 +25,19 @@ module.exports = class ClientGame {
         this.socket.onopen = (event) => {
             console.log("Socket opened");
             this.sendGetCanvasAction();
+            loadingOverlay.style.display = "none"; // Spinner verstecken
         };
 
         // Event handler for when the connection is closed
         this.socket.onclose = (event) => {
             console.log("Socket closed");
+            loadingOverlay.style.display = "flex"; // Spinner zeigen
         };
 
         // Event handler for any errors with the connection
         this.socket.onerror = (event) => {
             console.log("Socket error: " + JSON.stringify(event));
+            loadingOverlay.style.display = "flex"; // Spinner zeigen
         };
 
         // Event handler for receiving messages from the server
