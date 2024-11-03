@@ -1,10 +1,11 @@
 // clientgame.js
 "use strict"
 
-const Action = require('./class/action');
+const Action = require('./class/drawAction');
 const Message = require('./class/message');
 const ChatAction = require('./class/chatAction');
 const { displayChatMessage, displayChatMessageList } = require('./components/userInterface');
+const DrawAction = require('./class/drawAction');
 
 module.exports = class ClientGame {
 
@@ -50,17 +51,17 @@ module.exports = class ClientGame {
                 // Update the chat display
                 const chatMessages = document.querySelector(".chat-messages");
                 displayChatMessageList(chatMessages, data.data);
-            }
-            else if (data.type == 'chatMsg'){
+                
+            } else if (data.type == 'chatMsg'){
                 console.log(`${data.uid}: ${data.data}`);   // Chat output console.log
 
                 // Update the chat display
                 const chatMessages = document.querySelector(".chat-messages");
                 displayChatMessage(chatMessages, data.data, data.uid);
 
-                this.updateChat(data.data);
             } else if (data.type === 'pl') { // 'pl' = PointList
                 this.updateWithPoints(data.data);
+
             } else if (data.type === '2d') { // '2d' = Canvas data
                 this.update(data.data);
             }
@@ -247,7 +248,7 @@ module.exports = class ClientGame {
         if (tool === 'eraser') _tool = 'eraser';
         if (tool === 'fill') _tool = 'fill';
 
-        let action = new Action(_tool, x, y, color, thickness);
+        let action = new DrawAction(_tool, x, y, color, thickness);
         let message = new Message('drawAction', action);
 
         let _message = JSON.stringify(message);
@@ -259,7 +260,7 @@ module.exports = class ClientGame {
      * Asks the server to clear the whole board.
      */
     sendClearAction() {
-        let action = new Action('clear', 0, 0, '', 0);
+        let action = new DrawAction('clear', 0, 0, '', 0);
         let message = new Message('drawAction', action);
 
         this.send(JSON.stringify(message));
@@ -270,7 +271,7 @@ module.exports = class ClientGame {
      * @param {string} color  color code in hexadecimal notation.
      */
     sendFillAction(x = 0, y = 0, color = '#000000') {
-        let action = new Action('fill', x, y, color, 0);
+        let action = new DrawAction('fill', x, y, color, 0);
         let message = new Message('drawAction', action);
 
         this.send(JSON.stringify(message));

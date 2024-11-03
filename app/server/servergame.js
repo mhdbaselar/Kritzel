@@ -79,13 +79,13 @@ module.exports = class ServerGame {
     /**
      * Get and process a client message
      * @param {string} uid user unique ID
-     * @param {Message} message client request
+     * @param {Message} request client request
      */
-    processInput(uid, message){
-        let _message = JSON.parse(message);
+    processInput(uid, request){
+        let _request = JSON.parse(request);
 
-        if(_message.messageType == 'drawAction'){       // draw action
-            let action = _message.messageBody;
+        if(_request.messageType == 'drawAction'){       // draw action
+            let action = _request.messageBody;
 
             if(action.tool == 'pen') {
                 this.#board.draw(action.x, action.y, action.color, action.thickness);
@@ -112,19 +112,18 @@ module.exports = class ServerGame {
                 this.#isSendPointList = false;
             }
 
-        } else if (_message.messageType == 'getCanvasAction'){      // set 2D-array send option to send whole canvas 
+        } else if (_request.messageType == 'getCanvasAction'){      // set 2D-array send option to send whole canvas 
             this.#isSendPointList = false;
             
-        } else if (_message.messageType == 'chatAction'){           // send chat message to clients
-            let chatAction = _message.messageBody;
-            let chatMsg = chatAction.message;
+        } else if (_request.messageType == 'chatAction'){           // send chat message to clients
+            let chatMsg = _request.messageBody.message;
 
             this.#chat.addMessage(uid, chatMsg);
 
             let jsonMessage = JSON.stringify({type : 'chatMsg', data : chatMsg, uid : uid});
             this.#server.broadcastWsMessage(uid, jsonMessage, false, 'allWithoutSender');
 
-        } else if (_message.messageType == 'getChatAction'){                // get whole chat
+        } else if (_request.messageType == 'getChatAction'){                // get whole chat
             let jsonMessage = JSON.stringify({type : 'chatMsgList', data : this.#chat.getMessages(), uid : uid});
             this.#server.broadcastWsMessage(uid, jsonMessage, false, 'onlySender');
         }
