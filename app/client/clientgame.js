@@ -67,11 +67,6 @@ module.exports = class ClientGame {
         };
     }
 
-
-    updateChat(data){
-
-    }
-
     /**
      * Updates the canvas with a list of drawn points received from the server.
      * @param {Array<{x: number, y: number, color: string, thickness: number}>} data
@@ -253,7 +248,7 @@ module.exports = class ClientGame {
         if (tool === 'fill') _tool = 'fill';
 
         let action = new Action(_tool, x, y, color, thickness);
-        let message = new Message('action', action);
+        let message = new Message('drawAction', action);
 
         let _message = JSON.stringify(message);
 
@@ -265,7 +260,7 @@ module.exports = class ClientGame {
      */
     sendClearAction() {
         let action = new Action('clear', 0, 0, '', 0);
-        let message = new Message('action', action);
+        let message = new Message('drawAction', action);
 
         this.send(JSON.stringify(message));
     }
@@ -276,25 +271,32 @@ module.exports = class ClientGame {
      */
     sendFillAction(x = 0, y = 0, color = '#000000') {
         let action = new Action('fill', x, y, color, 0);
-        let message = new Message('action', action);
+        let message = new Message('drawAction', action);
 
         this.send(JSON.stringify(message));
     }
 
     /**
-     * Requests the server to send the current Canvas data.
+     * Requests the server to send the current Canvas data
      */
     sendGetCanvasAction() {
         let message = new Message('getCanvasAction', null);
         this.send(JSON.stringify(message));
     }
 
+    /**
+     * Sends the client chat message to the other clients
+     * @param {*} chatMessage client chat message
+     */
     sendChatAction(chatMessage){
         let action = new ChatAction(chatMessage);
         let message = new Message('chatAction', action);
         this.send(JSON.stringify(message));
     }
 
+    /**
+     * Requests the server to send the all chat messages
+     */
     sendGetChatAction(){
         let message = new Message('getChatAction', null);
         this.send(JSON.stringify(message));

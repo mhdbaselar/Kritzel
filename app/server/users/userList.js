@@ -1,7 +1,11 @@
 module.exports = class UserList {
     
+    /**@type {User[]} */
     #userList;
 
+    /**
+     * Constructor to instanciate the userList
+     * */
     constructor(){
         this.#userList = [];
     }

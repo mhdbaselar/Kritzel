@@ -46,7 +46,7 @@ function displayChatMessage(chatMessages, message, sender) {
 }
 
 /**
- * Displays a list of chat messages in the specified container.
+ * Displays a list of chat messages in the chat container.
  *
  * @param {HTMLElement} chatMessages - The container element where chat messages will be displayed.
  * @param {Array} messageList - An array of message objects to be displayed. Each object should have `uid` and `message` properties.

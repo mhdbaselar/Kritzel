@@ -8,11 +8,14 @@ module.exports = class ServerGame {
     #board;
     /**@type {boolean} */
     #isSendPointList;
+    /**@type {Chat} */
     #chat;
+    /**@type {TinyServer} */
     #server;
 
     /**
      * Constructor to instanciate the server game logic
+     * @param {TinyServer} server websocketserver
      * @param {function} tickCallback send function
      */
     constructor(server, tickCallback) {
@@ -75,12 +78,13 @@ module.exports = class ServerGame {
 
     /**
      * Get and process a client message
+     * @param {string} uid user unique ID
      * @param {Message} message client request
      */
     processInput(uid, message){
         let _message = JSON.parse(message);
 
-        if(_message.messageType == 'action'){
+        if(_message.messageType == 'drawAction'){       // draw action
             let action = _message.messageBody;
 
             if(action.tool == 'pen') {
@@ -108,19 +112,21 @@ module.exports = class ServerGame {
                 this.#isSendPointList = false;
             }
 
-        } else if (_message.messageType == 'getCanvasAction'){
+        } else if (_message.messageType == 'getCanvasAction'){      // set 2D-array send option to send whole canvas 
             this.#isSendPointList = false;
-        } else if (_message.messageType == 'chatAction'){
+            
+        } else if (_message.messageType == 'chatAction'){           // send chat message to clients
             let chatAction = _message.messageBody;
             let chatMsg = chatAction.message;
 
             this.#chat.addMessage(uid, chatMsg);
 
             let jsonMessage = JSON.stringify({type : 'chatMsg', data : chatMsg, uid : uid});
-            this.#server.broadcastWsMessage2(uid, jsonMessage, false);
-        } else if (_message.messageType == 'getChatAction'){
+            this.#server.broadcastWsMessage(uid, jsonMessage, false, 'allWithoutSender');
+
+        } else if (_message.messageType == 'getChatAction'){                // get whole chat
             let jsonMessage = JSON.stringify({type : 'chatMsgList', data : this.#chat.getMessages(), uid : uid});
-            this.#server.broadcastWsMessage3(uid, jsonMessage, false);
+            this.#server.broadcastWsMessage(uid, jsonMessage, false, 'onlySender');
         }
     }
 }

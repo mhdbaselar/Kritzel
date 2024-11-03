@@ -60,34 +60,36 @@ module.exports = class TinyServer {
 
     /**
      * Sends a message to all clients
+     * @param {string} uid user unique ID
      * @param {string} data server response
      * @param {boolean} isBinary is data binary
+     * @param {string} broadcastType send - all | allWithoutSender | onlySender - client
      */
-    broadcastWsMessage(data, isBinary) {
-        this.websocketServer.clients.forEach(function each(client) {
-            if (client.readyState === ws.OPEN) {
-                //console.log(client.uid);
-                client.send(data, { binary: isBinary });
-            }
-        });
-    }
+    broadcastWsMessage(uid, data, isBinary, broadcastType) {
 
-    broadcastWsMessage2(uid, data, isBinary) {
-        this.websocketServer.clients.forEach(function each(client) {
-            if (client.readyState === ws.OPEN && client.uid != uid) {
-                //console.log(client.uid);
-                client.send(data, { binary: isBinary });
-            }
-        });
-    }
+        let broadcastFunction = function each (client) {};                  // empty function
 
-    broadcastWsMessage3(uid, data, isBinary) {
-        this.websocketServer.clients.forEach(function each(client) {
-            if (client.readyState === ws.OPEN && client.uid == uid) {
-                //console.log(client.uid);
-                client.send(data, { binary: isBinary });
+        if(broadcastType == 'all'){                                         // send all clients
+            broadcastFunction = function each(client) {
+                if (client.readyState === ws.OPEN) {
+                    client.send(data, { binary: isBinary });
+                }
             }
-        });
+        } else if (broadcastType == 'allWithoutSender'){
+            broadcastFunction = function each(client) {
+                if (client.readyState === ws.OPEN && client.uid != uid) {   // send all clients without sender
+                    client.send(data, { binary: isBinary });
+                }
+            }
+        } else if (broadcastType == 'onlySender'){
+            broadcastFunction = function each(client) {
+                if (client.readyState === ws.OPEN && client.uid == uid) {   // send only sender client
+                    client.send(data, { binary: isBinary });
+                }
+            }
+        }
+
+        this.websocketServer.clients.forEach(broadcastFunction);
     }
 
     /**

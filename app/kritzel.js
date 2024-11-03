@@ -4,7 +4,7 @@ const TinyServer = require('./server/tinyserver');
 const ServerGame = require('./server/servergame');
 
 // Creates a Server (organizes WebSocketServer)
-let server = new TinyServer(8123, (uid ,data) => {
+let server = new TinyServer(8123, (uid, data) => {
     receive(uid, data);
 });
 
@@ -20,26 +20,23 @@ let game = new ServerGame(server, () => {
         data = game.getBoard().getBoard(); 
         type = "2d";
     }
+
     let json = JSON.stringify({type : type , data : data});
     game.getBoard().setPointsEmpty();
     game.setIsSendPointList(true);
-    server.broadcastWsMessage(json, false);
+    server.broadcastWsMessage(null, json, false, 'all');
 });
 
 game.start();
 
 /**
  * Receives and processes a message from a client
+ * @param {string} uid user unique ID
  * @param {Message} message client request
  */
 function receive(uid ,message){
     game.processInput(uid, message);
 }
-
-/*function sendChatMessage(){
-
-    server.broadcastWsMessage(uid, message);
-}*/
 
 // catch all unhandled exceptions
 process.on('uncaughtException', (err) => {
