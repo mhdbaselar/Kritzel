@@ -4,6 +4,7 @@
 const Action = require('./class/action');
 const Message = require('./class/message');
 const ChatAction = require('./class/chatAction');
+const { displayChatMessage, displayChatMessageList } = require('./components/userInterface');
 
 module.exports = class ClientGame {
 
@@ -26,6 +27,7 @@ module.exports = class ClientGame {
         this.socket.onopen = (event) => {
             console.log("Socket opened");
             this.sendGetCanvasAction();
+            this.sendGetChatAction();
             loadingOverlay.style.display = "none"; // Spinner verstecken
         };
 
@@ -44,9 +46,18 @@ module.exports = class ClientGame {
         // Event handler for receiving messages from the server
         this.socket.onmessage = (event) => {
             let data = JSON.parse(event.data);
-            
-            if (data.type == 'chatMsg'){
+            if (data.type == 'chatMsgList'){
+                // Update the chat display
+                const chatMessages = document.querySelector(".chat-messages");
+                displayChatMessageList(chatMessages, data.data);
+            }
+            else if (data.type == 'chatMsg'){
                 console.log(`${data.uid}: ${data.data}`);   // Chat output console.log
+
+                // Update the chat display
+                const chatMessages = document.querySelector(".chat-messages");
+                displayChatMessage(chatMessages, data.data, data.uid);
+
                 this.updateChat(data.data);
             } else if (data.type === 'pl') { // 'pl' = PointList
                 this.updateWithPoints(data.data);
@@ -58,12 +69,12 @@ module.exports = class ClientGame {
 
 
     updateChat(data){
-        
+
     }
 
     /**
      * Updates the canvas with a list of drawn points received from the server.
-     * @param {Array<{x: number, y: number, color: string, thickness: number}>} data 
+     * @param {Array<{x: number, y: number, color: string, thickness: number}>} data
      */
     updateWithPoints(data) {
         let canvasData = data;
@@ -143,7 +154,7 @@ module.exports = class ClientGame {
 
     /**
      * Updates the entire canvas based on the full Canvas data received from the server.
-     * @param {Array<Array<string>>} data 
+     * @param {Array<Array<string>>} data
      */
     update(data) {
         let canvasData = data;
@@ -222,7 +233,7 @@ module.exports = class ClientGame {
         }
     }
 
-    //------------------------------------- 
+    //-------------------------------------
     //----------SENDING FUNCTIONS----------
     //-------------------------------------
 
@@ -284,13 +295,18 @@ module.exports = class ClientGame {
         this.send(JSON.stringify(message));
     }
 
-    //------------------------------------- 
+    sendGetChatAction(){
+        let message = new Message('getChatAction', null);
+        this.send(JSON.stringify(message));
+    }
+
+    //-------------------------------------
     //-----------HELP FUNCTIONS------------
     //-------------------------------------
 
     /**
      * Sends a message over the WebSocket.
-     * @param {string} message 
+     * @param {string} message
      */
     send(message) {
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {

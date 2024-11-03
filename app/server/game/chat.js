@@ -11,4 +11,8 @@ module.exports = class Chat{
         this.#messages.push({uid : uid, msg: message});
     }
 
+    getMessages(){
+        return this.#messages;
+    }
+
 }

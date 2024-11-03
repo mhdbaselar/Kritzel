@@ -51,7 +51,7 @@ module.exports = class TinyServer {
     }
 
     /**
-     * Recieves and processes a message from the client 
+     * Recieves and processes a message from the client
      * @param {string} data client request
      */
     processWsRequest(uid, data) {
@@ -59,7 +59,7 @@ module.exports = class TinyServer {
     }
 
     /**
-     * Sends a message to all clients 
+     * Sends a message to all clients
      * @param {string} data server response
      * @param {boolean} isBinary is data binary
      */
@@ -75,6 +75,15 @@ module.exports = class TinyServer {
     broadcastWsMessage2(uid, data, isBinary) {
         this.websocketServer.clients.forEach(function each(client) {
             if (client.readyState === ws.OPEN && client.uid != uid) {
+                //console.log(client.uid);
+                client.send(data, { binary: isBinary });
+            }
+        });
+    }
+
+    broadcastWsMessage3(uid, data, isBinary) {
+        this.websocketServer.clients.forEach(function each(client) {
+            if (client.readyState === ws.OPEN && client.uid == uid) {
                 //console.log(client.uid);
                 client.send(data, { binary: isBinary });
             }
