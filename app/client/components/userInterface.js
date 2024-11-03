@@ -4,7 +4,7 @@
 
 /**
  * Renders the list of users on the screen.
- * @param {User[]} users 
+ * @param {User[]} users
 */
 function renderUsers(users) {
     const usersContainer = document.querySelector(".users-container");
@@ -33,6 +33,34 @@ function renderUsers(users) {
 // Chat functionality
 // -------------------------------
 /**
+ * Displays a chat message in the chat container.
+ * @param {HTMLElement} chatMessages - The container for chat messages.
+ * @param {string} message - The message to display.
+ * @param {string} sender - The sender of the message.
+ */
+function displayChatMessage(chatMessages, message, sender) {
+    const messageDiv = document.createElement("div");
+    messageDiv.textContent = `${sender}: ${message}`;
+    chatMessages.appendChild(messageDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+/**
+ * Displays a list of chat messages in the specified container.
+ *
+ * @param {HTMLElement} chatMessages - The container element where chat messages will be displayed.
+ * @param {Array} messageList - An array of message objects to be displayed. Each object should have `uid` and `message` properties.
+ */
+function displayChatMessageList(chatMessages, messageList){
+    messageList.forEach(message => {
+        const messageDiv = document.createElement("div");
+        messageDiv.textContent = `${message.uid}: ${message.msg}`;
+        chatMessages.appendChild(messageDiv);
+    });
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+/**
  * Initializes the chat functionality by setting up event listeners
  * for sending messages via the send button and the Enter key.
  * @param {ClientGame} clientGame clientGame interface
@@ -48,12 +76,9 @@ function initializeChat(clientGame, sendButton, chatInput, chatMessages) {
     function sendMessage() {
         const message = chatInput.value.trim();
         if (message !== "") {
-            const messageDiv = document.createElement("div");
-            messageDiv.textContent = `Player1: ${message}`;
-            chatMessages.appendChild(messageDiv);
+            displayChatMessage(chatMessages, message, "You");
             chatInput.value = "";
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-            
+
             // Optionally, send the message to the server or WebSocket
             clientGame.sendChatAction(message);
         }
@@ -74,4 +99,4 @@ function initializeChat(clientGame, sendButton, chatInput, chatMessages) {
 }
 
 
-module.exports = { renderUsers, initializeChat };
+module.exports = { renderUsers, initializeChat, displayChatMessage, displayChatMessageList };
