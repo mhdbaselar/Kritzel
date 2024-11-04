@@ -10,7 +10,6 @@ const url = require('url');
 const fs = require('fs');
 const path = require('path');
 const ws = require('ws');
-const cookie = require('cookie');
 const ClientList = require('./users/clientList');
 
 module.exports = class TinyServer {
