@@ -9,9 +9,12 @@ const chatMessages = document.querySelector(".chat-messages");
 // Initialize chat and capture sendMessage function and listener handlers
 const chat = initializeChat(sendButton, chatInputDiv, chatMessages);
 
-let capsPressed = false;
-
 const keyboardContainer = document.querySelector(".simple-keyboard");
+
+// Hide keyboard initially
+keyboardContainer.style.display = "none";
+
+let capsPressed = false;
 
 // Initialize simple-keyboard with event handlers within the constructor
 const keyboard = new Keyboard({

@@ -282,14 +282,6 @@ window.addEventListener("load", () => {
   // Initialize chat and capture sendMessage function and listener handlers
   const chat = initializeChat(sendButton, chatInputDiv, chatMessages);
 
-  // -------------------------------
-  // Initialize Virtual Keyboard
-  // -------------------------------
-  const keyboardContainer = document.querySelector(".simple-keyboard");
-
-  // Hide keyboard initially
-  keyboardContainer.style.display = "none";
-
   // Handle window resize to toggle editable state and keyboard visibility
   window.addEventListener(
     "resize",
