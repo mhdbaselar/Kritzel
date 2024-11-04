@@ -1,5 +1,5 @@
 {
-  "name": "Kritzel",
+  "name": "kritzel",
   "version": "0.0.1",
   "description": "A fun interactive guess-my-drawing-game.",
   "scripts": {
@@ -10,7 +10,6 @@
   "author": "Ralf Peters",
   "license": "MIT",
   "dependencies": {
-    "cookie": "^1.0.1",
     "simple-keyboard": "^3.8.13",
     "watchify": "^4.0.0",
     "ws": "^8.18.0"
