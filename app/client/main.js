@@ -3,14 +3,19 @@
 
 // Import necessary modules
 const ClientGame = require("./clientgame");
-const { renderUsers, initializeChat } = require('./components/userInterface');
-const { initializeToolbar } = require('./components/toolbar');
-const Keyboard = require('simple-keyboard').default;
+const { renderUsers, initializeChat } = require("./components/userInterface");
+const { initializeToolbar } = require("./components/toolbar");
+const {
+  keyboard,
+  showKeyboard,
+  hideKeyboard,
+  setChatInputEditable,
+} = require("./components/virtualKeyboard");
 
 // Initialize simple-keyboard's CSS (if using a bundler that supports CSS imports)
 
-/** 
- * @type {ClientGame} 
+/**
+ * @type {ClientGame}
  */
 const clientGame = new ClientGame();
 
@@ -41,8 +46,8 @@ window.addEventListener("load", () => {
 
     canvas.width = newWidth;
     canvas.height = newHeight;
-    canvas.style.width = '100%';
-    canvas.style.height = 'auto';
+    canvas.style.width = "100%";
+    canvas.style.height = "auto";
 
     // Redraw preserved image after resizing
     const tempCanvas = document.createElement("canvas");
@@ -51,7 +56,17 @@ window.addEventListener("load", () => {
     const tempCtx = tempCanvas.getContext("2d");
     tempCtx.drawImage(canvas, 0, 0);
 
-    ctx.drawImage(tempCanvas, 0, 0, tempCanvas.width, tempCanvas.height, 0, 0, canvas.width, canvas.height);
+    ctx.drawImage(
+      tempCanvas,
+      0,
+      0,
+      tempCanvas.width,
+      tempCanvas.height,
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
 
     syncChatHeight();
   }
@@ -83,8 +98,8 @@ window.addEventListener("load", () => {
   // Drawing State Variables
   // -------------------------------
   let drawing = false;
-  let tool = 'pen';
-  let penColor = '#000';
+  let tool = "pen";
+  let penColor = "#000";
   let penSize = 3;
 
   // -------------------------------
@@ -118,8 +133,8 @@ window.addEventListener("load", () => {
   }
 
   function updateSelectedPenSizeButton(selectedButton) {
-    const penSizeButtons = document.querySelectorAll('.pen-size-btn');
-    penSizeButtons.forEach(button => {
+    const penSizeButtons = document.querySelectorAll(".pen-size-btn");
+    penSizeButtons.forEach((button) => {
       if (button === selectedButton) {
         button.classList.add("selected");
         button.style.backgroundColor = penColor;
@@ -131,8 +146,8 @@ window.addEventListener("load", () => {
   }
 
   function updateSelectedColorButton(selectedButton) {
-    const colorButtons = document.querySelectorAll('.color-button');
-    colorButtons.forEach(button => {
+    const colorButtons = document.querySelectorAll(".color-button");
+    colorButtons.forEach((button) => {
       if (button === selectedButton) {
         button.classList.add("selected");
         button.style.outline = "2px solid #fff";
@@ -144,8 +159,8 @@ window.addEventListener("load", () => {
   }
 
   function selectTool(selectedTool) {
-    const toolButtons = document.querySelectorAll('.tool-button');
-    toolButtons.forEach(button => {
+    const toolButtons = document.querySelectorAll(".tool-button");
+    toolButtons.forEach((button) => {
       if (button.dataset.tool === selectedTool) {
         button.classList.add("selected-tool");
       } else {
@@ -164,8 +179,10 @@ window.addEventListener("load", () => {
   });
 
   // Initialize the default selected pen size button
-  const penSizeButtons = document.querySelectorAll('.pen-size-btn');
-  const defaultPenSizeButton = Array.from(penSizeButtons).find(ps => parseInt(ps.dataset.size, 10) === penSize);
+  const penSizeButtons = document.querySelectorAll(".pen-size-btn");
+  const defaultPenSizeButton = Array.from(penSizeButtons).find(
+    (ps) => parseInt(ps.dataset.size, 10) === penSize
+  );
   if (defaultPenSizeButton) {
     defaultPenSizeButton.classList.add("selected");
     defaultPenSizeButton.style.backgroundColor = penColor;
@@ -203,7 +220,7 @@ window.addEventListener("load", () => {
   function stopDrawing() {
     drawing = false;
     ctx.beginPath();
-    clientGame.sendDrawAction('pen', null, null, penColor, 0);
+    clientGame.sendDrawAction("pen", null, null, penColor, 0);
   }
 
   function draw(e) {
@@ -224,19 +241,25 @@ window.addEventListener("load", () => {
 
     const scaledX = (pos.x / canvas.width) * 600;
     const scaledY = (pos.y / canvas.height) * 400;
-    clientGame.sendDrawAction(tool, Math.round(scaledX), Math.round(scaledY), penColor, penSize);
+    clientGame.sendDrawAction(
+      tool,
+      Math.round(scaledX),
+      Math.round(scaledY),
+      penColor,
+      penSize
+    );
   }
 
   // Mouse events
-  canvas.addEventListener('mousedown', startDrawing);
-  canvas.addEventListener('mouseup', stopDrawing);
-  canvas.addEventListener('mousemove', draw);
-  canvas.addEventListener('mouseout', stopDrawing);
+  canvas.addEventListener("mousedown", startDrawing);
+  canvas.addEventListener("mouseup", stopDrawing);
+  canvas.addEventListener("mousemove", draw);
+  canvas.addEventListener("mouseout", stopDrawing);
 
   // Touch events
-  canvas.addEventListener('touchstart', startDrawing);
-  canvas.addEventListener('touchend', stopDrawing);
-  canvas.addEventListener('touchmove', draw);
+  canvas.addEventListener("touchstart", startDrawing);
+  canvas.addEventListener("touchend", stopDrawing);
+  canvas.addEventListener("touchmove", draw);
 
   // -------------------------------
   // User Rendering (Dummy Data)
@@ -253,7 +276,7 @@ window.addEventListener("load", () => {
   // Chat Functionality
   // -------------------------------
   const sendButton = document.getElementById("sendButton");
-  const chatInputDiv = document.getElementById("chatMessage"); // This is now a <div>
+  const chatInputDiv = document.getElementById("chatMessage");
   const chatMessages = document.querySelector(".chat-messages");
 
   // Initialize chat and capture sendMessage function and listener handlers
@@ -267,209 +290,22 @@ window.addEventListener("load", () => {
   // Hide keyboard initially
   keyboardContainer.style.display = "none";
 
-  // Initialize simple-keyboard with event handlers within the constructor
-  const keyboard = new Keyboard({
-    onChange: input => onChange(input),
-    onKeyPress: button => onKeyPress(button),
-    theme: "hg-theme-default hg-layout-default",
-    layout: {
-      default: [
-        "q w e r t z u i o p ü + {bksp}",
-        "a s d f g h j k l ö ä #",
-        "{capslock} y x c v b n m , . -",
-        "{back} {space} {enter}"
-      ],
-      uppercase: [
-        "Q W E R T Z U I O P Ü + {bksp}",
-        "A S D F G H J K L Ö Ä #",
-        "{capslock} Y X C V B N M , . -",
-        "{back} {space} {enter}"
-      ]
-    },
-    display: {
-      "{bksp}": "⌫",
-      "{enter}": "Enter",
-      "{capslock}": "Caps",
-      "{space}": "Space",
-      "{back}": "←" // Back arrow symbol
-    }
-  });
-
-  /**
-   * Function to handle changes in the virtual keyboard input
-   * @param {string} input - The current input from the keyboard
-   */
-  function onChange(input) {
-    console.log("Input changed:", input);
-    chatInputDiv.textContent = input;
-  }
-
-  let capsPressed = false;
-
-  /**
-   * Function to handle key presses on the virtual keyboard
-   * @param {string} button - The button that was pressed
-   */
-  function onKeyPress(button) {
-    console.log("Button pressed:", button);
-
-    if (button === "{enter}") {
-      console.log("Enter key pressed");
-      const message = chatInputDiv.textContent.trim();
-      if (message === "") {
-        console.log("Cannot send empty message");
-        return;
-      }
-      chat.sendMessage();
-      keyboard.clearInput();
-      chatInputDiv.textContent = ""; // Clear the chat input
-      hideKeyboard(); // Hide keyboard after sending
-      chatInputDiv.blur(); // Remove focus from input
-      return;
-    }
-
-    if (button === "{bksp}") {
-      console.log("Backspace key pressed");
-      // No additional handling needed; onChange will update the input
-      return;
-    }
-
-    if (button === "{back}") {
-      console.log("Back button pressed");
-      // Implement back navigation logic here
-      // For example, navigate to a previous page or close the chat
-      window.history.back(); // Example: Go back to the previous page
-      return;
-    }
-
-    if (button === "{capslock}") {
-      toggleCapsLock();
-      return;
-    }
-
-    // If Caps Lock was pressed, toggle it off after the next key press
-    if (capsPressed && button !== "{capslock}") {
-      toggleCapsLock();
-      const capsButton = keyboard.getButtonElement("{capslock}");
-      if (capsButton) {
-        capsButton.classList.remove("active-capslock");
-      }
-      capsPressed = false;
-    }
-  }
-
-  /**
-   * Toggles Caps Lock by switching between 'default' and 'uppercase' layouts
-   */
-  function toggleCapsLock() {
-    const currentLayout = keyboard.options.layoutName;
-    const newLayout = currentLayout === "default" ? "uppercase" : "default";
-    keyboard.setOptions({ layoutName: newLayout });
-
-    // Update the Caps Lock key's appearance
-    const capsButton = keyboard.getButtonElement("{capslock}");
-    if (capsButton) {
-      capsPressed = true;
-      capsButton.classList.toggle("active-capslock");
-    }
-  }
-
-  /**
-   * Function to show the virtual keyboard
-   */
-  function showKeyboard() {
-    if (isMobile()) { // Mobile check
-      keyboardContainer.style.display = "block";
-      keyboard.setInput(chatInputDiv.textContent); // Initialize keyboard input with current chat input value
-    }
-  }
-
-  /**
-   * Function to hide the virtual keyboard
-   */
-  function hideKeyboard() {
-    keyboardContainer.style.display = "none";
-  }
-
-  // -------------------------------
-  // Device Detection and Chat Input Handling
-  // -------------------------------
-
-  /**
-   * Function to detect if the device is mobile based on viewport width
-   * @returns {boolean} - True if mobile, false otherwise
-   */
-  function isMobile() {
-    return window.innerWidth <= 850;
-  }
-
-  /**
-   * Function to set the chat input's editable state based on device
-   */
-  function setChatInputEditable() {
-    if (isMobile()) {
-      chatInputDiv.setAttribute("contenteditable", "false");
-      chatInputDiv.classList.remove("editable");
-      // Optionally, clear any physical input
-      chatInputDiv.textContent = "";
-      chat.removeKeydownListener();
-    } else {
-      chatInputDiv.setAttribute("contenteditable", "true");
-      chatInputDiv.classList.add("editable");
-      chat.addKeydownListener();
-    }
-  }
-
-  /**
-   * Function to handle chat input click/focus
-   */
-  function handleChatInputClick(event) {
-    if (isMobile()) {
-      event.preventDefault(); // Prevent any default behavior
-      showKeyboard();
-    } else {
-      // For desktop, focus the chat input div to allow typing
-      chatInputDiv.focus();
-    }
-  }
-
-  // Initial setup
-  setChatInputEditable();
-  if (isMobile()) {
-    hideKeyboard(); // Ensure it's hidden initially on mobile
-  }
-
-  // Event listener for chat input click/focus
-  chatInputDiv.addEventListener("click", handleChatInputClick);
-  chatInputDiv.addEventListener("focus", handleChatInputClick);
-
-  // Hide the keyboard when tapping outside the keyboard or input
-  document.addEventListener("click", (event) => {
-    if (!keyboardContainer.contains(event.target) && event.target !== chatInputDiv) {
-      hideKeyboard();
-    }
-  });
-
   // Handle window resize to toggle editable state and keyboard visibility
-  window.addEventListener("resize", debounce(() => {
-    const wasMobile = chatInputDiv.getAttribute("contenteditable") === "false";
-    setChatInputEditable();
-    const isNowMobile = isMobile();
+  window.addEventListener(
+    "resize",
+    debounce(() => {
+      const wasMobile =
+        chatInputDiv.getAttribute("contenteditable") === "false";
+      setChatInputEditable();
+      const isNowMobile = isMobile();
 
-    if (wasMobile !== isNowMobile) {
-      if (isNowMobile) {
-        hideKeyboard();
-      } else {
-        hideKeyboard();
+      if (wasMobile !== isNowMobile) {
+        if (isNowMobile) {
+          hideKeyboard();
+        } else {
+          hideKeyboard();
+        }
       }
-    }
-  }, 200));
-
-  // -------------------------------
-  // Finalizing and Ensuring Focus
-  // -------------------------------
-  // Optional: Automatically focus the chat input on desktop
-  if (!isMobile()) {
-    chatInputDiv.focus();
-  }
+    }, 200)
+  );
 });
