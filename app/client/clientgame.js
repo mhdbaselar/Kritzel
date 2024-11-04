@@ -21,14 +21,17 @@ module.exports = class ClientGame {
         // Show loadingOverlay
         const loadingOverlay = document.getElementById("loadingOverlay");
 
+        const cookie = document.cookie;
+
         // Build WebSocket URL with correct protocol
         this.socket = new WebSocket(protocol + location.host + location.pathname);
 
         // Event handler for when the connection is opened
         this.socket.onopen = (event) => {
             console.log("Socket opened");
-            this.sendGetCanvasAction();
+            this.send(JSON.stringify({type: 'checkCookie', data: cookie}));
             this.sendGetChatAction();
+            this.sendGetCanvasAction();
             loadingOverlay.style.display = "none"; // Spinner verstecken
         };
 
@@ -50,22 +53,33 @@ module.exports = class ClientGame {
             if (data.type == 'chatMsgList'){
                 // Update the chat display
                 const chatMessages = document.querySelector(".chat-messages");
-                displayChatMessageList(chatMessages, data.data);
+                displayChatMessageList(chatMessages, data.data, data.cid);
                 
             } else if (data.type == 'chatMsg'){
-                console.log(`${data.uid}: ${data.data}`);   // Chat output console.log
+                console.log(`${data.cid}: ${data.data}`);   // Chat output console.log
 
                 // Update the chat display
                 const chatMessages = document.querySelector(".chat-messages");
-                displayChatMessage(chatMessages, data.data, data.uid);
+                displayChatMessage(chatMessages, data.data, data.cid);
 
             } else if (data.type === 'pl') { // 'pl' = PointList
                 this.updateWithPoints(data.data);
 
             } else if (data.type === '2d') { // '2d' = Canvas data
                 this.update(data.data);
+
+            } else if (data.type === 'init'){
+                this.setSessionCookie(data.data);
             }
         };
+    }
+
+    setSessionCookie(cid){
+        var expires = "";
+        var date = new Date();
+        date.setTime(date.getTime() + (2*24*60*60*1000));
+        expires = "; expires=" + date.toUTCString();
+        document.cookie = "cid=" + (cid || "")  + expires + "; path=/";
     }
 
     /**

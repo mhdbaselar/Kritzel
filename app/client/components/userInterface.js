@@ -47,14 +47,19 @@ function displayChatMessage(chatMessages, message, sender) {
 
 /**
  * Displays a list of chat messages in the chat container.
- *
+ * @param {string} cid client unique id 
  * @param {HTMLElement} chatMessages - The container element where chat messages will be displayed.
- * @param {Array} messageList - An array of message objects to be displayed. Each object should have `uid` and `message` properties.
+ * @param {Array} messageList - An array of message objects to be displayed. Each object should have `cid` and `message` properties.
  */
-function displayChatMessageList(chatMessages, messageList){
+function displayChatMessageList(chatMessages, messageList, cid){
+    let cookieCid = document.cookie.split('=')[1];
     messageList.forEach(message => {
+        let name = message.cid;
+        if(cid == cookieCid && cookieCid == name){
+            name = 'You';
+        }
         const messageDiv = document.createElement("div");
-        messageDiv.textContent = `${message.uid}: ${message.msg}`;
+        messageDiv.textContent = `${name}: ${message.msg}`;
         chatMessages.appendChild(messageDiv);
     });
     chatMessages.scrollTop = chatMessages.scrollHeight;

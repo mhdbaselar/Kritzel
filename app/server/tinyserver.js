@@ -10,19 +10,23 @@ const url = require('url');
 const fs = require('fs');
 const path = require('path');
 const ws = require('ws');
+const cookie = require('cookie');
+const ClientList = require('./users/clientList');
 
 module.exports = class TinyServer {
 
+    #clients;
     /**
      * Constructor to instanciate the WebsocketServer
      * @param {int} port port number
      * @param {function} wsCallback receive function
      */
     constructor(port, wsCallback) {
+        this.#clients = new ClientList();
         this.wsCallback = wsCallback;
         this.server = http.createServer(this.processHttpRequest.bind(this));
         this.websocketServer = new ws.WebSocketServer({ server: this.server, clientTracking: true });
-        this.websocketServer.on('connection', this.connectWs.bind(this));
+        this.websocketServer.on('connection',this.connectWs.bind(this));
         this.server.listen(port, () => {
             console.log(`tinyserver running at http://127.0.0.1:${port}/`);
         });
@@ -33,9 +37,15 @@ module.exports = class TinyServer {
      * @param {WebSocket} websocket websocket - client
      */
     connectWs(websocket) {
-        websocket.uid = this.getUniqueID();
+
+        if(websocket.cid == null){
+            websocket.cid = this.getUniqueID(); 
+            websocket.send(JSON.stringify({type: 'init', data: websocket.cid}));
+            this.#clients.addClient(websocket.cid, null);
+        }
+        
         websocket.on('error', console.error);
-        websocket.on('message', (data) => { this.processWsRequest(websocket.uid, data)});
+        websocket.on('message', (data) => { this.processWsRequest(websocket, data)});
         websocket.on('close', () => { console.log('close'); });
     }
 
@@ -54,18 +64,31 @@ module.exports = class TinyServer {
      * Recieves and processes a message from the client
      * @param {string} data client request
      */
-    processWsRequest(uid, data) {
-        if (this.wsCallback) this.wsCallback(uid, data);
+    processWsRequest(websocket, data) {
+        try{
+            let cookie = JSON.parse(data);
+            if (cookie.type = 'checkCookie'){
+                let cid = cookie.data.split('=')[1];
+                if(cid != null){
+                    this.#clients.replaceCid(websocket.cid, cid);
+                    websocket.cid = cid;
+                    websocket.send(JSON.stringify({type: 'init', data: websocket.cid}));
+                }
+            }
+        }
+        catch(error) {}
+
+        if (this.wsCallback) this.wsCallback(websocket.cid, data);
     }
 
     /**
      * Sends a message to all clients
-     * @param {string} uid user unique ID
+     * @param {string} cid user unique ID
      * @param {string} data server response
      * @param {boolean} isBinary is data binary
      * @param {string} broadcastType send - all | allWithoutSender | onlySender - client
      */
-    broadcastWsMessage(uid, data, isBinary, broadcastType) {
+    broadcastWsMessage(cid, data, isBinary, broadcastType) {
 
         let broadcastFunction = function each (client) {};                  // empty function
 
@@ -77,13 +100,13 @@ module.exports = class TinyServer {
             }
         } else if (broadcastType == 'allWithoutSender'){
             broadcastFunction = function each(client) {
-                if (client.readyState === ws.OPEN && client.uid != uid) {   // send all clients without sender
+                if (client.readyState === ws.OPEN && client.cid != cid) {   // send all clients without sender
                     client.send(data, { binary: isBinary });
                 }
             }
         } else if (broadcastType == 'onlySender'){
             broadcastFunction = function each(client) {
-                if (client.readyState === ws.OPEN && client.uid == uid) {   // send only sender client
+                if (client.readyState === ws.OPEN && client.cid == cid) {   // send only sender client
                     client.send(data, { binary: isBinary });
                 }
             }

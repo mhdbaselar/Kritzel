@@ -78,10 +78,10 @@ module.exports = class ServerGame {
 
     /**
      * Get and process a client message
-     * @param {string} uid user unique ID
+     * @param {string} cid user unique ID
      * @param {Message} request client request
      */
-    processInput(uid, request){
+    processInput(cid, request){
         let _request = JSON.parse(request);
 
         if(_request.messageType == 'drawAction'){       // draw action
@@ -118,14 +118,14 @@ module.exports = class ServerGame {
         } else if (_request.messageType == 'chatAction'){           // send chat message to clients
             let chatMsg = _request.messageBody.message;
 
-            this.#chat.addMessage(uid, chatMsg);
+            this.#chat.addMessage(cid, chatMsg);
 
-            let jsonMessage = JSON.stringify({type : 'chatMsg', data : chatMsg, uid : uid});
-            this.#server.broadcastWsMessage(uid, jsonMessage, false, 'allWithoutSender');
+            let jsonMessage = JSON.stringify({type : 'chatMsg', data : chatMsg, cid : cid});
+            this.#server.broadcastWsMessage(cid, jsonMessage, false, 'allWithoutSender');
 
         } else if (_request.messageType == 'getChatAction'){                // get whole chat
-            let jsonMessage = JSON.stringify({type : 'chatMsgList', data : this.#chat.getMessages(), uid : uid});
-            this.#server.broadcastWsMessage(uid, jsonMessage, false, 'onlySender');
+            let jsonMessage = JSON.stringify({type : 'chatMsgList', data : this.#chat.getMessages(), cid : cid});
+            this.#server.broadcastWsMessage(cid, jsonMessage, false, 'onlySender');
         }
     }
 }
