@@ -8,18 +8,23 @@ let server = new TinyServer(8123, (uid, data) => {
     receive(uid, data);
 });
 
+let refreshCounter = 0;
+
 // Creates a ServerGame (organizes game logic server-side)
 let game = new ServerGame(server, () => {
     let data;
     let type;
     
-    if(game.getIsSendPointList()){          // send point list
+    if(game.getIsSendPointList() && refreshCounter < 20){          // send point list
         data = game.getBoard().getPoints();
         type = "pl";
     } else{                                 // send 2D-array (board)
         data = game.getBoard().getBoard(); 
         type = "2d";
+        refreshCounter = 0;
     }
+
+    refreshCounter++;
 
     let json = JSON.stringify({type : type , data : data});
     game.getBoard().setPointsEmpty();

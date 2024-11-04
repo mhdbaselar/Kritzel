@@ -104,7 +104,7 @@ module.exports = class ServerGame {
 
             if(action.tool == 'fill'){
                 this.#board.fill(action.x, action.y ,action.color);
-                this.#isSendPointList = true;
+                this.#isSendPointList = false;
             }
 
             if(action.tool == 'fillBackground'){
