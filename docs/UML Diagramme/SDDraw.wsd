@@ -1,0 +1,62 @@
+@startuml SDDraw
+actor Nutzer
+
+participant "Canvas Container\n(app/public/index.html)" as CanvasContainer
+participant "Toolbar\n(app/client/components/toolbar.js)" as Toolbar
+participant "Drawing Module\n(app/client/components/drawing.js)" as DrawingModule
+participant "ClientGame\n(app/client/clientgame.js)" as ClientGame
+participant "WebSocket\n(app/public/index.html)" as WebSocket #FFFF00
+participant "TinyServer\n(app/server/tinyserver.js)" as TinyServer
+participant "ServerGame\n(app/server/servergame.js)" as ServerGame
+participant "Kritzel\n(app/server/kritzel.js)" as Kritzel
+
+== Start des Zeichnens ==
+Nutzer -> CanvasContainer: Maus drücken (start drawing)
+CanvasContainer -> DrawingModule: mouseDown(event)
+DrawingModule -> Toolbar: getCurrentToolSettings()
+DrawingModule -> DrawingModule: beginPath(position, toolSettings)
+DrawingModule -> DrawingModule: startTracking(position)
+
+== Zeichnen der Bewegung ==
+Nutzer -> CanvasContainer: Maus bewegen (drawing)
+CanvasContainer -> DrawingModule: mouseMove(event)
+DrawingModule -> DrawingModule: trackPosition(position)
+DrawingModule -> ClientGame: sendDrawAction(tool, position, color, thickness)
+ClientGame -> WebSocket: send(JSON.stringify({ type: "drawAction", data: drawAction, cid }))  
+WebSocket -> TinyServer: receive(drawAction)
+TinyServer -> ServerGame: forwardDrawAction(drawAction)
+ServerGame -> Kritzel: processDrawAction(drawAction)
+Kritzel -> ServerGame: acknowledgment
+
+== Beenden des Zeichnens ==
+Nutzer -> CanvasContainer: Maus loslassen (stop drawing)
+CanvasContainer -> DrawingModule: mouseUp(event)
+DrawingModule -> DrawingModule: endPath()
+DrawingModule -> ClientGame: sendEndDrawAction()
+ClientGame -> WebSocket: send(JSON.stringify({ type: "endDrawAction", data: endDrawAction, cid }))  
+WebSocket -> TinyServer: receive(endDrawAction)
+TinyServer -> ServerGame: forwardEndDrawAction(endDrawAction)
+ServerGame -> Kritzel: finalizeSession(endDrawAction)
+Kritzel -> ServerGame: acknowledgment
+
+== Aktualisierung des Canvas ==
+ClientGame -> WebSocket: send(JSON.stringify({ type: "getCanvasAction", data: null }))  
+WebSocket -> TinyServer: receive(getCanvasAction)
+TinyServer -> ServerGame: forwardGetCanvasAction()
+ServerGame -> Kritzel: getCanvasData()
+Kritzel -> ServerGame: return canvasData
+ServerGame -> TinyServer: sendCanvasData(canvasData)
+TinyServer -> WebSocket: broadcast(JSON.stringify({ type: "2d", data: canvasData }))  
+WebSocket -> ClientGame: receive(2d)
+ClientGame -> ClientGame: update(canvasData)
+ClientGame -> CanvasContainer: updateCanvas(canvasData)
+
+== Aktualisierung mit Punkteliste ==
+ServerGame -> TinyServer: broadcastPointList(points)
+TinyServer -> WebSocket: broadcast(JSON.stringify({ type: "pl", data: points }))  
+WebSocket -> ClientGame: receive(pl)
+ClientGame -> ClientGame: updateWithPoints(points)
+ClientGame -> CanvasContainer: updateCanvasWithPoints(points)
+
+note right of Nutzer: Nutzer sieht die gezeichnete Linie auf der Canvas und die aktualisierte Zeichnung
+@enduml

@@ -1,4 +1,4 @@
-@startuml SD
+@startuml SDChat
 actor Nutzer
 participant "ChatInputDiv\n(app/public/index.html)" as ChatInputDiv
 participant "SendButton\n(app/public/index.html)" as SendButton
