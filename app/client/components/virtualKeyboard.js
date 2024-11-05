@@ -1,20 +1,39 @@
-// components/virtualKeyboard.js
+/**
+ * Virtual Keyboard Module
+ * This module provides a virtual keyboard for chat input on mobile devices.
+ * It uses the simple-keyboard library for the virtual keyboard implementation.
+ *
+ * @file virtualKeyboard.js
+ * @module virtualKeyboard
+ *
+ * @fileoverview This module provides a virtual keyboard for chat input on mobile devices.
+ *
+ * @requires simple-keyboard
+ *
+ * @exports initializeVirtualKeyboard
+ * @exports keyboard
+ * @exports showKeyboard
+ * @exports hideKeyboard
+ * @exports setChatInputEditable
+ * @exports isMobile
+ *
+ */
 "use strict";
 
+/**
+ * Simple Keyboard library for virtual keyboard implementation
+ * @type {import("simple-keyboard").default}
+ */
 const Keyboard = require("simple-keyboard").default;
 
+// Global variables
+var chat = null;
+var capsPressed = false;
+
 /**
- * @typedef {Object} Chat
- * @property {Function} sendMessage - Function to send chat messages.
- * @property {Function} addKeydownListener - Function to add keydown listener.
- * @property {Function} removeKeydownListener - Function to remove keydown listener.
+ * Virtual Keyboard instance
+ * @type {Keyboard}
  */
-
-let chat = null;
-
-let capsPressed = false;
-
-// Initialize simple-keyboard with event handlers within the constructor
 const keyboard = new Keyboard({
   onChange: (input) => onChange(input),
   onKeyPress: (button) => onKeyPress(button),
@@ -60,6 +79,7 @@ function onChange(input) {
 function onKeyPress(button) {
   console.log("Button pressed:", button);
 
+  // Handle virtual Enter key press
   if (button === "{enter}") {
     console.log("Enter key pressed");
     if (chat) {
@@ -68,8 +88,8 @@ function onKeyPress(button) {
         console.log("Cannot send empty message");
         return;
       }
-      chat.sendMessage();
-      keyboard.clearInput();
+      chat.sendMessage(); // Send the message
+      keyboard.clearInput(); // Clear the keyboard input
       chat.chatInputDiv.textContent = ""; // Clear the chat input
       hideKeyboard(); // Hide keyboard after sending
       chat.chatInputDiv.blur(); // Remove focus from input
@@ -77,12 +97,13 @@ function onKeyPress(button) {
     return;
   }
 
+  // Handle virtual Backspace key press
   if (button === "{bksp}") {
     console.log("Backspace key pressed");
-    // No additional handling needed; onChange will update the input
     return;
   }
 
+  // Handle virtual Space key press
   if (button === "{back}") {
     console.log("Back button pressed");
     // Implement back navigation logic here
@@ -91,6 +112,7 @@ function onKeyPress(button) {
     return;
   }
 
+  // Handle virtual Caps Lock key press
   if (button === "{capslock}") {
     toggleCapsLock();
     return;
@@ -125,6 +147,7 @@ function toggleCapsLock() {
 
 /**
  * Function to show the virtual keyboard
+ * This function is called when the chat input is clicked on mobile devices
  */
 function showKeyboard() {
   if (isMobile()) {
@@ -138,11 +161,16 @@ function showKeyboard() {
 
 /**
  * Function to hide the virtual keyboard
+ * This function is called when the user taps outside the keyboard or input
  */
 function hideKeyboard() {
   keyboardContainer.style.display = "none";
 }
 
+/**
+ * Simple Keyboard container element
+ * @type {HTMLElement}
+ */
 const keyboardContainer = document.querySelector(".simple-keyboard");
 
 // Hide keyboard initially
@@ -162,13 +190,15 @@ function isMobile() {
 
 /**
  * Function to set the chat input's editable state based on device
+ * This function disables the chat input on mobile devices
+ * to prevent the device's default keyboard from showing
+ * and enables it on desktop devices.
  */
 function setChatInputEditable() {
   if (isMobile()) {
     if (chat) {
       chat.chatInputDiv.setAttribute("contenteditable", "false");
       chat.chatInputDiv.classList.remove("editable");
-      // Optionally, clear any physical input
       chat.chatInputDiv.textContent = "";
       chat.removeKeydownListener();
     }
@@ -182,7 +212,9 @@ function setChatInputEditable() {
 }
 
 /**
- * Function to handle chat input click/focus
+ * Function to handle chat input click/focus events
+ * This function is called when the chat input is clicked or focused
+ * @param {Event} event - The click or focus event
  */
 function handleChatInputClick(event) {
   if (isMobile()) {
@@ -201,10 +233,10 @@ function handleChatInputClick(event) {
 function initializeVirtualKeyboard(chatInstance) {
   chat = chatInstance;
 
-  // Initial setup
+  // Initial setup for chat input
   setChatInputEditable();
   if (isMobile()) {
-    hideKeyboard(); // Ensure it's hidden initially on mobile
+    hideKeyboard();
   }
 
   // Event listener for chat input click/focus
@@ -222,6 +254,7 @@ function initializeVirtualKeyboard(chatInstance) {
   });
 }
 
+// Export the virtual keyboard module functions
 module.exports = {
   initializeVirtualKeyboard,
   keyboard,

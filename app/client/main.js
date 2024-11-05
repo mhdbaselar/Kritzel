@@ -5,6 +5,8 @@
  * @file main.js
  * @module main
  *
+ * @fileoverview Initializes the main client-side application.
+ *
  * @requires ./clientgame
  * @requires ./components/userInterface
  * @requires ./components/toolbar
@@ -86,7 +88,7 @@ window.addEventListener("load", () => {
     const newWidth = parentWidth;
 
     // Maintain a 2:3 aspect ratio for the canvas
-    const newHeight = newWidth * 0.5;
+    const newHeight = newWidth * (2 / 3);
 
     // Resize the canvas and update the style to fit the parent container
     canvas.width = newWidth;
