@@ -92,12 +92,15 @@ function initializeChat(clientGame, sendButton, chatInputDiv, chatMessages) {
      */
     function sendMessage() {
         const message = chatInputDiv.textContent.trim();
-        if (message !== "") {
+        if (message !== "" && chatMessages) {
             displayChatMessage(chatMessages, message, "You");
-            chatInput.value = "";
+            
+            chatInputDiv.textContent = "";
 
             // Optionally, send the message to the server or WebSocket
-            clientGame.sendChatAction(message);
+            try{
+                clientGame.sendChatAction(message);
+            } catch(error) {}
         }
     }
 
