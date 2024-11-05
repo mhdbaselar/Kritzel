@@ -1,8 +1,11 @@
 // clientgame.js
 "use strict"
 
-const Action = require('./class/action');
+const Action = require('./class/drawAction');
 const Message = require('./class/message');
+const ChatAction = require('./class/chatAction');
+const { displayChatMessage, displayChatMessageList } = require('./components/userInterface');
+const DrawAction = require('./class/drawAction');
 
 module.exports = class ClientGame {
 
@@ -18,12 +21,16 @@ module.exports = class ClientGame {
         // Show loadingOverlay
         const loadingOverlay = document.getElementById("loadingOverlay");
 
+        const cookie = document.cookie;
+
         // Build WebSocket URL with correct protocol
         this.socket = new WebSocket(protocol + location.host + location.pathname);
 
         // Event handler for when the connection is opened
         this.socket.onopen = (event) => {
             console.log("Socket opened");
+            this.send(JSON.stringify({type: 'checkCookie', data: cookie}));
+            this.sendGetChatAction();
             this.sendGetCanvasAction();
             loadingOverlay.style.display = "none"; // Spinner verstecken
         };
@@ -43,18 +50,41 @@ module.exports = class ClientGame {
         // Event handler for receiving messages from the server
         this.socket.onmessage = (event) => {
             let data = JSON.parse(event.data);
+            if (data.type == 'chatMsgList'){
+                // Update the chat display
+                const chatMessages = document.querySelector(".chat-messages");
+                displayChatMessageList(chatMessages, data.data, data.cid);
+                
+            } else if (data.type == 'chatMsg'){
+                console.log(`${data.cid}: ${data.data}`);   // Chat output console.log
 
-            if (data.type === 'pl') { // 'pl' = PointList
+                // Update the chat display
+                const chatMessages = document.querySelector(".chat-messages");
+                displayChatMessage(chatMessages, data.data, data.cid);
+
+            } else if (data.type === 'pl') { // 'pl' = PointList
                 this.updateWithPoints(data.data);
+
             } else if (data.type === '2d') { // '2d' = Canvas data
                 this.update(data.data);
+
+            } else if (data.type === 'init'){
+                this.setSessionCookie(data.data);
             }
         };
     }
 
+    setSessionCookie(cid){
+        var expires = "";
+        var date = new Date();
+        date.setTime(date.getTime() + (2*24*60*60*1000));
+        expires = "; expires=" + date.toUTCString();
+        document.cookie = "cid=" + (cid || "")  + expires + "; path=/";
+    }
+
     /**
      * Updates the canvas with a list of drawn points received from the server.
-     * @param {Array<{x: number, y: number, color: string, thickness: number}>} data 
+     * @param {Array<{x: number, y: number, color: string, thickness: number}>} data
      */
     updateWithPoints(data) {
         let canvasData = data;
@@ -134,7 +164,7 @@ module.exports = class ClientGame {
 
     /**
      * Updates the entire canvas based on the full Canvas data received from the server.
-     * @param {Array<Array<string>>} data 
+     * @param {Array<Array<string>>} data
      */
     update(data) {
         let canvasData = data;
@@ -213,7 +243,7 @@ module.exports = class ClientGame {
         }
     }
 
-    //------------------------------------- 
+    //-------------------------------------
     //----------SENDING FUNCTIONS----------
     //-------------------------------------
 
@@ -233,8 +263,8 @@ module.exports = class ClientGame {
         if (tool === 'fill') _tool = 'fill';
         if (tool === 'fill') _tool = 'fill';
 
-        let action = new Action(_tool, x, y, color, thickness);
-        let message = new Message('action', action);
+        let action = new DrawAction(_tool, x, y, color, thickness);
+        let message = new Message('drawAction', action);
 
         let _message = JSON.stringify(message);
 
@@ -248,8 +278,8 @@ module.exports = class ClientGame {
      * Asks the server to clear the whole board.
      */
     sendClearAction() {
-        let action = new Action('clear', 0, 0, '', 0);
-        let message = new Message('action', action);
+        let action = new DrawAction('clear', 0, 0, '', 0);
+        let message = new Message('drawAction', action);
 
         this.send(JSON.stringify(message));
     }
@@ -259,27 +289,45 @@ module.exports = class ClientGame {
      * @param {string} color  color code in hexadecimal notation.
      */
     sendFillAction(x = 0, y = 0, color = '#000000') {
-        let action = new Action('fill', x, y, color, 0);
-        let message = new Message('action', action);
+        let action = new DrawAction('fill', x, y, color, 0);
+        let message = new Message('drawAction', action);
 
         this.send(JSON.stringify(message));
     }
 
     /**
-     * Requests the server to send the current Canvas data.
+     * Requests the server to send the current Canvas data
      */
     sendGetCanvasAction() {
         let message = new Message('getCanvasAction', null);
         this.send(JSON.stringify(message));
     }
 
-    //------------------------------------- 
+    /**
+     * Sends the client chat message to the other clients
+     * @param {*} chatMessage client chat message
+     */
+    sendChatAction(chatMessage){
+        let action = new ChatAction(chatMessage);
+        let message = new Message('chatAction', action);
+        this.send(JSON.stringify(message));
+    }
+
+    /**
+     * Requests the server to send the all chat messages
+     */
+    sendGetChatAction(){
+        let message = new Message('getChatAction', null);
+        this.send(JSON.stringify(message));
+    }
+
+    //-------------------------------------
     //-----------HELP FUNCTIONS------------
     //-------------------------------------
 
     /**
      * Sends a message over the WebSocket.
-     * @param {string} message 
+     * @param {string} message
      */
     send(message) {
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {

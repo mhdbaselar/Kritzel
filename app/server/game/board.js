@@ -88,7 +88,7 @@ module.exports = class Board {
     fill(x, y, color){
         let previousColor = this.#canvas[y][x];
         if(color != previousColor){
-            this.#points = this.#points.concat(this.iterativefill(x, y, color, previousColor));
+            this.iterativefill(x, y, color, previousColor);
         }   
     }
 
@@ -98,10 +98,8 @@ module.exports = class Board {
      * @param {int} y coordinate
      * @param {string} color hexadecimal color code 
      * @param {string} previousColor previous color from fill mouse click 
-     * @returns list of points
      */
     iterativefill(x, y, color, previousColor){
-        let points = [];
         let pointStack = [{x: x, y: y}];
         
         while(pointStack.length > 0){
@@ -112,7 +110,6 @@ module.exports = class Board {
                     if(previousColor == this.#canvas[point.y][point.x]) {
                         
                         this.#canvas[point.y][point.x] = color;
-                        points.push({x: point.x, y: point.y, color: color});
 
                         pointStack.push({x: point.x+1, y: point.y});    // check right
                         pointStack.push({x: point.x-1, y: point.y});    // check left
@@ -121,8 +118,7 @@ module.exports = class Board {
                     }
                 }
             }
-        }  
-        return points;
+        }
     }
 
     /**

@@ -280,7 +280,7 @@ window.addEventListener("load", () => {
   const chatMessages = document.querySelector(".chat-messages");
 
   // Initialize chat and capture sendMessage function and listener handlers
-  const chat = initializeChat(sendButton, chatInputDiv, chatMessages);
+  const chat = initializeChat(clientGame, sendButton, chatInputDiv, chatMessages);
 
   // Handle window resize to toggle editable state and keyboard visibility
   window.addEventListener(
@@ -289,6 +289,10 @@ window.addEventListener("load", () => {
       const wasMobile =
         chatInputDiv.getAttribute("contenteditable") === "false";
       setChatInputEditable();
+      
+      //ACHTUNG, DAS SCHMEIßT HIER NOCH EINEN CLIENTFEHLER!!!
+      // --> isMobile() is not defined
+      //FEHLER WAR AUCH SCHON VOR DEM MERGEN IN MAIN, BITTE BEHEBEN
       const isNowMobile = isMobile();
 
       if (wasMobile !== isNowMobile) {

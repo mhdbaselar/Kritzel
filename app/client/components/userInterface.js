@@ -1,7 +1,6 @@
 // components/userInterface.js
 
 "use strict";
-
 // -------------------------------
 // user sidebar rendering
 // -------------------------------
@@ -44,40 +43,64 @@ function renderUsers(users) {
 // Chat functionality
 // -------------------------------
 /**
+ * Displays a chat message in the chat container.
+ * @param {HTMLElement} chatMessages - The container for chat messages.
+ * @param {string} message - The message to display.
+ * @param {string} sender - The sender of the message.
+ */
+function displayChatMessage(chatMessages, message, sender) {
+    const messageDiv = document.createElement("div");
+    messageDiv.textContent = `${sender}: ${message}`;
+    chatMessages.appendChild(messageDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+/**
+ * Displays a list of chat messages in the chat container.
+ * @param {string} cid client unique id 
+ * @param {HTMLElement} chatMessages - The container element where chat messages will be displayed.
+ * @param {Array} messageList - An array of message objects to be displayed. Each object should have `cid` and `message` properties.
+ */
+function displayChatMessageList(chatMessages, messageList, cid){
+    let cookieCid = document.cookie.split('=')[1];
+    messageList.forEach(message => {
+        let name = message.cid;
+        if(cid == cookieCid && cookieCid == name){
+            name = 'You';
+        }
+        const messageDiv = document.createElement("div");
+        messageDiv.textContent = `${name}: ${message.msg}`;
+        chatMessages.appendChild(messageDiv);
+    });
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+/**
  * Initializes the chat functionality by setting up event listeners
  * for sending messages via the send button and the Enter key from the virtual keyboard.
  * 
+ * for sending messages via the send button and the Enter key.
+ * @param {ClientGame} clientGame clientGame interface
  * @param {HTMLElement} sendButton - The send button element.
  * @param {HTMLElement} chatInputDiv - The chat input <div>.
  * @param {HTMLElement} chatMessages - The container for chat messages.
  * @returns {Function} sendMessage - The function to send messages.
  */
-function initializeChat(sendButton, chatInputDiv, chatMessages) {
+function initializeChat(clientGame, sendButton, chatInputDiv, chatMessages) {
     /**
      * Sends a chat message if the input is not empty.
      */
     function sendMessage() {
         const message = chatInputDiv.textContent.trim();
-        if (message !== "") {
-            const messageDiv = document.createElement("div");
-            messageDiv.classList.add("message");
-
-            const senderSpan = document.createElement("span");
-            senderSpan.classList.add("message-sender");
-            senderSpan.textContent = "Player1: ";
-
-            const textSpan = document.createElement("span");
-            textSpan.classList.add("message-text");
-            textSpan.textContent = message;
-
-            messageDiv.appendChild(senderSpan);
-            messageDiv.appendChild(textSpan);
-            chatMessages.appendChild(messageDiv);
+        if (message !== "" && chatMessages) {
+            displayChatMessage(chatMessages, message, "You");
+            
             chatInputDiv.textContent = "";
-            chatMessages.scrollTop = chatMessages.scrollHeight;
 
             // Optionally, send the message to the server or WebSocket
-            // clientGame.sendChatMessage(message);
+            try{
+                clientGame.sendChatAction(message);
+            } catch(error) {}
         }
     }
 
@@ -112,4 +135,4 @@ function initializeChat(sendButton, chatInputDiv, chatMessages) {
 }
 
 
-module.exports = { renderUsers, initializeChat };
+module.exports = { renderUsers, initializeChat, displayChatMessage, displayChatMessageList };

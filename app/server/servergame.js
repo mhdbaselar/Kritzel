@@ -1,21 +1,29 @@
 "use strict"
 
 const Board = require('./game/board');
+const Chat = require('./game/chat');
 
 module.exports = class ServerGame {
     /**@type {Board} */
     #board;
     /**@type {boolean} */
     #isSendPointList;
+    /**@type {Chat} */
+    #chat;
+    /**@type {TinyServer} */
+    #server;
 
     /**
      * Constructor to instanciate the server game logic
+     * @param {TinyServer} server websocketserver
      * @param {function} tickCallback send function
      */
-    constructor(tickCallback) {
+    constructor(server, tickCallback) {
+        this.#server = server;
         this.tickCallback = tickCallback;
         this.intervalReference = null;
         this.#board = null;
+        this.#chat = null;
         this.#isSendPointList = null;
     }
 
@@ -23,7 +31,8 @@ module.exports = class ServerGame {
      * Creates a board, sets and starts the interval for the send function
      */
     start() {
-        this.#board = new Board(600, 400, '#FFFFFF'); 
+        this.#board = new Board(600, 400, '#FFFFFF');
+        this.#chat = new Chat();
 
         this.intervalReference = setInterval(this.tick.bind(this), 100);
     }
@@ -44,7 +53,7 @@ module.exports = class ServerGame {
     }
 
     /**
-     * Returns the board object 
+     * Returns the board object
      * @returns Board (Servergame.#board)
      */
     getBoard(){
@@ -68,42 +77,55 @@ module.exports = class ServerGame {
     }
 
     /**
-     * Get and process a client message 
-     * @param {Message} message client request
+     * Get and process a client message
+     * @param {string} cid user unique ID
+     * @param {Message} request client request
      */
-    processInput(message){
-        let _message = JSON.parse(message);
+    processInput(cid, request){
+        let _request = JSON.parse(request);
 
-        if(_message.messageType == 'action'){
-            let action = _message.messageBody;
+        if(_request.messageType == 'drawAction'){       // draw action
+            let action = _request.messageBody;
 
             if(action.tool == 'pen') {
                 this.#board.draw(action.x, action.y, action.color, action.thickness);
                 this.#isSendPointList = true;
             }
-                
+
             if(action.tool == 'eraser'){
                 this.#board.erase(action.x, action.y, action.thickness);
                 this.#isSendPointList = true;
             }
-                
+
             if(action.tool == 'clear'){
                 this.#board.clear();
                 this.#isSendPointList = false;
             }
-                
+
             if(action.tool == 'fill'){
                 this.#board.fill(action.x, action.y ,action.color);
-                this.#isSendPointList = true;
+                this.#isSendPointList = false;
             }
 
             if(action.tool == 'fillBackground'){
                 this.#board.fillBackground(action.color);
                 this.#isSendPointList = false;
             }
-                
-        } else if (_message.messageType = 'getCanvasAction'){
+
+        } else if (_request.messageType == 'getCanvasAction'){      // set 2D-array send option to send whole canvas 
             this.#isSendPointList = false;
+            
+        } else if (_request.messageType == 'chatAction'){           // send chat message to clients
+            let chatMsg = _request.messageBody.message;
+
+            this.#chat.addMessage(cid, chatMsg);
+
+            let jsonMessage = JSON.stringify({type : 'chatMsg', data : chatMsg, cid : cid});
+            this.#server.broadcastWsMessage(cid, jsonMessage, false, 'allWithoutSender');
+
+        } else if (_request.messageType == 'getChatAction'){                // get whole chat
+            let jsonMessage = JSON.stringify({type : 'chatMsgList', data : this.#chat.getMessages(), cid : cid});
+            this.#server.broadcastWsMessage(cid, jsonMessage, false, 'onlySender');
         }
     }
 }
