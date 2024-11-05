@@ -261,6 +261,7 @@ module.exports = class ClientGame {
         if (tool === 'pen') _tool = 'pen';
         if (tool === 'eraser') _tool = 'eraser';
         if (tool === 'fill') _tool = 'fill';
+        if (tool === 'fill') _tool = 'fill';
 
         let action = new DrawAction(_tool, x, y, color, thickness);
         let message = new Message('drawAction', action);
@@ -268,6 +269,9 @@ module.exports = class ClientGame {
         let _message = JSON.stringify(message);
 
         this.send(_message);
+        if (tool === 'fill') {
+            setTimeout(this.sendGetCanvasAction(), 500); // Get new canvas on fill, to fix Moiré patterns
+        }
     }
 
     /**

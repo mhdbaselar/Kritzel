@@ -1,11 +1,21 @@
+// components/userInterface.js
+
+"use strict";
 // -------------------------------
 // user sidebar rendering
 // -------------------------------
 
 /**
+ * Represents a user.
+ * @typedef {Object} User
+ * @property {string} name - The name of the user.
+ * @property {number} points - The points of the user.
+ */
+
+/**
  * Renders the list of users on the screen.
- * @param {User[]} users
-*/
+ * @param {User[]} users 
+ */
 function renderUsers(users) {
     const usersContainer = document.querySelector(".users-container");
     usersContainer.innerHTML = "";
@@ -67,19 +77,21 @@ function displayChatMessageList(chatMessages, messageList, cid){
 
 /**
  * Initializes the chat functionality by setting up event listeners
+ * for sending messages via the send button and the Enter key from the virtual keyboard.
+ * 
  * for sending messages via the send button and the Enter key.
  * @param {ClientGame} clientGame clientGame interface
  * @param {HTMLElement} sendButton - The send button element.
- * @param {HTMLInputElement} chatInput - The chat input element.
+ * @param {HTMLElement} chatInputDiv - The chat input <div>.
  * @param {HTMLElement} chatMessages - The container for chat messages.
  * @returns {Function} sendMessage - The function to send messages.
  */
-function initializeChat(clientGame, sendButton, chatInput, chatMessages) {
+function initializeChat(clientGame, sendButton, chatInputDiv, chatMessages) {
     /**
      * Sends a chat message if the input is not empty.
      */
     function sendMessage() {
-        const message = chatInput.value.trim();
+        const message = chatInputDiv.textContent.trim();
         if (message !== "") {
             displayChatMessage(chatMessages, message, "You");
             chatInput.value = "";
@@ -92,15 +104,31 @@ function initializeChat(clientGame, sendButton, chatInput, chatMessages) {
     // Event listener for the send button click
     sendButton.addEventListener("click", sendMessage);
 
-    // Event listener for Enter key on the physical keyboard
-    chatInput.addEventListener("keydown", (e) => {
+    // If chatInputDiv is contenteditable, add keydown listener for Enter key
+    function handleKeyDown(e) {
         if (e.key === "Enter") {
-            e.preventDefault(); // Prevent default behavior (e.g., form submission)
+            e.preventDefault(); // Prevent default behavior (e.g., adding newline)
             sendMessage();
         }
-    });
+    }
 
-    return sendMessage;
+    // Function to add keydown listener
+    function addKeydownListener() {
+        chatInputDiv.addEventListener("keydown", handleKeyDown);
+    }
+
+    // Function to remove keydown listener
+    function removeKeydownListener() {
+        chatInputDiv.removeEventListener("keydown", handleKeyDown);
+    }
+
+    // Initialize based on current contenteditable state
+    if (chatInputDiv.isContentEditable) {
+        addKeydownListener();
+    }
+
+    // Return functions to manage listeners
+    return { sendMessage, addKeydownListener, removeKeydownListener };
 }
 
 

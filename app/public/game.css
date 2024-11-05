@@ -352,3 +352,121 @@ body {
     color: white;
     /* White text for contrast */
 }
+
+.chat-input-div {
+    flex: 1;
+    padding: 8px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #ffffff;
+    cursor: text;
+    user-select: none;
+    outline: none;
+    position: relative;
+}
+
+/* Placeholder styling */
+.chat-input-div::before {
+    content: attr(placeholder);
+    color: #888;
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.chat-input-div:not(:empty)::before {
+    content: '';
+}
+
+/* Focus styling */
+.chat-input-div:focus {
+    border-color: #007BFF;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+/* Chat Messages Styling */
+.chat-messages {
+    border: 1px solid #ccc;
+    padding: 10px;
+    overflow-y: auto;
+    background-color: #f9f9f9;
+    height: 300px;
+    /* Adjust as needed or make dynamic */
+}
+
+.message-sender {
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+/* Chat Input Div Styling */
+.chat-input-div {
+    flex: 1;
+    padding: 8px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #ffffff;
+    cursor: text;
+    user-select: text;
+    outline: none;
+    position: relative;
+    min-height: 40px;
+    align-content: center;
+}
+
+.chat-input-div[contenteditable="false"] {
+    cursor: pointer;
+    /* Indicate it's clickable to show the virtual keyboard */
+}
+
+.chat-input-div::before {
+    content: attr(placeholder);
+    color: #888;
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.chat-input-div:not(:empty)::before {
+    content: '';
+}
+
+/* Focus styling */
+.chat-input-div:focus {
+    border-color: #007BFF;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+/* Send Button Styling (Optional) */
+#sendButton {
+    padding: 8px 16px;
+    margin-left: 10px;
+    font-size: 1rem;
+    cursor: pointer;
+    border: none;
+    border-radius: 4px;
+    background-color: #007BFF;
+    color: #ffffff;
+    transition: background-color 0.3s;
+}
+
+#sendButton:hover {
+    background-color: #0056b3;
+}
+
+/* Keyboard Container Styling (Optional) */
+.simple-keyboard {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #ffffff;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}

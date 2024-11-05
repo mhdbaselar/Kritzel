@@ -1,3 +1,4 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="de">
 
@@ -5,7 +6,9 @@
   <meta charset="UTF-8" />
   <title>Kritzel</title>
   <link rel="stylesheet" href="game.css" />
-  <link rel="stylesheet" href="index.css">
+  <link rel="stylesheet" href="index.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-keyboard/build/css/index.css">
+  <!-- Ensure CSS is loaded -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 
@@ -80,13 +83,16 @@
           <!-- Chat messages will appear here -->
         </div>
         <div class="chat-input">
-          <input type="text" id="chatMessage" placeholder="Nachricht eingeben...">
+          <!-- Replace <input> with <div> -->
+          <div id="chatMessage" class="chat-input-div" contenteditable="false" tabindex="0"
+            placeholder="Nachricht eingeben..." role="textbox" aria-label="Chat message input"></div>
           <button id="sendButton">Senden</button>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- Include simple-keyboard's JS via bundler or script tag -->
   <script src="bundle.js"></script>
 </body>
 

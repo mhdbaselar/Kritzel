@@ -4,7 +4,7 @@ stages:
 deploy_to_vps:
   stage: deploy
   only:
-    - main  # Trigger this job only for the main branch
+    - main # Trigger this job only for the main branch
   before_script:
     - mkdir -p ~/.ssh
     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | base64 -d > ~/.ssh/id_rsa
@@ -17,4 +17,4 @@ deploy_to_vps:
     - ssh -i ~/.ssh/id_rsa root@87.106.216.52 'docker image prune -f'
   environment:
     name: production
-    url: http://87.106.216.52
+    url: http://kritzel.lol

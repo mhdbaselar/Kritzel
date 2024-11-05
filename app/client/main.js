@@ -1,54 +1,44 @@
 // main.js
 "use strict";
 
-/**
- * @typedef {Object} User
- * @property {string} name - The name of the user.
- * @property {number} points - The points scored by the user.
- */
-
-// Import the ClientGame module
+// Import necessary modules
 const ClientGame = require("./clientgame");
+const { renderUsers, initializeChat } = require("./components/userInterface");
+const { initializeToolbar } = require("./components/toolbar");
+const {
+  keyboard,
+  showKeyboard,
+  hideKeyboard,
+  setChatInputEditable,
+} = require("./components/virtualKeyboard");
 
-// Import interface tools
-const { renderUsers, initializeChat } = require('./components/userInterface');
+// Initialize simple-keyboard's CSS (if using a bundler that supports CSS imports)
 
-// Import toolbar functionalities
-const { initializeToolbar } = require('./components/toolbar');
-
-// Import simple-keyboard
-const Keyboard = require('simple-keyboard').default;
-
-/** 
- * @type {ClientGame} 
+/**
+ * @type {ClientGame}
  */
 const clientGame = new ClientGame();
 
+// Open WebSocket connection
 clientGame.openWebSocket();
 
 window.addEventListener("load", () => {
   // -------------------------------
   // Canvas Setup and Resizing
   // -------------------------------
-  /** @type {HTMLCanvasElement} */
   const canvas = document.getElementById("drawingCanvas");
-  /** @type {CanvasRenderingContext2D} */
   const ctx = canvas.getContext("2d");
 
-  /** @constant {number} */
   const ASPECT_RATIO = 3 / 2; // Width : Height ratio = 3:2
 
   resizeCanvas();
-  window.addEventListener("resize", resizeCanvasEvent);
+  window.addEventListener("resize", debounce(resizeCanvasEvent, 200));
 
   function resizeCanvasEvent() {
     resizeCanvas();
     clientGame.sendGetCanvasAction();
   }
 
-  /**
-   * Resizes the canvas based on the window size.
-   */
   function resizeCanvas() {
     const parentWidth = canvas.parentElement.clientWidth;
     const newWidth = parentWidth;
@@ -56,8 +46,8 @@ window.addEventListener("load", () => {
 
     canvas.width = newWidth;
     canvas.height = newHeight;
-    canvas.style.width = '100%';
-    canvas.style.height = 'auto';
+    canvas.style.width = "100%";
+    canvas.style.height = "auto";
 
     // Redraw preserved image after resizing
     const tempCanvas = document.createElement("canvas");
@@ -66,99 +56,85 @@ window.addEventListener("load", () => {
     const tempCtx = tempCanvas.getContext("2d");
     tempCtx.drawImage(canvas, 0, 0);
 
-    ctx.drawImage(tempCanvas, 0, 0, tempCanvas.width, tempCanvas.height, 0, 0, canvas.width, canvas.height);
+    ctx.drawImage(
+      tempCanvas,
+      0,
+      0,
+      tempCanvas.width,
+      tempCanvas.height,
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
 
     syncChatHeight();
+  }
+
+  // Debounce function to limit the rate at which a function can fire.
+  function debounce(func, wait) {
+    let timeout;
+    return function (...args) {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(this, args), wait);
+    };
   }
 
   function syncChatHeight() {
     const chatMessages = document.querySelector(".chat-messages");
     const canvasHeight = canvas.clientHeight;
 
-    // Check if the screen width is less than or equal to 850px (mobile)
     if (window.innerWidth <= 850) {
-      // Set chat height to half of the current calculated height for mobile
       chatMessages.style.height = `${(canvasHeight - 20) / 2}px`;
     } else {
-      // Set chat height to match canvas height for larger screens
       chatMessages.style.height = `${canvasHeight - 20}px`;
     }
   }
 
-  // Call syncChatHeight initially and on window resize
   syncChatHeight();
-  window.addEventListener("resize", syncChatHeight);
+  window.addEventListener("resize", debounce(syncChatHeight, 200));
 
   // -------------------------------
   // Drawing State Variables
   // -------------------------------
-  /** @type {boolean} */
   let drawing = false;
-  /** @type {string} */
-  let tool = 'pen';
-  /** @type {string} */
-  let penColor = '#000';
-  /** @type {number} */
+  let tool = "pen";
+  let penColor = "#000";
   let penSize = 3;
 
   // -------------------------------
   // Toolbar Initialization
   // -------------------------------
-  /**
-   * Callback when pen size changes.
-   * @param {number} newSize - The new pen size.
-   * @param {HTMLElement} button - The button element that was clicked.
-   */
   function onPenSizeChange(newSize, button) {
     penSize = newSize;
     updatePenSettings();
     updateSelectedPenSizeButton(button);
   }
 
-  /**
-   * Callback when pen color changes.
-   * @param {string} newColor - The new pen color.
-   * @param {HTMLElement} button - The button element that was clicked.
-   */
   function onPenColorChange(newColor, button) {
     penColor = newColor;
     updatePenSettings();
     updateSelectedColorButton(button);
   }
 
-  /**
-   * Callback when tool changes.
-   * @param {string} selectedTool - The tool to select ('pen', 'eraser', 'fill').
-   * @param {HTMLElement} button - The tool button element that was clicked.
-   */
   function onToolChange(selectedTool, button) {
     selectTool(selectedTool);
   }
 
-  /**
-   * Callback when clear canvas is triggered.
-   */
   function onClearCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     clientGame.sendClearAction();
   }
 
-  /**
-   * Updates the pen settings (size and color) on the canvas context.
-   */
   function updatePenSettings() {
     ctx.lineWidth = penSize;
     ctx.strokeStyle = penColor;
     console.log(`Pen settings updated: Size=${penSize}, Color=${penColor}`);
   }
 
-  /**
-   * Updates the selected pen size button UI.
-   * @param {HTMLElement} selectedButton - The button element to mark as selected.
-   */
   function updateSelectedPenSizeButton(selectedButton) {
-    const penSizeButtons = document.querySelectorAll('.pen-size-btn');
-    penSizeButtons.forEach(button => {
+    const penSizeButtons = document.querySelectorAll(".pen-size-btn");
+    penSizeButtons.forEach((button) => {
       if (button === selectedButton) {
         button.classList.add("selected");
         button.style.backgroundColor = penColor;
@@ -169,13 +145,9 @@ window.addEventListener("load", () => {
     });
   }
 
-  /**
-   * Updates the selected color button UI.
-   * @param {HTMLElement} selectedButton - The color button element to mark as selected.
-   */
   function updateSelectedColorButton(selectedButton) {
-    const colorButtons = document.querySelectorAll('.color-button');
-    colorButtons.forEach(button => {
+    const colorButtons = document.querySelectorAll(".color-button");
+    colorButtons.forEach((button) => {
       if (button === selectedButton) {
         button.classList.add("selected");
         button.style.outline = "2px solid #fff";
@@ -186,13 +158,9 @@ window.addEventListener("load", () => {
     });
   }
 
-  /**
-   * Selects a drawing tool.
-   * @param {string} selectedTool - The tool to select ('pen', 'eraser', 'fill').
-   */
   function selectTool(selectedTool) {
-    const toolButtons = document.querySelectorAll('.tool-button');
-    toolButtons.forEach(button => {
+    const toolButtons = document.querySelectorAll(".tool-button");
+    toolButtons.forEach((button) => {
       if (button.dataset.tool === selectedTool) {
         button.classList.add("selected-tool");
       } else {
@@ -203,7 +171,6 @@ window.addEventListener("load", () => {
     console.log(`Tool selected: ${tool}`);
   }
 
-  // Initialize toolbar with callbacks
   initializeToolbar({
     onPenSizeChange,
     onPenColorChange,
@@ -211,11 +178,11 @@ window.addEventListener("load", () => {
     onClearCanvas,
   });
 
-  // -------------------------------
   // Initialize the default selected pen size button
-  // -------------------------------
-  const penSizeButtons = document.querySelectorAll('.pen-size-btn');
-  const defaultPenSizeButton = Array.from(penSizeButtons).find(ps => parseInt(ps.dataset.size, 10) === penSize);
+  const penSizeButtons = document.querySelectorAll(".pen-size-btn");
+  const defaultPenSizeButton = Array.from(penSizeButtons).find(
+    (ps) => parseInt(ps.dataset.size, 10) === penSize
+  );
   if (defaultPenSizeButton) {
     defaultPenSizeButton.classList.add("selected");
     defaultPenSizeButton.style.backgroundColor = penColor;
@@ -227,11 +194,6 @@ window.addEventListener("load", () => {
   // -------------------------------
   // Drawing Functions
   // -------------------------------
-  /**
-   * Gets the mouse or touch position relative to the canvas.
-   * @param {MouseEvent | TouchEvent} e - The event to get the position from.
-   * @returns {{x: number, y: number}} The x and y coordinates on the canvas.
-   */
   function getPointerPosition(e) {
     const rect = canvas.getBoundingClientRect();
     let x, y;
@@ -250,28 +212,17 @@ window.addEventListener("load", () => {
     return { x, y };
   }
 
-  /**
-   * Starts drawing on the canvas.
-   * @param {MouseEvent | TouchEvent} e - The event to start drawing from.
-   */
   function startDrawing(e) {
     drawing = true;
     draw(e);
   }
 
-  /**
-   * Stops drawing on the canvas.
-   */
   function stopDrawing() {
     drawing = false;
     ctx.beginPath();
-    clientGame.sendDrawAction('pen', null, null, penColor, 0);
+    clientGame.sendDrawAction("pen", null, null, penColor, 0);
   }
 
-  /**
-   * Draws on the canvas.
-   * @param {MouseEvent | TouchEvent} e - The event to draw from.
-   */
   function draw(e) {
     if (!drawing) return;
 
@@ -290,24 +241,29 @@ window.addEventListener("load", () => {
 
     const scaledX = (pos.x / canvas.width) * 600;
     const scaledY = (pos.y / canvas.height) * 400;
-    clientGame.sendDrawAction(tool, Math.round(scaledX), Math.round(scaledY), penColor, penSize);
+    clientGame.sendDrawAction(
+      tool,
+      Math.round(scaledX),
+      Math.round(scaledY),
+      penColor,
+      penSize
+    );
   }
 
   // Mouse events
-  canvas.addEventListener('mousedown', startDrawing);
-  canvas.addEventListener('mouseup', stopDrawing);
-  canvas.addEventListener('mousemove', draw);
-  canvas.addEventListener('mouseout', stopDrawing);
+  canvas.addEventListener("mousedown", startDrawing);
+  canvas.addEventListener("mouseup", stopDrawing);
+  canvas.addEventListener("mousemove", draw);
+  canvas.addEventListener("mouseout", stopDrawing);
 
   // Touch events
-  canvas.addEventListener('touchstart', startDrawing);
-  canvas.addEventListener('touchend', stopDrawing);
-  canvas.addEventListener('touchmove', draw);
+  canvas.addEventListener("touchstart", startDrawing);
+  canvas.addEventListener("touchend", stopDrawing);
+  canvas.addEventListener("touchmove", draw);
 
   // -------------------------------
   // User Rendering (Dummy Data)
   // -------------------------------
-  /** @type {User[]} */
   const users = [
     { name: "Player1", points: 0 },
     { name: "Player2", points: 20 },
@@ -320,155 +276,28 @@ window.addEventListener("load", () => {
   // Chat Functionality
   // -------------------------------
   const sendButton = document.getElementById("sendButton");
-  const chatInput = document.getElementById("chatMessage");
+  const chatInputDiv = document.getElementById("chatMessage");
   const chatMessages = document.querySelector(".chat-messages");
 
-  // Initialize chat and capture sendMessage function
-  const sendMessage = initializeChat(clientGame, sendButton, chatInput, chatMessages);
+  // Initialize chat and capture sendMessage function and listener handlers
+  const chat = initializeChat(sendButton, chatInputDiv, chatMessages);
 
-  // -------------------------------
-  // Initialize Virtual Keyboard
-  // -------------------------------
-  const keyboardContainer = document.querySelector(".simple-keyboard");
+  // Handle window resize to toggle editable state and keyboard visibility
+  window.addEventListener(
+    "resize",
+    debounce(() => {
+      const wasMobile =
+        chatInputDiv.getAttribute("contenteditable") === "false";
+      setChatInputEditable();
+      const isNowMobile = isMobile();
 
-  // Hide keyboard initially
-  keyboardContainer.style.display = "none";
-
-  // Initialize simple-keyboard with default and uppercase layouts
-  const keyboard = new Keyboard({
-    onChange: input => onChange(input),
-    onKeyPress: button => onKeyPress(button),
-    theme: "hg-theme-default hg-layout-default",
-    layout: {
-      default: [
-        "q w e r t z u i o p ü +",
-        "a s d f g h j k l ö ä #",
-        "{capslock} y x c v b n m , . -",
-        "{space} {enter}"
-      ],
-      uppercase: [
-        "Q W E R T Z U I O P Ü +",
-        "A S D F G H J K L Ö Ä #",
-        "{capslock} Y X C V B N M , . -",
-        "{space} {enter}"
-      ]
-    },
-    display: {
-      "{enter}": "Enter",
-      "{capslock}": "Caps",
-      "{space}": "Space"
-    }
-  });
-
-  /**
-   * Function to handle changes in the virtual keyboard input
-   * @param {string} input - The current input from the keyboard
-   */
-  function onChange(input) {
-    chatInput.value = input;
-  }
-
-  let capsPressed = false;
-  /**
-   * Function to handle key presses on the virtual keyboard
-   * @param {string} button - The button that was pressed
-  */
-  function onKeyPress(button) {
-    console.log("Button pressed", button);
-
-    if (button === "{enter}") {
-      sendMessage();
-      keyboard.clearInput();
-      return;
-    }
-
-    if (button === "{capslock}") {
-      toggleCapsLock();
-      return;
-    }
-    if (capsPressed) {
-      toggleCapsLock();
-      const capsButton = keyboard.getButtonElement("{capslock}");
-      capsButton.classList.remove("active-capslock");
-      capsPressed = false;
-    }
-  }
-
-  /**
-   * Toggles Caps Lock by switching between 'default' and 'uppercase' layouts
-   */
-  function toggleCapsLock() {
-    const currentLayout = keyboard.options.layoutName;
-    const newLayout = currentLayout === "default" ? "uppercase" : "default";
-    keyboard.setOptions({ layoutName: newLayout });
-
-    // Update the Caps Lock key's appearance
-    const capsButton = keyboard.getButtonElement("{capslock}");
-    if (capsButton) {
-      capsPressed = true;
-      capsButton.classList.toggle("active-capslock");
-    }
-
-  }
-  // -------------------------------
-  // Prevent the native keyboard from showing on mobile
-  // -------------------------------
-
-  /**
-   * Function to detect if the device is mobile based on viewport width
-   * @returns {boolean} - True if mobile, false otherwise
-   */
-  function isMobile() {
-    return window.innerWidth <= 850;
-  }
-
-  // Set the chat input to readonly and inputmode="none" on mobile devices
-  if (isMobile()) {
-    chatInput.setAttribute("readonly", true);
-    chatInput.setAttribute("inputmode", "none");
-  }
-
-  // Event listener for focus on chat input
-  chatInput.addEventListener("focus", (event) => {
-    if (isMobile()) {
-      event.preventDefault(); // Prevents the input from getting focus and showing the mobile keyboard
-      showKeyboard();
-    }
-  });
-
-  // Show the virtual keyboard only on mobile
-  function showKeyboard() {
-    if (isMobile()) { // Mobile check
-      keyboardContainer.style.display = "block";
-      keyboard.setInput(chatInput.value); // Initialize keyboard input with current chat input value
-    }
-  }
-
-  // Hide the keyboard when tapping outside the keyboard or input
-  document.addEventListener("click", (event) => {
-    if (!keyboardContainer.contains(event.target) && event.target !== chatInput) {
-      keyboardContainer.style.display = "none";
-    }
-  });
-
-  // Update readonly and inputmode attributes on window resize
-  window.addEventListener("resize", () => {
-    if (isMobile()) {
-      chatInput.setAttribute("readonly", true);
-      chatInput.setAttribute("inputmode", "none");
-    } else {
-      chatInput.removeAttribute("readonly");
-      chatInput.removeAttribute("inputmode");
-    }
-  });
-
-  // -------------------------------
-  // Handle Virtual Keyboard Input
-  // -------------------------------
-
-  // Update the chat input value whenever the virtual keyboard input changes
-  keyboard.on("change", input => onChange(input));
-
-  // Update the chat input value and handle Caps Lock whenever a key is pressed
-  keyboard.on("keyPress", button => onKeyPress(button));
+      if (wasMobile !== isNowMobile) {
+        if (isNowMobile) {
+          hideKeyboard();
+        } else {
+          hideKeyboard();
+        }
+      }
+    }, 200)
+  );
 });
