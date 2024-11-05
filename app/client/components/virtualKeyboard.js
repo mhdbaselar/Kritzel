@@ -22,7 +22,7 @@
 
 /**
  * Simple Keyboard library for virtual keyboard implementation
- * @type {import("simple-keyboard").default}
+ * @type {Object}
  */
 const Keyboard = require("simple-keyboard").default;
 

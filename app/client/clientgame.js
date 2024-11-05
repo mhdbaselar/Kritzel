@@ -1,340 +1,348 @@
 // clientgame.js
-"use strict"
+"use strict";
 
-const Action = require('./class/drawAction');
-const Message = require('./class/message');
-const ChatAction = require('./class/chatAction');
-const { displayChatMessage, displayChatMessageList } = require('./components/userInterface');
-const DrawAction = require('./class/drawAction');
+const Action = require("./class/DrawAction");
+const Message = require("./class/Message");
+const ChatAction = require("./class/ChatAction");
+const {
+  displayChatMessage,
+  displayChatMessageList,
+} = require("./components/userInterface");
+const DrawAction = require("./class/DrawAction");
 
 module.exports = class ClientGame {
+  constructor() {}
 
-    constructor() { }
+  /**
+   * Opens a WebSocket connection to the server.
+   */
+  openWebSocket() {
+    // Determine WebSocket protocol based on current page protocol
+    const protocol = location.protocol === "https:" ? "wss://" : "ws://";
 
-    /**
-     * Opens a WebSocket connection to the server.
-     */
-    openWebSocket() {
-        // Determine WebSocket protocol based on current page protocol
-        const protocol = location.protocol === 'https:' ? 'wss://' : 'ws://';
+    // Show loadingOverlay
+    const loadingOverlay = document.getElementById("loadingOverlay");
 
-        // Show loadingOverlay
-        const loadingOverlay = document.getElementById("loadingOverlay");
+    const cookie = document.cookie;
 
-        const cookie = document.cookie;
+    // Build WebSocket URL with correct protocol
+    this.socket = new WebSocket(protocol + location.host + location.pathname);
 
-        // Build WebSocket URL with correct protocol
-        this.socket = new WebSocket(protocol + location.host + location.pathname);
+    // Event handler for when the connection is opened
+    this.socket.onopen = (event) => {
+      console.log("Socket opened");
+      this.send(JSON.stringify({ type: "checkCookie", data: cookie }));
+      this.sendGetChatAction();
+      this.sendGetCanvasAction();
+      loadingOverlay.style.display = "none"; // Spinner verstecken
+    };
 
-        // Event handler for when the connection is opened
-        this.socket.onopen = (event) => {
-            console.log("Socket opened");
-            this.send(JSON.stringify({type: 'checkCookie', data: cookie}));
-            this.sendGetChatAction();
-            this.sendGetCanvasAction();
-            loadingOverlay.style.display = "none"; // Spinner verstecken
-        };
+    // Event handler for when the connection is closed
+    this.socket.onclose = (event) => {
+      console.log("Socket closed");
+      loadingOverlay.style.display = "flex"; // Spinner zeigen
+    };
 
-        // Event handler for when the connection is closed
-        this.socket.onclose = (event) => {
-            console.log("Socket closed");
-            loadingOverlay.style.display = "flex"; // Spinner zeigen
-        };
+    // Event handler for any errors with the connection
+    this.socket.onerror = (event) => {
+      console.log("Socket error: " + JSON.stringify(event));
+      loadingOverlay.style.display = "flex"; // Spinner zeigen
+    };
 
-        // Event handler for any errors with the connection
-        this.socket.onerror = (event) => {
-            console.log("Socket error: " + JSON.stringify(event));
-            loadingOverlay.style.display = "flex"; // Spinner zeigen
-        };
+    // Event handler for receiving messages from the server
+    this.socket.onmessage = (event) => {
+      let data = JSON.parse(event.data);
+      if (data.type == "chatMsgList") {
+        // Update the chat display
+        const chatMessages = document.querySelector(".chat-messages");
+        displayChatMessageList(chatMessages, data.data, data.cid);
+      } else if (data.type == "chatMsg") {
+        console.log(`${data.cid}: ${data.data}`); // Chat output console.log
 
-        // Event handler for receiving messages from the server
-        this.socket.onmessage = (event) => {
-            let data = JSON.parse(event.data);
-            if (data.type == 'chatMsgList'){
-                // Update the chat display
-                const chatMessages = document.querySelector(".chat-messages");
-                displayChatMessageList(chatMessages, data.data, data.cid);
-                
-            } else if (data.type == 'chatMsg'){
-                console.log(`${data.cid}: ${data.data}`);   // Chat output console.log
+        // Update the chat display
+        const chatMessages = document.querySelector(".chat-messages");
+        displayChatMessage(chatMessages, data.data, data.cid);
+      } else if (data.type === "pl") {
+        // 'pl' = PointList
+        this.updateWithPoints(data.data);
+      } else if (data.type === "2d") {
+        // '2d' = Canvas data
+        this.update(data.data);
+      } else if (data.type === "init") {
+        this.setSessionCookie(data.data);
+      }
+    };
+  }
 
-                // Update the chat display
-                const chatMessages = document.querySelector(".chat-messages");
-                displayChatMessage(chatMessages, data.data, data.cid);
+  setSessionCookie(cid) {
+    var expires = "";
+    var date = new Date();
+    date.setTime(date.getTime() + 2 * 24 * 60 * 60 * 1000);
+    expires = "; expires=" + date.toUTCString();
+    document.cookie = "cid=" + (cid || "") + expires + "; path=/";
+  }
 
-            } else if (data.type === 'pl') { // 'pl' = PointList
-                this.updateWithPoints(data.data);
+  /**
+   * Updates the canvas with a list of drawn points received from the server.
+   * @param {Array<{x: number, y: number, color: string, thickness: number}>} data
+   */
+  updateWithPoints(data) {
+    let canvasData = data;
+    // Example: Point List
+    //  [{x: 0, y: 0, color: '#FFFFFF'},
+    //  {x: 1, y: 1, color: '#FFFFFF'}]
 
-            } else if (data.type === '2d') { // '2d' = Canvas data
-                this.update(data.data);
-
-            } else if (data.type === 'init'){
-                this.setSessionCookie(data.data);
-            }
-        };
+    // Access the canvas element
+    let canvas = document.getElementById("drawingCanvas");
+    if (!canvas) {
+      console.error("Canvas not found");
+      return;
     }
+    let ctx = canvas.getContext("2d");
 
-    setSessionCookie(cid){
-        var expires = "";
-        var date = new Date();
-        date.setTime(date.getTime() + (2*24*60*60*1000));
-        expires = "; expires=" + date.toUTCString();
-        document.cookie = "cid=" + (cid || "")  + expires + "; path=/";
-    }
+    // Calculate scaling factors based on current canvas size
+    let scaleX = canvas.width / 600;
+    let scaleY = canvas.height / 400;
 
-    /**
-     * Updates the canvas with a list of drawn points received from the server.
-     * @param {Array<{x: number, y: number, color: string, thickness: number}>} data
-     */
-    updateWithPoints(data) {
-        let canvasData = data;
-        // Example: Point List
-        //  [{x: 0, y: 0, color: '#FFFFFF'},
-        //  {x: 1, y: 1, color: '#FFFFFF'}]
+    // Enable image smoothing for better quality
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
 
-        // Access the canvas element
-        let canvas = document.getElementById('drawingCanvas');
-        if (!canvas) {
-            console.error('Canvas not found');
-            return;
-        }
-        let ctx = canvas.getContext('2d');
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
 
-        // Calculate scaling factors based on current canvas size
-        let scaleX = canvas.width / 600;
-        let scaleY = canvas.height / 400;
+    // Iterate through each point and draw it
+    for (let i = 0; i < canvasData.length; i++) {
+      let point = canvasData[i];
+      let hexColor = point.color;
 
-        // Enable image smoothing for better quality
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
+      // Convert hex color to RGB string
+      let rgb = hexToRgb(hexColor);
+      if (!rgb) {
+        // If invalid color, default to white
+        rgb = { r: 255, g: 255, b: 255 };
+      }
+      let rgbString = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
 
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
+      // Set the fill style to the RGB string
+      ctx.fillStyle = rgbString;
 
-        // Iterate through each point and draw it
-        for (let i = 0; i < canvasData.length; i++) {
-            let point = canvasData[i];
-            let hexColor = point.color;
+      // Scale the x and y coordinates
+      let scaledX = point.x * scaleX;
+      let scaledY = point.y * scaleY;
 
-            // Convert hex color to RGB string
-            let rgb = hexToRgb(hexColor);
-            if (!rgb) {
-                // If invalid color, default to white
-                rgb = { r: 255, g: 255, b: 255 };
-            }
-            let rgbString = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
-
-            // Set the fill style to the RGB string
-            ctx.fillStyle = rgbString;
-
-            // Scale the x and y coordinates
-            let scaledX = point.x * scaleX;
-            let scaledY = point.y * scaleY;
-
-            // Draw a small rectangle (1x1 pixel) at the scaled position
-            ctx.fillRect(scaledX, scaledY, 1, 1);
-        }
-
-        /**
-         * Converts a hex color code to an RGB object.
-         * @param {string} hex - The hex color code.
-         * @returns {{r: number, g: number, b: number}} The RGB representation.
-         */
-        function hexToRgb(hex) {
-            // Remove '#' if present
-            hex = hex.replace(/^#/, '');
-
-            if (hex.length === 3) {
-                // Expand shorthand form (#03F => #0033FF)
-                hex = hex.split('').map(c => c + c).join('');
-            }
-
-            if (hex.length !== 6) {
-                return null;
-            }
-
-            let num = parseInt(hex, 16);
-            let r = (num >> 16) & 255;
-            let g = (num >> 8) & 255;
-            let b = num & 255;
-
-            return { r: r, g: g, b: b };
-        }
+      // Draw a small rectangle (1x1 pixel) at the scaled position
+      ctx.fillRect(scaledX, scaledY, 1, 1);
     }
 
     /**
-     * Updates the entire canvas based on the full Canvas data received from the server.
-     * @param {Array<Array<string>>} data
+     * Converts a hex color code to an RGB object.
+     * @param {string} hex - The hex color code.
+     * @returns {{r: number, g: number, b: number}} The RGB representation.
      */
-    update(data) {
-        let canvasData = data;
+    function hexToRgb(hex) {
+      // Remove '#' if present
+      hex = hex.replace(/^#/, "");
 
-        // Access the canvas element
-        let canvas = document.getElementById('drawingCanvas');
-        if (!canvas) {
-            console.error('Canvas not found');
-            return;
-        }
-        let ctx = canvas.getContext('2d');
+      if (hex.length === 3) {
+        // Expand shorthand form (#03F => #0033FF)
+        hex = hex
+          .split("")
+          .map((c) => c + c)
+          .join("");
+      }
 
-        // Create an ImageData object with dimensions 600x400
-        let imageData = ctx.createImageData(600, 400); // Width 600, Height 400
+      if (hex.length !== 6) {
+        return null;
+      }
 
-        // Loop through canvasData and set the pixel data
-        for (let y = 0; y < 400; y++) {
-            for (let x = 0; x < 600; x++) {
-                let hexColor = canvasData[y][x]; // Should be '#RRGGBB'
+      let num = parseInt(hex, 16);
+      let r = (num >> 16) & 255;
+      let g = (num >> 8) & 255;
+      let b = num & 255;
 
-                let index = (y * 600 + x) * 4;
+      return { r: r, g: g, b: b };
+    }
+  }
 
-                let rgb = hexToRgb(hexColor);
+  /**
+   * Updates the entire canvas based on the full Canvas data received from the server.
+   * @param {Array<Array<string>>} data
+   */
+  update(data) {
+    let canvasData = data;
 
-                if (!rgb) {
-                    // If invalid color, default to white
-                    rgb = { r: 255, g: 255, b: 255 };
-                }
+    // Access the canvas element
+    let canvas = document.getElementById("drawingCanvas");
+    if (!canvas) {
+      console.error("Canvas not found");
+      return;
+    }
+    let ctx = canvas.getContext("2d");
 
-                imageData.data[index] = rgb.r;
-                imageData.data[index + 1] = rgb.g;
-                imageData.data[index + 2] = rgb.b;
-                imageData.data[index + 3] = 255; // Alpha channel
-            }
+    // Create an ImageData object with dimensions 600x400
+    let imageData = ctx.createImageData(600, 400); // Width 600, Height 400
+
+    // Loop through canvasData and set the pixel data
+    for (let y = 0; y < 400; y++) {
+      for (let x = 0; x < 600; x++) {
+        let hexColor = canvasData[y][x]; // Should be '#RRGGBB'
+
+        let index = (y * 600 + x) * 4;
+
+        let rgb = hexToRgb(hexColor);
+
+        if (!rgb) {
+          // If invalid color, default to white
+          rgb = { r: 255, g: 255, b: 255 };
         }
 
-        // Create a temporary canvas to scale the imageData
-        let tempCanvas = document.createElement('canvas');
-        tempCanvas.width = 600;
-        tempCanvas.height = 400;
-        let tempCtx = tempCanvas.getContext('2d');
-
-        // Put the imageData onto the temporary canvas
-        tempCtx.putImageData(imageData, 0, 0);
-
-        // Clear the main canvas
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // Draw the temp canvas onto the main canvas, scaling it to fit
-        ctx.drawImage(tempCanvas, 0, 0, canvas.width, canvas.height);
-
-        /**
-         * Converts a hex color code to an RGB object.
-         * @param {string} hex - The hex color code.
-         * @returns {{r: number, g: number, b: number}} The RGB representation.
-         */
-        function hexToRgb(hex) {
-            // Remove '#' if present
-            hex = hex.replace(/^#/, '');
-
-            if (hex.length === 3) {
-                // Expand shorthand form (#03F => #0033FF)
-                hex = hex.split('').map(c => c + c).join('');
-            }
-
-            if (hex.length !== 6) {
-                return null;
-            }
-
-            let num = parseInt(hex, 16);
-            let r = (num >> 16) & 255;
-            let g = (num >> 8) & 255;
-            let b = num & 255;
-
-            return { r: r, g: g, b: b };
-        }
+        imageData.data[index] = rgb.r;
+        imageData.data[index + 1] = rgb.g;
+        imageData.data[index + 2] = rgb.b;
+        imageData.data[index + 3] = 255; // Alpha channel
+      }
     }
 
-    //-------------------------------------
-    //----------SENDING FUNCTIONS----------
-    //-------------------------------------
+    // Create a temporary canvas to scale the imageData
+    let tempCanvas = document.createElement("canvas");
+    tempCanvas.width = 600;
+    tempCanvas.height = 400;
+    let tempCtx = tempCanvas.getContext("2d");
+
+    // Put the imageData onto the temporary canvas
+    tempCtx.putImageData(imageData, 0, 0);
+
+    // Clear the main canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw the temp canvas onto the main canvas, scaling it to fit
+    ctx.drawImage(tempCanvas, 0, 0, canvas.width, canvas.height);
 
     /**
-     * Sends a draw action directly to the server.
-     * @param {string} tool - 'pen' | 'eraser' | 'fill': Tool used for the draw action.
-     * @param {number} x - x-coordinate of the pixel to draw on.
-     * @param {number} y - y-coordinate of the pixel to draw on.
-     * @param {string} color - Color code in hexadecimal notation.
-     * @param {number} thickness - Thickness of the draw action.
+     * Converts a hex color code to an RGB object.
+     * @param {string} hex - The hex color code.
+     * @returns {{r: number, g: number, b: number}} The RGB representation.
      */
-    sendDrawAction(tool = 'pen', x = 0, y = 0, color = '#000000', thickness = 3) {
-        let _tool = 'pen';
+    function hexToRgb(hex) {
+      // Remove '#' if present
+      hex = hex.replace(/^#/, "");
 
-        if (tool === 'pen') _tool = 'pen';
-        if (tool === 'eraser') _tool = 'eraser';
-        if (tool === 'fill') _tool = 'fill';
-        if (tool === 'fill') _tool = 'fill';
+      if (hex.length === 3) {
+        // Expand shorthand form (#03F => #0033FF)
+        hex = hex
+          .split("")
+          .map((c) => c + c)
+          .join("");
+      }
 
-        let action = new DrawAction(_tool, x, y, color, thickness);
-        let message = new Message('drawAction', action);
+      if (hex.length !== 6) {
+        return null;
+      }
 
-        let _message = JSON.stringify(message);
+      let num = parseInt(hex, 16);
+      let r = (num >> 16) & 255;
+      let g = (num >> 8) & 255;
+      let b = num & 255;
 
-        this.send(_message);
-        if (tool === 'fill') {
-            setTimeout(this.sendGetCanvasAction(), 500); // Get new canvas on fill, to fix Moiré patterns
-        }
+      return { r: r, g: g, b: b };
     }
+  }
 
-    /**
-     * Asks the server to clear the whole board.
-     */
-    sendClearAction() {
-        let action = new DrawAction('clear', 0, 0, '', 0);
-        let message = new Message('drawAction', action);
+  //-------------------------------------
+  //----------SENDING FUNCTIONS----------
+  //-------------------------------------
 
-        this.send(JSON.stringify(message));
+  /**
+   * Sends a draw action directly to the server.
+   * @param {string} tool - 'pen' | 'eraser' | 'fill': Tool used for the draw action.
+   * @param {number} x - x-coordinate of the pixel to draw on.
+   * @param {number} y - y-coordinate of the pixel to draw on.
+   * @param {string} color - Color code in hexadecimal notation.
+   * @param {number} thickness - Thickness of the draw action.
+   */
+  sendDrawAction(tool = "pen", x = 0, y = 0, color = "#000000", thickness = 3) {
+    let _tool = "pen";
+
+    if (tool === "pen") _tool = "pen";
+    if (tool === "eraser") _tool = "eraser";
+    if (tool === "fill") _tool = "fill";
+    if (tool === "fill") _tool = "fill";
+
+    let action = new DrawAction(_tool, x, y, color, thickness);
+    let message = new Message("drawAction", action);
+
+    let _message = JSON.stringify(message);
+
+    this.send(_message);
+    if (tool === "fill") {
+      setTimeout(this.sendGetCanvasAction(), 500); // Get new canvas on fill, to fix Moiré patterns
     }
+  }
 
-    /**
-     * Asks the server to fill the whole board into one color.
-     * @param {string} color  color code in hexadecimal notation.
-     */
-    sendFillAction(x = 0, y = 0, color = '#000000') {
-        let action = new DrawAction('fill', x, y, color, 0);
-        let message = new Message('drawAction', action);
+  /**
+   * Asks the server to clear the whole board.
+   */
+  sendClearAction() {
+    let action = new DrawAction("clear", 0, 0, "", 0);
+    let message = new Message("drawAction", action);
 
-        this.send(JSON.stringify(message));
+    this.send(JSON.stringify(message));
+  }
+
+  /**
+   * Asks the server to fill the whole board into one color.
+   * @param {string} color  color code in hexadecimal notation.
+   */
+  sendFillAction(x = 0, y = 0, color = "#000000") {
+    let action = new DrawAction("fill", x, y, color, 0);
+    let message = new Message("drawAction", action);
+
+    this.send(JSON.stringify(message));
+  }
+
+  /**
+   * Requests the server to send the current Canvas data
+   */
+  sendGetCanvasAction() {
+    let message = new Message("getCanvasAction", null);
+    this.send(JSON.stringify(message));
+  }
+
+  /**
+   * Sends the client chat message to the other clients
+   * @param {*} chatMessage client chat message
+   */
+  sendChatAction(chatMessage) {
+    let action = new ChatAction(chatMessage);
+    let message = new Message("chatAction", action);
+    this.send(JSON.stringify(message));
+  }
+
+  /**
+   * Requests the server to send the all chat messages
+   */
+  sendGetChatAction() {
+    let message = new Message("getChatAction", null);
+    this.send(JSON.stringify(message));
+  }
+
+  //-------------------------------------
+  //-----------HELP FUNCTIONS------------
+  //-------------------------------------
+
+  /**
+   * Sends a message over the WebSocket.
+   * @param {string} message
+   */
+  send(message) {
+    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+      this.socket.send(message);
+    } else {
+      console.error(
+        "WebSocket is not open. Ready state:",
+        this.socket.readyState
+      );
     }
-
-    /**
-     * Requests the server to send the current Canvas data
-     */
-    sendGetCanvasAction() {
-        let message = new Message('getCanvasAction', null);
-        this.send(JSON.stringify(message));
-    }
-
-    /**
-     * Sends the client chat message to the other clients
-     * @param {*} chatMessage client chat message
-     */
-    sendChatAction(chatMessage){
-        let action = new ChatAction(chatMessage);
-        let message = new Message('chatAction', action);
-        this.send(JSON.stringify(message));
-    }
-
-    /**
-     * Requests the server to send the all chat messages
-     */
-    sendGetChatAction(){
-        let message = new Message('getChatAction', null);
-        this.send(JSON.stringify(message));
-    }
-
-    //-------------------------------------
-    //-----------HELP FUNCTIONS------------
-    //-------------------------------------
-
-    /**
-     * Sends a message over the WebSocket.
-     * @param {string} message
-     */
-    send(message) {
-        if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-            this.socket.send(message);
-        } else {
-            console.error("WebSocket is not open. Ready state:", this.socket.readyState);
-        }
-    }
-
-}
+  }
+};

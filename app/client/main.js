@@ -123,9 +123,9 @@ window.addEventListener("load", () => {
 
   /**
    * Debounces a function to limit the rate at which it can be called.
-   * @param {*} func
-   * @param {*} wait
-   * @returns
+   * @param {function} func - The function to debounce.
+   * @param {number} wait - The number of milliseconds to wait before calling the function.
+   * @returns {function} A debounced version of the input function.
    */
   function debounce(func, wait) {
     let timeout;
