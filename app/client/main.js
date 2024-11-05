@@ -3,13 +3,16 @@
 
 // Import necessary modules
 const ClientGame = require("./clientgame");
-const { renderUsers, initializeChat } = require("./components/userInterface");
+const { renderUsers } = require("./components/userInterface");
 const { initializeToolbar } = require("./components/toolbar");
+const { initializeChat } = require("./components/chat"); // Updated import
 const {
+  initializeVirtualKeyboard, // Updated to include initializeVirtualKeyboard
   keyboard,
   showKeyboard,
   hideKeyboard,
   setChatInputEditable,
+  isMobile,
 } = require("./components/virtualKeyboard");
 
 // Initialize simple-keyboard's CSS (if using a bundler that supports CSS imports)
@@ -279,8 +282,16 @@ window.addEventListener("load", () => {
   const chatInputDiv = document.getElementById("chatMessage");
   const chatMessages = document.querySelector(".chat-messages");
 
-  // Initialize chat and capture sendMessage function and listener handlers
-  const chat = initializeChat(clientGame, sendButton, chatInputDiv, chatMessages);
+  // Initialize chat
+  const chat = initializeChat(
+    clientGame,
+    sendButton,
+    chatInputDiv,
+    chatMessages
+  );
+
+  // Initialize virtual keyboard with chat
+  initializeVirtualKeyboard(chat);
 
   // Handle window resize to toggle editable state and keyboard visibility
   window.addEventListener(
@@ -289,18 +300,11 @@ window.addEventListener("load", () => {
       const wasMobile =
         chatInputDiv.getAttribute("contenteditable") === "false";
       setChatInputEditable();
-      
-      //ACHTUNG, DAS SCHMEIßT HIER NOCH EINEN CLIENTFEHLER!!!
-      // --> isMobile() is not defined
-      //FEHLER WAR AUCH SCHON VOR DEM MERGEN IN MAIN, BITTE BEHEBEN
+
       const isNowMobile = isMobile();
 
       if (wasMobile !== isNowMobile) {
-        if (isNowMobile) {
-          hideKeyboard();
-        } else {
-          hideKeyboard();
-        }
+        hideKeyboard();
       }
     }, 200)
   );

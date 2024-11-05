@@ -1,18 +1,16 @@
+// components/virtualKeyboard.js
+"use strict";
+
 const Keyboard = require("simple-keyboard").default;
 
-const { initializeChat } = require("./userInterface");
+/**
+ * @typedef {Object} Chat
+ * @property {Function} sendMessage - Function to send chat messages.
+ * @property {Function} addKeydownListener - Function to add keydown listener.
+ * @property {Function} removeKeydownListener - Function to remove keydown listener.
+ */
 
-const sendButton = document.getElementById("sendButton");
-const chatInputDiv = document.getElementById("chatMessage");
-const chatMessages = document.querySelector(".chat-messages");
-
-// Initialize chat and capture sendMessage function and listener handlers
-const chat = initializeChat(sendButton, chatInputDiv, chatMessages);
-
-const keyboardContainer = document.querySelector(".simple-keyboard");
-
-// Hide keyboard initially
-keyboardContainer.style.display = "none";
+let chat = null;
 
 let capsPressed = false;
 
@@ -50,7 +48,9 @@ const keyboard = new Keyboard({
  */
 function onChange(input) {
   console.log("Input changed:", input);
-  chatInputDiv.textContent = input;
+  if (chat) {
+    chat.chatInputDiv.textContent = input;
+  }
 }
 
 /**
@@ -62,16 +62,18 @@ function onKeyPress(button) {
 
   if (button === "{enter}") {
     console.log("Enter key pressed");
-    const message = chatInputDiv.textContent.trim();
-    if (message === "") {
-      console.log("Cannot send empty message");
-      return;
+    if (chat) {
+      const message = chat.chatInputDiv.textContent.trim();
+      if (message === "") {
+        console.log("Cannot send empty message");
+        return;
+      }
+      chat.sendMessage();
+      keyboard.clearInput();
+      chat.chatInputDiv.textContent = ""; // Clear the chat input
+      hideKeyboard(); // Hide keyboard after sending
+      chat.chatInputDiv.blur(); // Remove focus from input
     }
-    chat.sendMessage();
-    keyboard.clearInput();
-    chatInputDiv.textContent = ""; // Clear the chat input
-    hideKeyboard(); // Hide keyboard after sending
-    chatInputDiv.blur(); // Remove focus from input
     return;
   }
 
@@ -128,7 +130,9 @@ function showKeyboard() {
   if (isMobile()) {
     // Mobile check
     keyboardContainer.style.display = "block";
-    keyboard.setInput(chatInputDiv.textContent); // Initialize keyboard input with current chat input value
+    if (chat) {
+      keyboard.setInput(chat.chatInputDiv.textContent); // Initialize keyboard input with current chat input value
+    }
   }
 }
 
@@ -138,6 +142,11 @@ function showKeyboard() {
 function hideKeyboard() {
   keyboardContainer.style.display = "none";
 }
+
+const keyboardContainer = document.querySelector(".simple-keyboard");
+
+// Hide keyboard initially
+keyboardContainer.style.display = "none";
 
 // -------------------------------
 // Device Detection and Chat Input Handling
@@ -156,15 +165,19 @@ function isMobile() {
  */
 function setChatInputEditable() {
   if (isMobile()) {
-    chatInputDiv.setAttribute("contenteditable", "false");
-    chatInputDiv.classList.remove("editable");
-    // Optionally, clear any physical input
-    chatInputDiv.textContent = "";
-    chat.removeKeydownListener();
+    if (chat) {
+      chat.chatInputDiv.setAttribute("contenteditable", "false");
+      chat.chatInputDiv.classList.remove("editable");
+      // Optionally, clear any physical input
+      chat.chatInputDiv.textContent = "";
+      chat.removeKeydownListener();
+    }
   } else {
-    chatInputDiv.setAttribute("contenteditable", "true");
-    chatInputDiv.classList.add("editable");
-    chat.addKeydownListener();
+    if (chat) {
+      chat.chatInputDiv.setAttribute("contenteditable", "true");
+      chat.chatInputDiv.classList.add("editable");
+      chat.addKeydownListener();
+    }
   }
 }
 
@@ -177,28 +190,43 @@ function handleChatInputClick(event) {
     showKeyboard();
   } else {
     // For desktop, focus the chat input div to allow typing
-    chatInputDiv.focus();
+    chat.chatInputDiv.focus();
   }
 }
 
-// Initial setup
-setChatInputEditable();
-if (isMobile()) {
-  hideKeyboard(); // Ensure it's hidden initially on mobile
+/**
+ * Initializes the virtual keyboard with the provided chat instance
+ * @param {Chat} chatInstance - The chat instance
+ */
+function initializeVirtualKeyboard(chatInstance) {
+  chat = chatInstance;
+
+  // Initial setup
+  setChatInputEditable();
+  if (isMobile()) {
+    hideKeyboard(); // Ensure it's hidden initially on mobile
+  }
+
+  // Event listener for chat input click/focus
+  chat.chatInputDiv.addEventListener("click", handleChatInputClick);
+  chat.chatInputDiv.addEventListener("focus", handleChatInputClick);
+
+  // Hide the keyboard when tapping outside the keyboard or input
+  document.addEventListener("click", (event) => {
+    if (
+      !keyboardContainer.contains(event.target) &&
+      event.target !== chat.chatInputDiv
+    ) {
+      hideKeyboard();
+    }
+  });
 }
 
-// Event listener for chat input click/focus
-chatInputDiv.addEventListener("click", handleChatInputClick);
-chatInputDiv.addEventListener("focus", handleChatInputClick);
-
-// Hide the keyboard when tapping outside the keyboard or input
-document.addEventListener("click", (event) => {
-  if (
-    !keyboardContainer.contains(event.target) &&
-    event.target !== chatInputDiv
-  ) {
-    hideKeyboard();
-  }
-});
-
-module.exports = { keyboard, showKeyboard, hideKeyboard, setChatInputEditable };
+module.exports = {
+  initializeVirtualKeyboard,
+  keyboard,
+  showKeyboard,
+  hideKeyboard,
+  setChatInputEditable,
+  isMobile,
+};
