@@ -64,19 +64,17 @@ module.exports = class TinyServer {
      * @param {string} data client request
      */
     processWsRequest(websocket, data) {
-        try{
-            let cookie = JSON.parse(data);
-            if (cookie.type = 'checkCookie'){
+        
+        let cookie = JSON.parse(data);
+        if (cookie.type == 'checkCookie'){
                 let cid = cookie.data.split('=')[1];
                 if(cid != null){
                     this.#clients.replaceCid(websocket.cid, cid);
                     websocket.cid = cid;
                     websocket.send(JSON.stringify({type: 'init', data: websocket.cid}));
                 }
-            }
         }
-        catch(error) {}
-
+        
         if (this.wsCallback) this.wsCallback(websocket.cid, data);
     }
 
