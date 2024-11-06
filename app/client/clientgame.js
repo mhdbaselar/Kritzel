@@ -8,7 +8,6 @@ const {
   displayChatMessage,
   displayChatMessageList,
 } = require("./components/userInterface");
-const DrawAction = require("./class/DrawAction");
 
 module.exports = class ClientGame {
   constructor() {}
