@@ -1,7 +1,7 @@
 // clientgame.js
 "use strict";
 
-const Action = require("./class/DrawAction");
+const DrawAction = require("./class/DrawAction");
 const Message = require("./class/Message");
 const ChatAction = require("./class/ChatAction");
 const {
