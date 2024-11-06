@@ -1,0 +1,93 @@
+@startuml CDBackend
+class Kritzel {
+    - server: TinyServer
+    - game: ServerGame
+    + receive(uid: string, message: Message)
+
+}
+class TinyServer {
+    - clients: ClientList
+    - wsCallback: function
+    - server: http.Server
+    - websocketServer: ws.WebSocketServer
+    + constructor(port: int, wsCallback: function)
+    + connectWs(websocket: WebSocket)
+    + getUniqueID(): string
+    + processWsRequest(websocket: WebSocket, data: string)
+    + broadcastWsMessage(cid: string, data: string, isBinary: boolean, broadcastType: string)
+    + processHttpRequest(req: http.IncomingMessage, res: http.ServerResponse)
+}
+
+class ServerGame {
+    - board: Board
+    - isSendPointList: boolean
+    - chat: Chat
+    - server: TinyServer
+    - intervalReference: NodeJS.Timeout
+    - tickCallback: function
+    + constructor(server: TinyServer, tickCallback: function)
+    + start()
+    + stop()
+    + tick()
+    + getBoard(): Board
+    + getIsSendPointList(): boolean
+    + setIsSendPointList(bool: boolean)
+    + processInput(cid: string, request: Message)
+}
+
+class ClientList {
+    - clientList: Client[]
+    + constructor()
+    + addClient(cid: string, name: string)
+    + replaceCid(oldCid: string, newCid: string)
+    + getClientList(): Client[]
+}
+
+class Client {
+    - cid: string
+    - name: string
+    + constructor(cid: string, name: string)
+    + getCid(): string
+    + setCid(cid: string)
+}
+
+class Board {
+    - canvas: string[][]
+    - rows: int
+    - columns: int
+    - initialColor: string
+    - backgroundColor: string
+    - previousPoint: {x0: int, y0: int}
+    - points: {x: int, y: int, color: string}[]
+    + constructor(columns: int, rows: int, initialColor: string)
+    + draw(x: int, y: int, color: string, thickness: int)
+    + erase(x: int, y: int, thickness: int)
+    + clear()
+    + fillBackground(color: string)
+    + fill(x: int, y: int, color: string)
+    + iterativefill(x: int, y: int, color: string, previousColor: string)
+    + getBoard(): string[][]
+    + getPoints(): {x: int, y: int, color: string}[]
+    + setPointsEmpty()
+    - drawLine(x0: int, y0: int, x1: int, y1: int, color: string, thickness: int): {x: int, y: int, color: string}[]
+    - drawPoint(x: int, y: int, color: string, thickness: int): {x: int, y: int, color: string}[]
+    - setWholeBoard(color: string)
+}
+
+class Chat {
+    - messages: {cid: string, msg: string}[]
+    + constructor()
+    + addMessage(cid: string, message: string)
+    + getMessages(): {cid: string, msg: string}[]
+}
+
+Kritzel --> TinyServer
+Kritzel --> ServerGame
+TinyServer --> ClientList
+TinyServer --> ServerGame
+ServerGame --> Board
+ServerGame --> Chat
+ServerGame --> TinyServer
+ClientList --> Client
+
+@enduml

@@ -1,0 +1,28 @@
+@startuml SDChat
+actor Nutzer
+participant "ChatInputDiv\n(app/public/index.html)" as ChatInputDiv
+participant "SendButton\n(app/public/index.html)" as SendButton
+participant "Chat Container\n(app/public/index.html)" as ChatContainer
+participant "Chat Module\n(app/client/components/chat.js)" as ChatModule
+participant "ClientGame\n(app/client/clientgame.js)" as ClientGame
+participant "WebSocket" as WebSocket
+participant "ServerGame\n(app/server/servergame.js)" as ServerGame
+participant "ServerChat\n(app/server/users/serverchat.js)" as ServerChat
+
+Nutzer -> ChatInputDiv: Nachricht eingeben
+Nutzer -> SendButton: Sendeknopf klicken
+SendButton -> ChatModule: sendButton Klick-Event
+ChatModule -> ChatModule: sendMessage()
+ChatModule -> ChatContainer: displayChatMessage(chatMessages, "You", message)
+ChatModule -> ClientGame: sendChatAction(message)
+ClientGame -> WebSocket: send(message)
+WebSocket -> ServerGame: receive(message)
+ServerGame -> ServerChat: addMessage(cid, message)
+ServerGame -> WebSocket: broadcast(message)
+WebSocket -> ClientGame: receive(message)
+ClientGame -> ChatModule: displayChatMessage(chatMessages, sender, message)
+ChatModule -> ChatContainer: displayChatMessage(chatMessages, sender, message)
+ChatContainer -> Nutzer: Neue Nachricht anzeigen
+
+note right of Nutzer: Nutzer sieht die neue Nachricht im Chat
+@enduml

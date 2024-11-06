@@ -1,0 +1,73 @@
+@startuml CDFrontend
+
+class ClientGame {
+  +openWebSocket(): void
+  +sendDrawAction(tool: string, x: number, y: number, color: string, thickness: number): void
+  +sendClearAction(): void
+  +sendChatAction(chatMessage: string): void
+}
+
+class UserInterface {
+  +renderUsers(users: User[]): void
+  +displayChatMessages(messages: ChatMessage[], clientId: string): void
+}
+
+class Chat {
+  +sendMessage(): void
+  +displayChatMessage(message: string, sender: string): void
+  +displayChatMessageList(messageList: ChatMessage[], clientId: string): void
+}
+
+class Toolbar {
+  +initializeToolbar(options: object): void
+  +onPenSizeChange(newSize: number, button: HTMLButtonElement): void
+  +onPenColorChange(newColor: string, button: HTMLButtonElement): void
+  +onToolChange(selectedTool: string, button: HTMLButtonElement): void
+  +onClearCanvas(): void
+}
+
+class VirtualKeyboard {
+  +initializeVirtualKeyboard(chatInstance: Chat): void
+  +showKeyboard(): void
+  +hideKeyboard(): void
+  +setChatInputEditable(): void
+  +isMobile(): boolean
+}
+
+class User {
+  -name: string
+  -points: number
+}
+
+class ChatMessage {
+  -cid: string
+  -msg: string
+}
+
+class Main {
+  +initializeCanvasContext(): void
+  +resizeCanvas(): void
+  +debounce(func: function, wait: number): function
+  +startDrawing(event: Event): void
+  +stopDrawing(): void
+  +draw(event: Event): void
+  +getPointerPosition(event: Event): {x: number, y: number}
+}
+
+ClientGame --> UserInterface
+ClientGame --> Chat
+ClientGame --> Toolbar
+ClientGame --> VirtualKeyboard
+UserInterface --> Chat
+Chat --> VirtualKeyboard
+Main --> ClientGame
+Main --> UserInterface
+Main --> Chat
+Main --> Toolbar
+Main --> VirtualKeyboard
+
+UserInterface --> User
+UserInterface --> ChatMessage
+Chat --> ChatMessage
+
+@enduml
