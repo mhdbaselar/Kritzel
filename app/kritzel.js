@@ -32,6 +32,9 @@ let game = new ServerGame(server, () => {
   let json = JSON.stringify({ type: type, data: data });
   game.getBoard().setPointsEmpty();
   game.setIsSendPointList(true);
+
+  // Only send if there is data
+  if (data.length === 0) return;
   server.broadcastWsMessage(null, json, false, "all");
 });
 
