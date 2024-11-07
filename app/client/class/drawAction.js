@@ -18,7 +18,7 @@ module.exports = class DrawAction {
    * @param {string} tool draw tool
    * @param {int} x coordinate
    * @param {int} y coordinate
-   * @param {string} color hexadecimal color code
+   * @param {number} color int color code
    * @param {*} thickness thicknes
    * @class DrawAction
    */

@@ -8,6 +8,13 @@ const {
   displayChatMessage,
   displayChatMessageList,
 } = require("./components/userInterface");
+const HexColorConverter = require("./class/hexColorConverter");
+
+/**
+ * Instance of the HexColorConverter class.
+ * @type {HexColorConverter}
+ */
+const converter = new HexColorConverter();
 
 module.exports = class ClientGame {
   constructor() {}
@@ -88,8 +95,8 @@ module.exports = class ClientGame {
   updateWithPoints(data) {
     let canvasData = data;
     // Example: Point List
-    //  [{x: 0, y: 0, color: '#FFFFFF'},
-    //  {x: 1, y: 1, color: '#FFFFFF'}]
+    //  [{x: 0, y: 0, color: 0},
+    //  {x: 1, y: 1, color: 0}]
 
     // Access the canvas element
     let canvas = document.getElementById("drawingCanvas");
@@ -113,7 +120,7 @@ module.exports = class ClientGame {
     // Iterate through each point and draw it
     for (let i = 0; i < canvasData.length; i++) {
       let point = canvasData[i];
-      let hexColor = point.color;
+      let hexColor = converter.intToHex(point.color);
 
       // Convert hex color to RGB string
       let rgb = hexToRgb(hexColor);
@@ -189,7 +196,7 @@ module.exports = class ClientGame {
 
         let index = (y * 600 + x) * 4;
 
-        let rgb = hexToRgb(hexColor);
+        let rgb = hexToRgb(converter.intToHex(hexColor));
 
         if (!rgb) {
           // If invalid color, default to white
@@ -268,7 +275,13 @@ module.exports = class ClientGame {
     if (tool === "fill") _tool = "fill";
     if (tool === "fill") _tool = "fill";
 
-    let action = new DrawAction(_tool, x, y, color, thickness);
+    let action = new DrawAction(
+      _tool,
+      x,
+      y,
+      converter.hexToInt(color),
+      thickness
+    );
     let message = new Message("drawAction", action);
 
     let _message = JSON.stringify(message);
@@ -294,7 +307,7 @@ module.exports = class ClientGame {
    * @param {string} color  color code in hexadecimal notation.
    */
   sendFillAction(x = 0, y = 0, color = "#000000") {
-    let action = new DrawAction("fill", x, y, color, 0);
+    let action = new DrawAction("fill", x, y, converter.hexToInt(color), 0);
     let message = new Message("drawAction", action);
 
     this.send(JSON.stringify(message));

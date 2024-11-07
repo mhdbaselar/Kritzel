@@ -27,6 +27,7 @@ const {
   setChatInputEditable,
   isMobile,
 } = require("./components/virtualKeyboard");
+const HexColorConverter = require("./class/hexColorConverter");
 
 /**
  * Instance of the ClientGame class.
@@ -34,10 +35,19 @@ const {
  */
 const clientGame = new ClientGame();
 
+/**
+ * Instance of the HexColorConverter class.
+ * @type {HexColorConverter}
+ */
+const converter = new HexColorConverter();
+
 // Open WebSocket connection
 clientGame.openWebSocket();
 
 window.addEventListener("load", () => {
+  console.log(converter.hexToInt("#FFFFFF"));
+  console.log(converter.intToHex(0));
+
   // -------------------------------
   // Canvas Setup and Resizing
   // -------------------------------
@@ -161,7 +171,7 @@ window.addEventListener("load", () => {
   // Initialize drawing state variables´
   let drawing = false;
   let tool = "pen";
-  let penColor = "#000";
+  let penColor = "#000000";
   let penSize = 3;
 
   // -------------------------------
