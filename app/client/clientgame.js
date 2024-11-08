@@ -74,6 +74,9 @@ module.exports = class ClientGame {
       } else if (data.type === "2d") {
         // '2d' = Canvas data
         this.update(data.data);
+      } else if (data.type === "initWhiteCanvas") {
+        data.data = Array.from({ length: 400 }, () => Array(600).fill(0));
+        this.update(data.data);
       } else if (data.type === "init") {
         this.setSessionCookie(data.data);
       }

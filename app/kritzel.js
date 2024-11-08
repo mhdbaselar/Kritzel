@@ -10,6 +10,16 @@ let server = new TinyServer(8123, (uid, data) => {
 
 let refreshCounter = 0;
 
+// Compares two arrays (Compare if two canvas are identical)
+function arraysAreIdentical(arr1, arr2) {
+  return (
+    arr1.length === arr2.length &&
+    arr1.every((el, i) =>
+      Array.isArray(el) ? arraysAreIdentical(el, arr2[i]) : el === arr2[i]
+    )
+  );
+}
+
 // Creates a ServerGame (organizes game logic server-side)
 let game = new ServerGame(server, () => {
   let data;
@@ -23,8 +33,17 @@ let game = new ServerGame(server, () => {
   } else {
     // send 2D-array (board)
     data = game.getBoard().getBoard();
-    type = "2d";
-    refreshCounter = 0;
+    const initArray = Array.from({ length: 400 }, () => Array(600).fill(0));
+
+    // Check if the canvas is empty (init State)
+    if (arraysAreIdentical(data, initArray)) {
+      // If Canvas is empty send initWhiteCanvas type (Makes Client Canvas white without sending data)
+      type = "initWhiteCanvas";
+      data = [0];
+    } else {
+      // If Canvas is not empty send 2D-array type
+      type = "2d";
+    }
   }
 
   refreshCounter++;
