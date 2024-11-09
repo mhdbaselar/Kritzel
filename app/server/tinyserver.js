@@ -71,9 +71,20 @@ module.exports = class TinyServer {
    * @param {string} data client request
    */
   processWsRequest(websocket, data) {
-    let cookie = JSON.parse(data);
-    if (cookie.type == "checkCookie") {
-      let cid = cookie.data.split("=")[1];
+    let requestData = JSON.parse(data);
+
+    if (requestData.type == "checkCookie") {
+      const parseCookie = str =>
+        str
+          .split(';')
+          .map(v => v.split('='))
+          .reduce((acc, v) => {
+            acc[decodeURIComponent(v[0].trim())] = decodeURIComponent(v[1].trim());
+            return acc;
+          }, {});
+      
+      let cid = parseCookie(requestData.data)['cid'];
+      
       if (cid != null) {
         this.#clients.replaceCid(websocket.cid, cid);
         websocket.cid = cid;

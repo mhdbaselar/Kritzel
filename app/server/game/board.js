@@ -92,8 +92,11 @@ module.exports = class Board {
   fill(x, y, color) {
     let previousColor = this.#canvas[y][x];
     if (color != previousColor) {
+      console.log(color + " " + previousColor);
       this.iterativefill(x, y, color, previousColor);
+      return true;
     }
+    return false;
   }
 
   /**

@@ -62,7 +62,17 @@ function displayChatMessage(chatMessages, message, sender) {
  * @param {Array} messageList - An array of message objects to be displayed. Each object should have `cid` and `message` properties.
  */
 function displayChatMessageList(chatMessages, messageList, cid){
-    let cookieCid = document.cookie.split('=')[1];
+    const parseCookie = str =>
+        str
+          .split(';')
+          .map(v => v.split('='))
+          .reduce((acc, v) => {
+            acc[decodeURIComponent(v[0].trim())] = decodeURIComponent(v[1].trim());
+            return acc;
+          }, {});
+
+    let cookieCid = parseCookie(document.cookie)['cid'];
+    
     messageList.forEach(message => {
         let name = message.cid;
         if(cid == cookieCid && cookieCid == name){

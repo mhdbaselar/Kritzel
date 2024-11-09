@@ -6,8 +6,6 @@ const Chat = require("./game/chat");
 module.exports = class ServerGame {
   /**@type {Board} */
   #board;
-  /**@type {boolean} */
-  #isSendPointList;
   /**@type {Chat} */
   #chat;
   /**@type {TinyServer} */
@@ -24,7 +22,6 @@ module.exports = class ServerGame {
     this.intervalReference = null;
     this.#board = null;
     this.#chat = null;
-    this.#isSendPointList = null;
   }
 
   /**
@@ -61,22 +58,6 @@ module.exports = class ServerGame {
   }
 
   /**
-   * Returns whether a list of points or the entire canvas should be send
-   * @returns boolean (Servergame.#isSendPointList)
-   */
-  getIsSendPointList() {
-    return this.#isSendPointList;
-  }
-
-  /**
-   * Sets whether a list of points or the entire canvas should be send
-   * @param {boolean} bool true or false
-   */
-  setIsSendPointList(bool) {
-    this.#isSendPointList = bool;
-  }
-
-  /**
    * Get and process a client message
    * @param {string} cid user unique ID
    * @param {Message} request client request
@@ -85,61 +66,83 @@ module.exports = class ServerGame {
     let _request = JSON.parse(request);
 
     if (_request.messageType == "drawAction") {
-      // draw action
-      let action = _request.messageBody;
-
-      if (action.tool == "pen") {
-        this.#board.draw(action.x, action.y, action.color, action.thickness);
-        this.#isSendPointList = true;
-      }
-
-      if (action.tool == "eraser") {
-        this.#board.erase(action.x, action.y, action.thickness);
-        this.#isSendPointList = true;
-      }
-
-      if (action.tool == "clear") {
-        this.#board.clear();
-        this.#isSendPointList = false;
-      }
-
-      if (action.tool == "fill") {
-        this.#board.fill(action.x, action.y, action.color);
-        this.#isSendPointList = false;
-      }
-
-      if (action.tool == "fillBackground") {
-        this.#board.fillBackground(action.color);
-        this.#isSendPointList = false;
-      }
+      this.#processDrawAction(_request.messageBody, cid);
+      
     } else if (_request.messageType == "getCanvasAction") {
-      // set 2D-array send option to send whole canvas
-      this.#isSendPointList = false;
+      this.#processGetCanvasAction(cid);
+
     } else if (_request.messageType == "chatAction") {
-      // send chat message to clients
-      let chatMsg = _request.messageBody.message;
+      this.#processChatAction(_request.messageBody.message, cid);
 
-      this.#chat.addMessage(cid, chatMsg);
-
-      let jsonMessage = JSON.stringify({
-        type: "chatMsg",
-        data: chatMsg,
-        cid: cid,
-      });
-      this.#server.broadcastWsMessage(
-        cid,
-        jsonMessage,
-        false,
-        "allWithoutSender"
-      );
     } else if (_request.messageType == "getChatAction") {
-      // get whole chat
-      let jsonMessage = JSON.stringify({
-        type: "chatMsgList",
-        data: this.#chat.getMessages(),
-        cid: cid,
-      });
-      this.#server.broadcastWsMessage(cid, jsonMessage, false, "onlySender");
+      this.#processGetChatAction(cid);
     }
+  }
+
+  //-------------------------------------
+  //------------HELP FUNCTIONS-----------
+  //-------------------------------------
+  #processDrawAction(action, cid){
+    console.log("Draw Action");
+
+    if (action.tool == "pen") {
+      this.#board.draw(action.x, action.y, action.color, action.thickness);
+    }
+
+    if (action.tool == "eraser") {
+      this.#board.erase(action.x, action.y, action.thickness);
+    }
+
+    if (action.tool == "clear") {
+      this.#board.clear();
+      let jsonMessage = JSON.stringify({type: "initWhiteCanvas", data: [0]});
+      this.#server.broadcastWsMessage(cid, jsonMessage, false, "all");
+    }
+
+    if (action.tool == "fill") {
+      let hasChanged = this.#board.fill(action.x, action.y, action.color);
+      if(hasChanged){
+        console.log("hasChanged" + hasChanged);
+        let jsonMessage = JSON.stringify({type: "2d", data: this.#board.getBoard()});
+        this.#server.broadcastWsMessage(cid, jsonMessage, false, "all");
+      }
+    }
+
+    /*if (action.tool == "fillBackground") {
+      this.#board.fillBackground(action.color);
+      this.#isSendPointList = false;
+    }*/
+  }
+
+  #processGetCanvasAction(cid){
+    let jsonMessage = JSON.stringify({type: "2d", data: this.#board.getBoard()});
+    this.#server.broadcastWsMessage(cid, jsonMessage, false, "all");
+  }
+
+  #processChatAction(chatMsg, cid){
+
+    this.#chat.addMessage(cid, chatMsg);
+
+    let jsonMessage = JSON.stringify({
+      type: "chatMsg",
+      data: chatMsg,
+      cid: cid,
+    });
+    this.#server.broadcastWsMessage(
+      cid,
+      jsonMessage,
+      false,
+      "allWithoutSender"
+    );
+
+  }
+
+  #processGetChatAction(cid){
+    let jsonMessage = JSON.stringify({
+      type: "chatMsgList",
+      data: this.#chat.getMessages(),
+      cid: cid,
+    });
+    this.#server.broadcastWsMessage(cid, jsonMessage, false, "onlySender");
   }
 };

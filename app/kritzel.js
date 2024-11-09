@@ -8,8 +8,6 @@ let server = new TinyServer(8123, (uid, data) => {
   receive(uid, data);
 });
 
-let refreshCounter = 0;
-
 // Compares two arrays (Compare if two canvas are identical)
 function arraysAreIdentical(arr1, arr2) {
   return (
@@ -22,36 +20,11 @@ function arraysAreIdentical(arr1, arr2) {
 
 // Creates a ServerGame (organizes game logic server-side)
 let game = new ServerGame(server, () => {
-  let data;
-  let type;
-
-  if (game.getIsSendPointList()) {
-    // removed && refreshCounter < 20
-    // send point list
-    data = game.getBoard().getPoints();
-    type = "pl";
-  } else {
-    // send 2D-array (board)
-    data = game.getBoard().getBoard();
-    const initArray = Array.from({ length: 400 }, () => Array(600).fill(0));
-
-    // Check if the canvas is empty (init State)
-    if (arraysAreIdentical(data, initArray)) {
-      // If Canvas is empty send initWhiteCanvas type (Makes Client Canvas white without sending data)
-      type = "initWhiteCanvas";
-      data = [0];
-    } else {
-      // If Canvas is not empty send 2D-array type
-      type = "2d";
-    }
-  }
-
-  refreshCounter++;
+  let data = game.getBoard().getPoints();
+  let type = "pl";
 
   let json = JSON.stringify({ type: type, data: data });
   game.getBoard().setPointsEmpty();
-  game.setIsSendPointList(true);
-
   // Only send if there is data
   if (data.length === 0) return;
   server.broadcastWsMessage(null, json, false, "all");
