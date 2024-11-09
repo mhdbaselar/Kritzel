@@ -73,6 +73,7 @@ module.exports = class ClientGame {
         this.updateWithPoints(data.data);
       } else if (data.type === "2d") {
         // '2d' = Canvas data
+        console.log("2d")
         this.update(data.data);
       } else if (data.type === "initWhiteCanvas") {
         data.data = Array.from({ length: 400 }, () => Array(600).fill(0));
@@ -180,6 +181,8 @@ module.exports = class ClientGame {
    */
   update(data) {
     let canvasData = data;
+
+    //console.log("Update Canvas");
 
     // Access the canvas element
     let canvas = document.getElementById("drawingCanvas");
@@ -290,9 +293,6 @@ module.exports = class ClientGame {
     let _message = JSON.stringify(message);
 
     this.send(_message);
-    if (tool === "fill") {
-      setTimeout(this.sendGetCanvasAction(), 500); // Get new canvas on fill, to fix Moiré patterns
-    }
   }
 
   /**
