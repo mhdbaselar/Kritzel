@@ -361,3 +361,21 @@ module.exports = class ClientGame {
     }
   }
 };
+//Users Modal
+// Funktion zur Eingabe und Übernahme des Benutzernamens
+function submitUsername() {
+  console.log("submitUsername function triggered"); // Test-Ausgabe
+  const usernameInput = document.getElementById("usernameInput");
+  const username = usernameInput.value.trim();
+  if (username.length >= 1) {
+    document.getElementById("usernameModal").style.display = "none";
+    clientGame.setUsername(username);
+    console.log("Benutzername gespeichert:", clientGame.getUsername());
+  } else {
+    alert("Der Benutzername muss mindestens 1 Zeichen lang sein.");
+    usernameInput.focus();
+  }
+}
+
+// Funktion für globale Erreichbarkeit im HTML
+window.submitUsername = submitUsername;
