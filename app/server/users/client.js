@@ -16,10 +16,18 @@ module.exports = class Client {
     }
 
     getCid(){
-        this.#cid;
+        return this.#cid;
     }
 
     setCid(cid){
         this.#cid = cid;
+    }
+
+    getName(){
+        return this.#name;
+    }
+
+    setName(name){
+        this.#name = name;
     }
 }

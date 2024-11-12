@@ -2,6 +2,7 @@
 
 const Board = require("./game/board");
 const Chat = require("./game/chat");
+const ClientList = require("./users/clientList");
 
 module.exports = class ServerGame {
   /**@type {Board} */

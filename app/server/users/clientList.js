@@ -28,5 +28,13 @@ module.exports = class ClientList {
         return this.#clientList;
     }
 
-    
+    registerName(cid, name){
+        this.#clientList.forEach(client => {
+            if(client.getCid() == cid){
+                client.setName(name);
+                console.log("Registered Name: " + client.getName() + " for Client: " + client.getCid());
+                return;
+            }
+        });
+    }
 }
