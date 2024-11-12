@@ -84,7 +84,6 @@ module.exports = class ServerGame {
   //------------HELP FUNCTIONS-----------
   //-------------------------------------
   #processDrawAction(action, cid){
-    console.log("Draw Action");
 
     if (action.tool == "pen") {
       this.#board.draw(action.x, action.y, action.color, action.thickness);
@@ -103,7 +102,6 @@ module.exports = class ServerGame {
     if (action.tool == "fill") {
       let hasChanged = this.#board.fill(action.x, action.y, action.color);
       if(hasChanged){
-        console.log("hasChanged" + hasChanged);
         let jsonMessage = JSON.stringify({type: "2d", data: this.#board.getBoard()});
         this.#server.broadcastWsMessage(cid, jsonMessage, false, "all");
       }
