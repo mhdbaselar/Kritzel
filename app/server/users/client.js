@@ -4,19 +4,25 @@ module.exports = class Client {
     #cid;
     /**@type {string} */
     #name;
+    /**@type {int} */
+    #boardID;
+    /**@type {int} */
+    #points;
 
     /**
      * Constructor to instanciate the client
      * @param {*} cid client unique ID (for cookie)
      * @param {*} name client name
      */
-    constructor(cid, name) {
+    constructor(cid, name, boardID, points){
         this.#cid = cid;
         if(name){
             this.#name = name;
         } else {
             this.#name = "";
         }
+        this.#boardID = 0;
+        this.#points = 0;
     }
 
     /**
@@ -49,5 +55,21 @@ module.exports = class Client {
      */
     setName(name){
         this.#name = name;
+    }
+
+    getBoardID(){
+        return this.#boardID;
+    }
+
+    setBoardID(boardID){
+        this.#boardID = boardID;
+    }
+
+    getPoints(){
+        return this.#points;
+    }
+
+    setPoints(points){
+        this.#points = points;
     }
 }

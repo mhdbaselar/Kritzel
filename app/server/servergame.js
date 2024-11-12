@@ -77,7 +77,30 @@ module.exports = class ServerGame {
 
     } else if (_request.messageType == "getChatAction") {
       this.#processGetChatAction(cid);
+
+    } else if(_request.messageType == "getUserListAction") {
+      let userList = this.#server.getClients().getClientList();
+      let userBoardID = 0;
+      let sendUserList = [];
+
+      // find out boardID
+      userList.forEach(user => {
+        if(user.getCid() == cid) {
+          userBoardID = user.getBoardID();
+        }
+      });
+      
+      // get all user at the same board
+      userList.forEach(user => {
+        if(user.getBoardID() == userBoardID){
+          sendUserList.push({name: user.getName(), points: user.getPoints()})
+        }
+      });
+
+      let jsonMessage = JSON.stringify({type: "userList", data: sendUserList});
+      this.#server.broadcastWsMessage(cid, jsonMessage, false, "all");
     }
+      
   }
 
   //-------------------------------------
