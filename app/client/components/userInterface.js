@@ -46,11 +46,11 @@ function renderUsers(users) {
  * Displays a chat message in the chat container.
  * @param {HTMLElement} chatMessages - The container for chat messages.
  * @param {string} message - The message to display.
- * @param {string} sender - The sender of the message.
+ * @param {string} senderCid - The sender of the message.
  */
-function displayChatMessage(chatMessages, message, sender) {
+function displayChatMessage(chatMessages, message, senderCid, senderName = "") {
     const messageDiv = document.createElement("div");
-    messageDiv.textContent = `${sender}: ${message}`;
+    messageDiv.textContent = `${senderName}: ${message}`;
     chatMessages.appendChild(messageDiv);
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
@@ -74,8 +74,9 @@ function displayChatMessageList(chatMessages, messageList, cid){
     let cookieCid = parseCookie(document.cookie)['cid'];
     
     messageList.forEach(message => {
-        let name = message.cid;
-        if(cid == cookieCid && cookieCid == name){
+        let name = message.name;
+        let msgCid = message.cid;
+        if(cid == cookieCid && cookieCid == msgCid){
             name = 'You';
         }
         const messageDiv = document.createElement("div");
@@ -144,5 +145,21 @@ function initializeChat(clientGame, sendButton, chatInputDiv, chatMessages) {
     return { sendMessage, addKeydownListener, removeKeydownListener };
 }
 
+//Users Modal
+// Funktion zur Eingabe und Übernahme des Benutzernamens
+function _submitUsername(clientGame) {
+    console.log("submitUsername function triggered"); // Test-Ausgabe
+    const usernameInput = document.getElementById("usernameInput");
+    const username = usernameInput.value.trim();
+    if (username.length >= 1) {
+      document.getElementById("usernameModal").style.display = "none";
+      clientGame.sendNameAction(username);
+      //console.log("Benutzername gespeichert:", clientGame.getUsername());
+    } else {
+      alert("Der Benutzername muss mindestens 1 Zeichen lang sein.");
+      usernameInput.focus();
+    }
+  }
 
-module.exports = { renderUsers, initializeChat, displayChatMessage, displayChatMessageList };
+
+module.exports = { renderUsers, initializeChat, displayChatMessage, displayChatMessageList, _submitUsername };

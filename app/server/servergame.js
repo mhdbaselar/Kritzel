@@ -2,6 +2,7 @@
 
 const Board = require("./game/board");
 const Chat = require("./game/chat");
+const ClientList = require("./users/clientList");
 
 module.exports = class ServerGame {
   /**@type {Board} */
@@ -122,11 +123,14 @@ module.exports = class ServerGame {
   #processChatAction(chatMsg, cid){
 
     this.#chat.addMessage(cid, chatMsg);
+    
+    let name = this.#server.getClients().getNameByCid(cid);
 
     let jsonMessage = JSON.stringify({
       type: "chatMsg",
       data: chatMsg,
       cid: cid,
+      name: name
     });
     this.#server.broadcastWsMessage(
       cid,
@@ -138,9 +142,16 @@ module.exports = class ServerGame {
   }
 
   #processGetChatAction(cid){
+    let messages = this.#chat.getMessages();
+    let data = [];
+    messages.forEach(message => {
+      let name = this.#server.getClients().getNameByCid(message.cid);
+      data.push({cid: message.cid, msg: message.msg, name: name});
+    });
+
     let jsonMessage = JSON.stringify({
       type: "chatMsgList",
-      data: this.#chat.getMessages(),
+      data: data,
       cid: cid,
     });
     this.#server.broadcastWsMessage(cid, jsonMessage, false, "onlySender");

@@ -12,14 +12,26 @@ module.exports = class Client {
      */
     constructor(cid, name) {
         this.#cid = cid;
-        this.#name = name;
+        if(name){
+            this.#name = name;
+        } else {
+            this.#name = "";
+        }
     }
 
     getCid(){
-        this.#cid;
+        return this.#cid;
     }
 
     setCid(cid){
         this.#cid = cid;
+    }
+
+    getName(){
+        return this.#name;
+    }
+
+    setName(name){
+        this.#name = name;
     }
 }
