@@ -17,12 +17,19 @@ const HexColorConverter = require("./class/hexColorConverter");
 const converter = new HexColorConverter();
 
 module.exports = class ClientGame {
-  #name;
+  #name;  // user name
 
+  /**
+   * Constructor to instanciate the ClientGame
+   */
   constructor() {
     this.#name = null;
   }
 
+  /**
+   * Sets the user name
+   * @param {string} name user name
+   */
   setUserNameByClientGame(name) {
     this.#name = name;
   }
@@ -349,6 +356,10 @@ module.exports = class ClientGame {
     this.send(JSON.stringify(message));
   }
 
+  /**
+   * Sends the client name to the server
+   * @param {string} name client name
+   */
   sendNameAction(name) {
     let message = new Message("setName", { name: name });
     this.send(JSON.stringify(message));

@@ -187,6 +187,10 @@ module.exports = class TinyServer {
     });
   }
 
+  /**
+   * Returns the client list
+   * @returns {ClientList} client list
+   */
   getClients(){
     return this.#clients;
   }

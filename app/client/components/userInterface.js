@@ -145,8 +145,10 @@ function initializeChat(clientGame, sendButton, chatInputDiv, chatMessages) {
     return { sendMessage, addKeydownListener, removeKeydownListener };
 }
 
-//Users Modal
-// Funktion zur Eingabe und Übernahme des Benutzernamens
+/**
+ * Submits the username entered by the user and after that connect the client to the server.
+ * @param {ClientGame} clientGame clientGame interface
+ */
 function _submitUsername(clientGame) {
     console.log("submitUsername function triggered"); // Test-Ausgabe
     const usernameInput = document.getElementById("usernameInput");

@@ -12,10 +12,20 @@ module.exports = class ClientList {
         this.#clientList = [];
     }
 
+    /**
+     * Adds a client to the list
+     * @param {string} cid client unique ID
+     * @param {string} name client name
+     */
     addClient(cid, name){
         this.#clientList.push(new Client(cid, name));
     }
 
+    /**
+     * Replace the client unique ID from oldCid to newCid
+     * @param {*} oldCid old client unique ID
+     * @param {*} newCid new client unique ID
+     */
     replaceCid(oldCid, newCid){
         this.#clientList.forEach(client => {
             if(client.getCid() == oldCid){
@@ -24,10 +34,19 @@ module.exports = class ClientList {
         });
     }
 
+    /**
+     * Get the client list
+     * @returns {Client[]} list of clients
+     */
     getClientList(){
         return this.#clientList;
     }
 
+    /**
+     * Register a name to a client (to cid)
+     * @param {string} cid client unique ID
+     * @param {string} name client name
+     */
     registerName(cid, name){
         this.#clientList.forEach(client => {
             if(client.getCid() == cid){
@@ -37,6 +56,11 @@ module.exports = class ClientList {
         });
     }
 
+    /**
+     * Get the name of a client by its unique ID
+     * @param {string} cid client unique ID
+     * @returns {string} client name
+     */
     getNameByCid(cid){
         let name = "";
 
