@@ -144,5 +144,21 @@ function initializeChat(clientGame, sendButton, chatInputDiv, chatMessages) {
     return { sendMessage, addKeydownListener, removeKeydownListener };
 }
 
+//Users Modal
+// Funktion zur Eingabe und Übernahme des Benutzernamens
+function _submitUsername(clientGame) {
+    console.log("submitUsername function triggered"); // Test-Ausgabe
+    const usernameInput = document.getElementById("usernameInput");
+    const username = usernameInput.value.trim();
+    if (username.length >= 1) {
+      document.getElementById("usernameModal").style.display = "none";
+      clientGame.sendNameAction(username);
+      //console.log("Benutzername gespeichert:", clientGame.getUsername());
+    } else {
+      alert("Der Benutzername muss mindestens 1 Zeichen lang sein.");
+      usernameInput.focus();
+    }
+  }
 
-module.exports = { renderUsers, initializeChat, displayChatMessage, displayChatMessageList };
+
+module.exports = { renderUsers, initializeChat, displayChatMessage, displayChatMessageList, _submitUsername };

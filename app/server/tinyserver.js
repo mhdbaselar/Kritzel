@@ -92,8 +92,10 @@ module.exports = class TinyServer {
       }
     }
 
-    if (requestData.type == "setName") {
-      this.#clients.registerName(websocket.cid, requestData.messageBody.name);
+    if (requestData.messageType == "setName") {
+      if(requestData.messageBody.name){
+        this.#clients.registerName(websocket.cid, requestData.messageBody.name);
+      }
     }
 
     if (this.wsCallback) this.wsCallback(websocket.cid, data);

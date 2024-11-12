@@ -18,7 +18,7 @@
 
 // Import necessary modules
 const ClientGame = require("./clientgame");
-const { renderUsers } = require("./components/userInterface");
+const { renderUsers, _submitUsername } = require("./components/userInterface");
 const { initializeToolbar } = require("./components/toolbar");
 const { initializeChat } = require("./components/chat");
 const {
@@ -481,3 +481,10 @@ window.addEventListener("load", () => {
     }, 200)
   );
 });
+
+function submitUsername(){
+  _submitUsername(clientGame);
+}
+
+// Funktion für globale Erreichbarkeit im HTML
+window.submitUsername = submitUsername;
