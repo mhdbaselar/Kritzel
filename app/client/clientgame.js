@@ -63,17 +63,16 @@ module.exports = class ClientGame {
         const chatMessages = document.querySelector(".chat-messages");
         displayChatMessageList(chatMessages, data.data, data.cid);
       } else if (data.type == "chatMsg") {
-        console.log(`${data.cid}: ${data.data}`); // Chat output console.log
+        console.log(`${data.cid}: ${data.data} : ${data.name}`); // Chat output console.log
 
         // Update the chat display
         const chatMessages = document.querySelector(".chat-messages");
-        displayChatMessage(chatMessages, data.data, data.cid);
+        displayChatMessage(chatMessages, data.data, data.cid, data.name);
       } else if (data.type === "pl") {
         // 'pl' = PointList
         this.updateWithPoints(data.data);
       } else if (data.type === "2d") {
         // '2d' = Canvas data
-        console.log("2d")
         this.update(data.data);
       } else if (data.type === "initWhiteCanvas") {
         data.data = Array.from({ length: 400 }, () => Array(600).fill(0));

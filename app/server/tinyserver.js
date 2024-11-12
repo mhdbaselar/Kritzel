@@ -174,4 +174,8 @@ module.exports = class TinyServer {
       res.end(data);
     });
   }
+
+  getClients(){
+    return this.#clients;
+  }
 };

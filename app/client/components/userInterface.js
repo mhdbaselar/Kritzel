@@ -46,11 +46,11 @@ function renderUsers(users) {
  * Displays a chat message in the chat container.
  * @param {HTMLElement} chatMessages - The container for chat messages.
  * @param {string} message - The message to display.
- * @param {string} sender - The sender of the message.
+ * @param {string} senderCid - The sender of the message.
  */
-function displayChatMessage(chatMessages, message, sender) {
+function displayChatMessage(chatMessages, message, senderCid, senderName = "") {
     const messageDiv = document.createElement("div");
-    messageDiv.textContent = `${sender}: ${message}`;
+    messageDiv.textContent = `${senderName}: ${message}`;
     chatMessages.appendChild(messageDiv);
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
@@ -74,8 +74,9 @@ function displayChatMessageList(chatMessages, messageList, cid){
     let cookieCid = parseCookie(document.cookie)['cid'];
     
     messageList.forEach(message => {
-        let name = message.cid;
-        if(cid == cookieCid && cookieCid == name){
+        let name = message.name;
+        let msgCid = message.cid;
+        if(cid == cookieCid && cookieCid == msgCid){
             name = 'You';
         }
         const messageDiv = document.createElement("div");

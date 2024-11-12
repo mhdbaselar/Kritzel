@@ -32,9 +32,20 @@ module.exports = class ClientList {
         this.#clientList.forEach(client => {
             if(client.getCid() == cid){
                 client.setName(name);
-                console.log("Registered Name: " + client.getName() + " for Client: " + client.getCid());
                 return;
             }
         });
+    }
+
+    getNameByCid(cid){
+        let name = "";
+
+        this.#clientList.forEach(client => {
+            if(client.getCid() == cid){
+                name = client.getName();
+            }
+        });
+
+        return name;
     }
 }
