@@ -88,6 +88,7 @@ module.exports = class Board {
    * @param {int} x coordinate
    * @param {int} y coordinate
    * @param {int} color int color code
+   * @returns {boolean} true if the color has changed, false if not
    */
   fill(x, y, color) {
     let previousColor = this.#canvas[y][x];
@@ -128,7 +129,7 @@ module.exports = class Board {
 
   /**
    * Returns the current canvas (2D-array)
-   * @returns this.#canvas - 2D-array
+   * @returns {int[][]} this.#canvas - 2D-array
    */
   getBoard() {
     return this.#canvas;
@@ -136,7 +137,7 @@ module.exports = class Board {
 
   /**
    * Returns the current transfer points list
-   * @returns this.#points - list of all points to be transmitted to the clients
+   * @returns {{x: int, y: int, color: int}[]} this.#points - list of all points to be transmitted to the clients
    */
   getPoints() {
     return this.#points;
@@ -161,7 +162,7 @@ module.exports = class Board {
    * @param {int} y1 current y coordinate
    * @param {int} color int color code
    * @param {int} thickness thickness of the line
-   * @returns list of line points
+   * @returns {{x: int, y: int, color: int}[]} list of line points
    */
   #drawLine(x0, y0, x1, y1, color, thickness) {
     let points = [];
@@ -201,7 +202,7 @@ module.exports = class Board {
    * @param {int} y
    * @param {int} color int color code
    * @param {int} thickness thickness of the point
-   * @returns list of pixels from the point
+   * @returns {{x: int, y: int, color: int}[]} list of pixels from the point
    */
   #drawPoint(x, y, color, thickness) {
     let points = [];

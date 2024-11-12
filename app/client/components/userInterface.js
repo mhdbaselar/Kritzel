@@ -61,22 +61,22 @@ function displayChatMessage(chatMessages, message, senderCid, senderName = "") {
  * @param {HTMLElement} chatMessages - The container element where chat messages will be displayed.
  * @param {Array} messageList - An array of message objects to be displayed. Each object should have `cid` and `message` properties.
  */
-function displayChatMessageList(chatMessages, messageList, cid){
+function displayChatMessageList(chatMessages, messageList, cid) {
     const parseCookie = str =>
         str
-          .split(';')
-          .map(v => v.split('='))
-          .reduce((acc, v) => {
-            acc[decodeURIComponent(v[0].trim())] = decodeURIComponent(v[1].trim());
-            return acc;
-          }, {});
+            .split(';')
+            .map(v => v.split('='))
+            .reduce((acc, v) => {
+                acc[decodeURIComponent(v[0].trim())] = decodeURIComponent(v[1].trim());
+                return acc;
+            }, {});
 
     let cookieCid = parseCookie(document.cookie)['cid'];
-    
+
     messageList.forEach(message => {
         let name = message.name;
         let msgCid = message.cid;
-        if(cid == cookieCid && cookieCid == msgCid){
+        if (cid == cookieCid && cookieCid == msgCid) {
             name = 'You';
         }
         const messageDiv = document.createElement("div");
@@ -105,13 +105,13 @@ function initializeChat(clientGame, sendButton, chatInputDiv, chatMessages) {
         const message = chatInputDiv.textContent.trim();
         if (message !== "" && chatMessages) {
             displayChatMessage(chatMessages, message, "You");
-            
+
             chatInputDiv.textContent = "";
 
             // Optionally, send the message to the server or WebSocket
-            try{
+            try {
                 clientGame.sendChatAction(message);
-            } catch(error) {}
+            } catch (error) { }
         }
     }
 
@@ -145,21 +145,24 @@ function initializeChat(clientGame, sendButton, chatInputDiv, chatMessages) {
     return { sendMessage, addKeydownListener, removeKeydownListener };
 }
 
-//Users Modal
-// Funktion zur Eingabe und Übernahme des Benutzernamens
+/**
+ * Submits the username entered by the user and after that connect the client to the server.
+ * @param {ClientGame} clientGame clientGame interface
+ */
 function _submitUsername(clientGame) {
     console.log("submitUsername function triggered"); // Test-Ausgabe
     const usernameInput = document.getElementById("usernameInput");
     const username = usernameInput.value.trim();
     if (username.length >= 1) {
-      document.getElementById("usernameModal").style.display = "none";
-      clientGame.sendNameAction(username);
-      //console.log("Benutzername gespeichert:", clientGame.getUsername());
+        document.getElementById("usernameModal").style.display = "none";
+        clientGame.setUserNameByClientGame(username);
+        // Open WebSocket connection
+        clientGame.openWebSocket();
     } else {
-      alert("Der Benutzername muss mindestens 1 Zeichen lang sein.");
-      usernameInput.focus();
+        alert("Der Benutzername muss mindestens 1 Zeichen lang sein.");
+        usernameInput.focus();
     }
-  }
+}
 
 
 module.exports = { renderUsers, initializeChat, displayChatMessage, displayChatMessageList, _submitUsername };

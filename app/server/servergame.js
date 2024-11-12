@@ -83,6 +83,12 @@ module.exports = class ServerGame {
   //-------------------------------------
   //------------HELP FUNCTIONS-----------
   //-------------------------------------
+
+  /**
+   * Processes the draw action
+   * @param {Object} action draw action
+   * @param {string} cid user unique ID
+   */
   #processDrawAction(action, cid){
 
     if (action.tool == "pen") {
@@ -113,11 +119,20 @@ module.exports = class ServerGame {
     }*/
   }
 
+  /**
+   * Sends the current canvas to all clients
+   * @param {string} cid user unique ID
+  */
   #processGetCanvasAction(cid){
     let jsonMessage = JSON.stringify({type: "2d", data: this.#board.getBoard()});
     this.#server.broadcastWsMessage(cid, jsonMessage, false, "all");
   }
 
+  /**
+   * Processes the chat action (send a message to all clients)
+   * @param {string} chatMsg chat message
+   * @param {string} cid user unique ID
+   */
   #processChatAction(chatMsg, cid){
 
     this.#chat.addMessage(cid, chatMsg);
@@ -139,6 +154,10 @@ module.exports = class ServerGame {
 
   }
 
+  /**
+   * Sends all chat messages to the client
+   * @param {string} cid user unique ID
+   */
   #processGetChatAction(cid){
     let messages = this.#chat.getMessages();
     let data = [];

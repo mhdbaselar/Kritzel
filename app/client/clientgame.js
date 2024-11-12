@@ -17,7 +17,22 @@ const HexColorConverter = require("./class/hexColorConverter");
 const converter = new HexColorConverter();
 
 module.exports = class ClientGame {
-  constructor() {}
+  #name;  // user name
+
+  /**
+   * Constructor to instanciate the ClientGame
+   */
+  constructor() {
+    this.#name = null;
+  }
+
+  /**
+   * Sets the user name
+   * @param {string} name user name
+   */
+  setUserNameByClientGame(name) {
+    this.#name = name;
+  }
 
   /**
    * Opens a WebSocket connection to the server.
@@ -37,6 +52,7 @@ module.exports = class ClientGame {
     // Event handler for when the connection is opened
     this.socket.onopen = (event) => {
       console.log("Socket opened");
+      this.sendNameAction(this.#name);
       this.sendGetChatAction();
       this.sendGetCanvasAction();
       loadingOverlay.style.display = "none"; // Spinner verstecken
@@ -340,8 +356,12 @@ module.exports = class ClientGame {
     this.send(JSON.stringify(message));
   }
 
+  /**
+   * Sends the client name to the server
+   * @param {string} name client name
+   */
   sendNameAction(name) {
-    let message = new Message("setName", {name : name});
+    let message = new Message("setName", { name: name });
     this.send(JSON.stringify(message));
   }
 
