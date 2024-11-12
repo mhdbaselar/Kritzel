@@ -41,9 +41,6 @@ const clientGame = new ClientGame();
  */
 const converter = new HexColorConverter();
 
-// Open WebSocket connection
-clientGame.openWebSocket();
-
 window.addEventListener("load", () => {
   console.log(converter.hexToInt("#FFFFFF"));
   console.log(converter.intToHex(0));
@@ -482,7 +479,7 @@ window.addEventListener("load", () => {
   );
 });
 
-function submitUsername(){
+function submitUsername() {
   _submitUsername(clientGame);
 }
 
