@@ -104,6 +104,12 @@ module.exports = class TinyServer {
       }
     }
 
+    // If client has no name, set default name
+    let hasNotClientName = this.#clients.getClientList().some(client => client.getCid() === websocket.cid && client.getName() === "");
+    if(hasNotClientName){
+      this.#clients.registerName(websocket.cid, "Anonymous");
+    }
+
     if (this.wsCallback) this.wsCallback(websocket.cid, data);
   }
 
