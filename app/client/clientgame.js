@@ -37,7 +37,6 @@ module.exports = class ClientGame {
     // Event handler for when the connection is opened
     this.socket.onopen = (event) => {
       console.log("Socket opened");
-      this.send(JSON.stringify({ type: "checkCookie", data: cookie }));
       this.sendGetChatAction();
       this.sendGetCanvasAction();
       loadingOverlay.style.display = "none"; // Spinner verstecken

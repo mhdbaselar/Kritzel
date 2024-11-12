@@ -37,8 +37,33 @@ module.exports = class TinyServer {
    * Configures the connection to the connecting client
    * @param {WebSocket} websocket websocket - client
    */
-  connectWs(websocket) {
-    if (websocket.cid == null) {
+  connectWs(websocket, request) {
+    const cookies = request.headers.cookie;
+    
+    const parseCookie = str =>
+      str
+        .split(';')
+        .map(v => v.split('='))
+        .reduce((acc, v) => {
+          acc[decodeURIComponent(v[0].trim())] = decodeURIComponent(v[1].trim());
+          return acc;
+        }, {});
+    
+    let cid;
+
+    // Check if cookie is set
+    if(cookies !== undefined){
+      cid = parseCookie(cookies)['cid'];
+    } else {
+      cid = null;
+    }
+
+    let isClientInList = this.#clients.getClientList().some(client => client.getCid() === cid); // check if client is in list
+
+    if (cid && isClientInList){
+      websocket.cid = cid;
+    }
+    else {    // create new client
       websocket.cid = this.getUniqueID();
       websocket.send(JSON.stringify({ type: "init", data: websocket.cid }));
       this.#clients.addClient(websocket.cid, null);
@@ -72,25 +97,6 @@ module.exports = class TinyServer {
    */
   processWsRequest(websocket, data) {
     let requestData = JSON.parse(data);
-
-    if (requestData.type == "checkCookie") {
-      const parseCookie = str =>
-        str
-          .split(';')
-          .map(v => v.split('='))
-          .reduce((acc, v) => {
-            acc[decodeURIComponent(v[0].trim())] = decodeURIComponent(v[1].trim());
-            return acc;
-          }, {});
-      
-      let cid = parseCookie(requestData.data)['cid'];
-      
-      if (cid != null) {
-        this.#clients.replaceCid(websocket.cid, cid);
-        websocket.cid = cid;
-        websocket.send(JSON.stringify({ type: "init", data: websocket.cid }));
-      }
-    }
 
     if (requestData.messageType == "setName") {
       if(requestData.messageBody.name){
