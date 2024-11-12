@@ -74,7 +74,9 @@ window.addEventListener("load", () => {
    */
   function resizeCanvasEvent() {
     resizeCanvas();
-    clientGame.sendGetCanvasAction();
+    if (clientGame.socket && clientGame.socket.readyState === WebSocket.OPEN) {
+      clientGame.sendGetCanvasAction();
+    }
   }
 
   /**
