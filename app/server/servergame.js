@@ -98,6 +98,8 @@ module.exports = class ServerGame {
       });
 
       let jsonMessage = JSON.stringify({type: "userList", data: sendUserList});
+      
+      // TODO: nur an clients in selber lobby schicken (nicht an alle) 
       this.#server.broadcastWsMessage(cid, jsonMessage, false, "all");
     }
       
