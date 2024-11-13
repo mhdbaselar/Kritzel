@@ -55,6 +55,7 @@ module.exports = class ClientGame {
       this.sendNameAction(this.#name);
       this.sendGetChatAction();
       this.sendGetCanvasAction();
+      this.sendGetUserListAction();
       loadingOverlay.style.display = "none"; // Spinner verstecken
     };
 
@@ -94,8 +95,16 @@ module.exports = class ClientGame {
         this.update(data.data);
       } else if (data.type === "init") {
         this.setSessionCookie(data.data);
+      } else if (data.type === "userList"){
+        this.setUserList(data.data);
+
       }
     };
+  }
+
+  setUserList(data){
+    this.userList = data;
+    renderUsers(this.userList);
   }
 
   setSessionCookie(cid) {
@@ -362,6 +371,11 @@ module.exports = class ClientGame {
    */
   sendNameAction(name) {
     let message = new Message("setName", { name: name });
+    this.send(JSON.stringify(message));
+  }
+
+  sendGetUserListAction() {
+    let message = new Message("getUserListAction", null);
     this.send(JSON.stringify(message));
   }
 
