@@ -97,14 +97,14 @@ module.exports = class ClientGame {
         this.setSessionCookie(data.data);
       } else if (data.type === "userList"){
         this.setUserList(data.data);
-        
+
       }
     };
   }
 
-  // Todo für Frontend diese Funktion implementieren
   setUserList(data){
-    console.log(data);
+    this.userList = data;
+    renderUsers(this.userList);
   }
 
   setSessionCookie(cid) {

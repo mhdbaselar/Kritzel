@@ -419,14 +419,17 @@ window.addEventListener("load", () => {
   // -------------------------------
   // User Rendering (Dummy Data)
   // -------------------------------
-  const users = [
-    { name: "Player1", points: 0 },
-    { name: "Player2", points: 20 },
-    { name: "Player3", points: 15 },
-  ];
+  // const users = [
+  //   { name: "Player1", points: 0 },
+  //   { name: "Player2", points: 20 },
+  //   { name: "Player3", points: 15 },
+  // ];
+
+  // const users = clientGame.getUserList();
+  // console.log("USERS MAIN", users)
 
   // Render the list of users
-  renderUsers(users);
+  // renderUsers(users);
 
   // -------------------------------
   // Chat Functionality
@@ -487,3 +490,4 @@ function submitUsername() {
 
 // Funktion für globale Erreichbarkeit im HTML
 window.submitUsername = submitUsername;
+window.renderUsers = renderUsers;
