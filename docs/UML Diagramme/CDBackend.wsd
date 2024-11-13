@@ -16,6 +16,7 @@ class TinyServer {
     + processWsRequest(websocket: WebSocket, data: string)
     + broadcastWsMessage(cid: string, data: string, isBinary: boolean, broadcastType: string)
     + processHttpRequest(req: http.IncomingMessage, res: http.ServerResponse)
+    + getClients(): ClientList
 }
 
 class ServerGame {
@@ -33,6 +34,10 @@ class ServerGame {
     + getIsSendPointList(): boolean
     + setIsSendPointList(bool: boolean)
     + processInput(cid: string, request: Message)
+    - processDrawAction(action: Object, cid: string)
+    - processGetCanvasAction(cid: string)
+    - processChatAction(chatMsg: string, cid: string)
+    - processGetChatAction(cid: string)
 }
 
 class ClientList {
@@ -41,6 +46,23 @@ class ClientList {
     + addClient(cid: string, name: string)
     + replaceCid(oldCid: string, newCid: string)
     + getClientList(): Client[]
+    + registerName(cid: string, name: string)
+    + getNameByCid(cid: string): string
+}
+class Client {
+    - cid: string
+    - name: string
+    - boardID: int
+    - points: int
+    + constructor(cid: string, name: string, boardID: int, points: int)
+    + getCid(): string
+    + setCid(cid: string)
+    + getName(): string
+    + setName(name: string)
+    + getBoardID(): int
+    + setBoardID(boardID: int)
+    + getPoints(): int
+    + setPoints(points: int)
 }
 
 class Client {
