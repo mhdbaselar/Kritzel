@@ -49,6 +49,7 @@ class ClientList {
     + registerName(cid: string, name: string)
     + getNameByCid(cid: string): string
 }
+
 class Client {
     - cid: string
     - name: string
@@ -63,14 +64,6 @@ class Client {
     + setBoardID(boardID: int)
     + getPoints(): int
     + setPoints(points: int)
-}
-
-class Client {
-    - cid: string
-    - name: string
-    + constructor(cid: string, name: string)
-    + getCid(): string
-    + setCid(cid: string)
 }
 
 class Board {
