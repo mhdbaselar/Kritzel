@@ -1,0 +1,12 @@
+@startuml ADspielzug
+start
+
+if (Fallunterscheidung) then (yes)
+  :TODO \nTODO;
+else (no)
+  :TODO
+  TODO;
+endif
+
+stop
+@enduml
