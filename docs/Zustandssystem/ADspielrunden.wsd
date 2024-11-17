@@ -1,12 +1,38 @@
 @startuml ADspielrunden
 start
-
-if (Fallunterscheidung) then (yes)
-  :TODO \nTODO;
-else (no)
-  :TODO
-  TODO;
-endif
+:Spieler in Lobby beitreten;
+repeat
+  :Neue Runde;
+  repeat
+    :Aktiven Spieler auswählen
+    Iteration über Liste der Spieler;
+    repeat
+      if (Aktiver Spieler?) then (ja)
+        :Wort auswählen;
+      else (nein)
+      endif
+    repeat while (Timer Wortauswählen)
+    if (Wort ausgewählt?) then (ja)
+      repeat
+        if (Aktiver Spieler?) then (ja)
+          :Zeichnen;
+        else (nein)
+          if (Zustand [Bereits erraten]?) then (ja)
+          else (nein)
+            :Raten im Chat;
+            if (Wort korrekt?) then (ja)
+              :Spieler erhält Zustand:
+              [Bereits erraten];
+            else (nein)
+            endif
+          endif
+        endif
+      repeat while (Timer Zeichnen)
+      :Punktevergabe (Logik TBD);
+    else (nein)
+    endif
+  repeat while (Spieler offen?)
+repeat while (Runden offen?)
 
 stop
 @enduml
