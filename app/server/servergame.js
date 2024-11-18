@@ -72,7 +72,7 @@ module.exports = class ServerGame {
    */
   processInput(cid, request) {
     let _request = JSON.parse(request);
-
+    
     if (_request.messageType == "drawAction") {
       this.#processDrawAction(_request.messageBody, cid);
 

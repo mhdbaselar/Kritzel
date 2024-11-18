@@ -8,6 +8,8 @@ module.exports = class Client {
     #score;
     /**@type {boolean} */
     #isActivePlayer;
+    /**@type {int} */
+    #lobbyID;
 
 
     /**
@@ -23,6 +25,7 @@ module.exports = class Client {
             this.#name = "";
         }
         this.#score = 0;
+        this.#lobbyID = 0;
     }
 
     /**
