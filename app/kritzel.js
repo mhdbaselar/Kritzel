@@ -23,17 +23,17 @@ let game = new ServerGame(server, () => {
 
   let lobbies = game.getLobbies();
 
-  for(let i = 0; i < lobbies.length; i++){
-    let data = lobbies[i].getBoard().getPoints();
+  for(let lobbyID = 0; lobbyID < lobbies.length; lobbyID++){
+    let data = lobbies[lobbyID].getBoard().getPoints();
     let type = "pl";
 
     let json = JSON.stringify({ type: type, data: data });
-    lobbies[i].getBoard().setPointsEmpty();
+    lobbies[lobbyID].getBoard().setPointsEmpty();
 
     // Only send if there is data
-    if (data.length === 0) return;
+    if (data.length === 0) {continue;}
 
-    server.broadcastWsMessage(null, json, false, "allInLobby");
+    server.broadcastWsMessage(null, json, false, "allInLobby", lobbyID);
   } 
 });
 

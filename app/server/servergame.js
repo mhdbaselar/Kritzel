@@ -24,11 +24,11 @@ module.exports = class ServerGame {
    * Creates a board, sets and starts the interval for the send function
    */
   start() {
-    //this.#board = new Board(600, 400, 0);
-    //this.#chat = new Chat();
-
     let lobby = new Lobby();
     this.#lobbies.push(lobby);
+
+    /*let lobby2 = new Lobby();       // Test for two lobbies
+    this.#lobbies.push(lobby);*/
 
     this.intervalReference = setInterval(this.tick.bind(this), 100);
   }
@@ -110,14 +110,14 @@ module.exports = class ServerGame {
     if (action.tool == "clear") {
       this.#lobbies[lobbyID].clear(cid);
       let jsonMessage = JSON.stringify({ type: "initWhiteCanvas", data: [0] });
-      this.#server.broadcastWsMessage(cid, jsonMessage, false, "allInLobby");
+      this.#server.broadcastWsMessage(cid, jsonMessage, false, "allInLobby", lobbyID);
     }
 
     if (action.tool == "fill") {
       let hasChanged = this.#lobbies[lobbyID].fill(action.x, action.y, action.color, cid);
       if (hasChanged) {
         let jsonMessage = JSON.stringify({ type: "2d", data: this.#lobbies[lobbyID].getBoardCanvas() });
-        this.#server.broadcastWsMessage(cid, jsonMessage, false, "allInLobby");
+        this.#server.broadcastWsMessage(cid, jsonMessage, false, "allInLobby", lobbyID);
       }
     }
 
@@ -134,7 +134,7 @@ module.exports = class ServerGame {
   */
   #processGetCanvasAction(cid, lobbyID) {
     let jsonMessage = JSON.stringify({ type: "2d", data: this.#lobbies[lobbyID].getBoardCanvas() });
-    this.#server.broadcastWsMessage(cid, jsonMessage, false, "allInLobby");
+    this.#server.broadcastWsMessage(cid, jsonMessage, false, "allInLobby", lobbyID);
   }
 
   /**
@@ -158,7 +158,8 @@ module.exports = class ServerGame {
       cid,
       jsonMessage,
       false,
-      "allInLobbyWithoutSender"
+      "allInLobbyWithoutSender",
+      lobbyID
     );
   }
 
@@ -183,6 +184,7 @@ module.exports = class ServerGame {
     this.#server.broadcastWsMessage(cid, jsonMessage, false, "onlySender");
   }
 
+  
   #processGetUserListAction(cid, lobbyID) {
     let userList = this.#server.getClients().getClientsByLobbyID(lobbyID);
     let sendUserList = [];
@@ -193,7 +195,7 @@ module.exports = class ServerGame {
 
     let jsonMessage = JSON.stringify({ type: "userList", data: sendUserList });
 
-    this.#server.broadcastWsMessage(cid, jsonMessage, false, "allInLobby");
+    this.#server.broadcastWsMessage(cid, jsonMessage, false, "allInLobby", lobbyID);
   }
 };
 

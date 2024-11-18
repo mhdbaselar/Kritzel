@@ -14,10 +14,11 @@ module.exports = class Client {
 
     /**
      * Constructor to instanciate the client
-     * @param {*} cid client unique ID (for cookie)
-     * @param {*} name client name
+     * @param {string} cid client unique ID (for cookie)
+     * @param {string} name client name
+     * @param {int} lobbyID Lobby Index
      */
-    constructor(cid, name) {
+    constructor(cid, name, lobbyID) {
         this.#cid = cid;
         if (name) {
             this.#name = name;
@@ -25,7 +26,7 @@ module.exports = class Client {
             this.#name = "";
         }
         this.#score = 0;
-        this.#lobbyID = 0;
+        this.#lobbyID = lobbyID;
     }
 
     /**
