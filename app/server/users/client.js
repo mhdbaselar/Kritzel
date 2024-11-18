@@ -5,31 +5,31 @@ module.exports = class Client {
     /**@type {string} */
     #name;
     /**@type {int} */
-    #boardID;
-    /**@type {int} */
-    #points;
+    #score;
+    /**@type {boolean} */
+    #isActivePlayer;
+
 
     /**
      * Constructor to instanciate the client
      * @param {*} cid client unique ID (for cookie)
      * @param {*} name client name
      */
-    constructor(cid, name, boardID, points){
+    constructor(cid, name, score) {
         this.#cid = cid;
-        if(name){
+        if (name) {
             this.#name = name;
         } else {
             this.#name = "";
         }
-        this.#boardID = 0;
-        this.#points = 0;
+        this.#score = 0;
     }
 
     /**
      * Returns the client unique ID
      * @returns {string} client unique ID
      */
-    getCid(){
+    getCid() {
         return this.#cid;
     }
 
@@ -37,7 +37,7 @@ module.exports = class Client {
      * Sets the client unique ID
      * @param {string} cid client unique ID
      */
-    setCid(cid){
+    setCid(cid) {
         this.#cid = cid;
     }
 
@@ -45,7 +45,7 @@ module.exports = class Client {
      * Returns the client name
      * @returns {string} client name
      */
-    getName(){
+    getName() {
         return this.#name;
     }
 
@@ -53,23 +53,15 @@ module.exports = class Client {
      * Sets the client name
      * @param {string} name client name
      */
-    setName(name){
+    setName(name) {
         this.#name = name;
     }
 
-    getBoardID(){
-        return this.#boardID;
+    getPoints() {
+        return this.#score;
     }
 
-    setBoardID(boardID){
-        this.#boardID = boardID;
-    }
-
-    getPoints(){
-        return this.#points;
-    }
-
-    setPoints(points){
-        this.#points = points;
+    setPoints(points) {
+        this.#score = points;
     }
 }

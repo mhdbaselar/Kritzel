@@ -68,7 +68,7 @@ module.exports = class ServerGame {
 
     if (_request.messageType == "drawAction") {
       this.#processDrawAction(_request.messageBody, cid);
-      
+
     } else if (_request.messageType == "getCanvasAction") {
       this.#processGetCanvasAction(cid);
 
@@ -78,31 +78,20 @@ module.exports = class ServerGame {
     } else if (_request.messageType == "getChatAction") {
       this.#processGetChatAction(cid);
 
-    } else if(_request.messageType == "getUserListAction") {
+    } else if (_request.messageType == "getUserListAction") {
       let userList = this.#server.getClients().getClientList();
-      let userBoardID = 0;
       let sendUserList = [];
 
-      // find out boardID
       userList.forEach(user => {
-        if(user.getCid() == cid) {
-          userBoardID = user.getBoardID();
-        }
-      });
-      
-      // get all user at the same board
-      userList.forEach(user => {
-        if(user.getBoardID() == userBoardID){
-          sendUserList.push({name: user.getName(), points: user.getPoints()})
-        }
+        sendUserList.push({ name: user.getName(), points: user.getPoints() });
       });
 
-      let jsonMessage = JSON.stringify({type: "userList", data: sendUserList});
-      
+      let jsonMessage = JSON.stringify({ type: "userList", data: sendUserList });
+
       // TODO: nur an clients in selber lobby schicken (nicht an alle) 
       this.#server.broadcastWsMessage(cid, jsonMessage, false, "all");
     }
-      
+
   }
 
   //-------------------------------------
@@ -114,7 +103,7 @@ module.exports = class ServerGame {
    * @param {Object} action draw action
    * @param {string} cid user unique ID
    */
-  #processDrawAction(action, cid){
+  #processDrawAction(action, cid) {
 
     if (action.tool == "pen") {
       this.#board.draw(action.x, action.y, action.color, action.thickness);
@@ -126,14 +115,14 @@ module.exports = class ServerGame {
 
     if (action.tool == "clear") {
       this.#board.clear();
-      let jsonMessage = JSON.stringify({type: "initWhiteCanvas", data: [0]});
+      let jsonMessage = JSON.stringify({ type: "initWhiteCanvas", data: [0] });
       this.#server.broadcastWsMessage(cid, jsonMessage, false, "all");
     }
 
     if (action.tool == "fill") {
       let hasChanged = this.#board.fill(action.x, action.y, action.color);
-      if(hasChanged){
-        let jsonMessage = JSON.stringify({type: "2d", data: this.#board.getBoard()});
+      if (hasChanged) {
+        let jsonMessage = JSON.stringify({ type: "2d", data: this.#board.getBoard() });
         this.#server.broadcastWsMessage(cid, jsonMessage, false, "all");
       }
     }
@@ -148,8 +137,8 @@ module.exports = class ServerGame {
    * Sends the current canvas to all clients
    * @param {string} cid user unique ID
   */
-  #processGetCanvasAction(cid){
-    let jsonMessage = JSON.stringify({type: "2d", data: this.#board.getBoard()});
+  #processGetCanvasAction(cid) {
+    let jsonMessage = JSON.stringify({ type: "2d", data: this.#board.getBoard() });
     this.#server.broadcastWsMessage(cid, jsonMessage, false, "all");
   }
 
@@ -158,10 +147,10 @@ module.exports = class ServerGame {
    * @param {string} chatMsg chat message
    * @param {string} cid user unique ID
    */
-  #processChatAction(chatMsg, cid){
+  #processChatAction(chatMsg, cid) {
 
     this.#chat.addMessage(cid, chatMsg);
-    
+
     let name = this.#server.getClients().getNameByCid(cid);
 
     let jsonMessage = JSON.stringify({
@@ -183,12 +172,12 @@ module.exports = class ServerGame {
    * Sends all chat messages to the client
    * @param {string} cid user unique ID
    */
-  #processGetChatAction(cid){
+  #processGetChatAction(cid) {
     let messages = this.#chat.getMessages();
     let data = [];
     messages.forEach(message => {
       let name = this.#server.getClients().getNameByCid(message.cid);
-      data.push({cid: message.cid, msg: message.msg, name: name});
+      data.push({ cid: message.cid, msg: message.msg, name: name });
     });
 
     let jsonMessage = JSON.stringify({
