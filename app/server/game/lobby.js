@@ -21,23 +21,41 @@ module.exports = class Lobby {
         }
     }
 
+    getPlayerList(){
+        return this.#playerList;
+    }
+
     draw(x, y, color, thickness, cid) {
-        //TODO: CHECK RIGHTS OF CID
+        //TODO: CHECK PERMISSION OF CID
         this.#board.draw(x,y,color,thickness);
     }
 
     erase(x, y, thickness, cid) {
-        //TODO: CHECK RIGHTS OF CID
+        //TODO: CHECK PERMISSION OF CID
         this.#board.erase(x, y, thickness);
     }
 
     fill(x, y, color, cid){
-        //TODO: CHECK RIGHTS OF CID
+        //TODO: CHECK PERMISSION OF CID
         this.#board.fill(x, y, color);
     }
 
     clear(cid) {
-        //TODO: CHECK RIGHTS OF CID
+        //TODO: CHECK PERMISSION OF CID
         this.#board.clear();
+    }
+
+    getBoard() {
+        return this.#board.getBoard();
+    }
+
+    addMessage(message, cid){
+        //TODO: CHECK PERMISSION OF CID
+        this.#chat.addMessage(cid, message);
+    }
+
+    getMessages(cid){
+        //TODO: CHECK PERMISSION OF CID
+        return this.#chat.getMessages();
     }
 }
