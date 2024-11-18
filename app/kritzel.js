@@ -20,14 +20,21 @@ function arraysAreIdentical(arr1, arr2) {
 
 // Creates a ServerGame (organizes game logic server-side)
 let game = new ServerGame(server, () => {
-  let data = game.getBoard().getPoints();
-  let type = "pl";
 
-  let json = JSON.stringify({ type: type, data: data });
-  game.getBoard().setPointsEmpty();
-  // Only send if there is data
-  if (data.length === 0) return;
-  server.broadcastWsMessage(null, json, false, "all");
+  let lobbies = game.getLobbies();
+
+  for(let i = 0; i < lobbies.length; i++){
+    let data = lobbies[i].getBoard().getPoints();
+    let type = "pl";
+
+    let json = JSON.stringify({ type: type, data: data });
+    lobbies[i].getBoard().setPointsEmpty();
+
+    // Only send if there is data
+    if (data.length === 0) return;
+
+    server.broadcastWsMessage(null, json, false, "allInLobby");
+  } 
 });
 
 game.start();

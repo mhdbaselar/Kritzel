@@ -17,7 +17,7 @@ module.exports = class Client {
      * @param {*} cid client unique ID (for cookie)
      * @param {*} name client name
      */
-    constructor(cid, name, score) {
+    constructor(cid, name) {
         this.#cid = cid;
         if (name) {
             this.#name = name;
@@ -66,5 +66,9 @@ module.exports = class Client {
 
     setPoints(points) {
         this.#score = points;
+    }
+
+    getLobbyID(){
+        return this.#lobbyID;
     }
 }

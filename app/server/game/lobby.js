@@ -5,17 +5,18 @@ const Board = require('./board');
 const Chat = require('./chat');
 
 module.exports = class Lobby {
-    #playerList = null;
+    // Player werden aktuell über lobbyId in client organisiert, da sonst doppelte Einträge mit unterschiedlichen Objekten
+    //#playerList = null;
     #board = null;
     #chat = null;
 
     constructor(){
-        this.#playerList = [];
+        //this.#playerList = [];
         this.#board = new Board(600, 400, 0);
         this.#chat = new Chat();
     }
 
-    addPlayer(player){
+    /*addPlayer(player){
         if (player instanceof Client){
             this.#playerList.push(player);
         }
@@ -23,7 +24,7 @@ module.exports = class Lobby {
 
     getPlayerList(){
         return this.#playerList;
-    }
+    }*/
 
     draw(x, y, color, thickness, cid) {
         //TODO: CHECK PERMISSION OF CID
@@ -37,7 +38,8 @@ module.exports = class Lobby {
 
     fill(x, y, color, cid){
         //TODO: CHECK PERMISSION OF CID
-        this.#board.fill(x, y, color);
+        let hasChanged = this.#board.fill(x, y, color);
+        return hasChanged;
     }
 
     clear(cid) {
@@ -45,8 +47,16 @@ module.exports = class Lobby {
         this.#board.clear();
     }
 
-    getBoard() {
+    getBoardCanvas() {
         return this.#board.getBoard();
+    }
+
+    /**
+     * Get Board
+     * @returns {Board}
+     */
+    getBoard() {
+        return this.#board;
     }
 
     addMessage(message, cid){

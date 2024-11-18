@@ -96,19 +96,20 @@ module.exports = class TinyServer {
    * @param {string} data client request
    */
   processWsRequest(websocket, data) {
-    let requestData = JSON.parse(data);
-
-    if (requestData.messageType == "setName") {
-      if(requestData.messageBody.name){
-        this.#clients.registerName(websocket.cid, requestData.messageBody.name);
+      let requestData = JSON.parse(data);
+    
+    
+      if (requestData.messageType == "setName") {
+        if(requestData.messageBody.name){
+          this.#clients.registerName(websocket.cid, requestData.messageBody.name);
+        }
       }
-    }
 
-    // If client has no name, set default name
-    let hasNotClientName = this.#clients.getClientList().some(client => client.getCid() === websocket.cid && client.getName() === "");
-    if(hasNotClientName){
-      this.#clients.registerName(websocket.cid, "Anonymous");
-    }
+      // If client has no name, set default name
+      let hasNotClientName = this.#clients.getClientList().some(client => client.getCid() === websocket.cid && client.getName() === "");
+      if(hasNotClientName){
+        this.#clients.registerName(websocket.cid, "Anonymous");
+      }
 
     if (this.wsCallback) this.wsCallback(websocket.cid, data);
   }
@@ -141,6 +142,27 @@ module.exports = class TinyServer {
       broadcastFunction = function each(client) {
         if (client.readyState === ws.OPEN && client.cid == cid) {
           // send only sender client
+          client.send(data, { binary: isBinary });
+        }
+      };
+    } else if (broadcastType == "allInLobbyWithoutSender"){
+      let lobbyID = this.#clients.getLobbyIDByCid(cid);
+      let clientsInLobby = this.#clients.getClientsByLobbyID(lobbyID);
+
+      broadcastFunction = function each(client) {
+        if (client.readyState === ws.OPEN && client.cid != cid && (clientsInLobby.some(clientInLobby => clientInLobby.getCid() === client.cid))) {
+          // send all clients without sender
+          client.send(data, { binary: isBinary });
+        }
+      };
+    }
+    else if (broadcastType == "allInLobby"){
+      let lobbyID = this.#clients.getLobbyIDByCid(cid);
+      let clientsInLobby = this.#clients.getClientsByLobbyID(lobbyID);
+      
+      broadcastFunction = function each(client) {
+        if (client.readyState === ws.OPEN && (clientsInLobby.some(clientInLobby => clientInLobby.getCid() === client.cid))) {
+          // send all clients without sender
           client.send(data, { binary: isBinary });
         }
       };

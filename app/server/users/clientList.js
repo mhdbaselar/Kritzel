@@ -72,4 +72,21 @@ module.exports = class ClientList {
 
         return name;
     }
+
+    getLobbyIDByCid(cid){
+        let lobbyID = 0;
+
+        this.#clientList.forEach(client => {
+            if(client.getCid() == cid){
+                lobbyID = client.getLobbyID();
+            }
+        });
+
+        return lobbyID;
+    }
+
+    getClientsByLobbyID(lobbyID){
+        let clientsInLobby = this.#clientList.filter(client => client.getLobbyID() == lobbyID);
+        return clientsInLobby;
+    }
 }
