@@ -2,6 +2,7 @@
 
 const Board = require("./game/board");
 const Chat = require("./game/chat");
+const Lobby = require("./game/lobby");
 const ClientList = require("./users/clientList");
 
 module.exports = class ServerGame {
@@ -11,6 +12,8 @@ module.exports = class ServerGame {
   #chat;
   /**@type {TinyServer} */
   #server;
+  /**@type {Lobby[]} */
+  #lobbies;
 
   /**
    * Constructor to instanciate the server game logic
@@ -23,14 +26,18 @@ module.exports = class ServerGame {
     this.intervalReference = null;
     this.#board = null;
     this.#chat = null;
+    this.#lobbies = [];
   }
 
   /**
    * Creates a board, sets and starts the interval for the send function
    */
   start() {
-    this.#board = new Board(600, 400, 0);
-    this.#chat = new Chat();
+    //this.#board = new Board(600, 400, 0);
+    //this.#chat = new Chat();
+
+    let lobby = new Lobby();
+    this.#lobbies.push(lobby);
 
     this.intervalReference = setInterval(this.tick.bind(this), 100);
   }

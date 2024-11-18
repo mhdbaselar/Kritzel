@@ -20,4 +20,24 @@ module.exports = class Lobby {
             this.#playerList.push(player);
         }
     }
+
+    draw(x, y, color, thickness, cid) {
+        //TODO: CHECK RIGHTS OF CID
+        this.#board.draw(x,y,color,thickness);
+    }
+
+    erase(x, y, thickness, cid) {
+        //TODO: CHECK RIGHTS OF CID
+        this.#board.erase(x, y, thickness);
+    }
+
+    fill(x, y, color, cid){
+        //TODO: CHECK RIGHTS OF CID
+        this.#board.fill(x, y, color);
+    }
+
+    clear(cid) {
+        //TODO: CHECK RIGHTS OF CID
+        this.#board.clear();
+    }
 }
