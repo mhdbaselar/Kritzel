@@ -5,16 +5,26 @@ const Board = require('./board');
 const Chat = require('./chat');
 
 module.exports = class Lobby {
+    /**@type {Client[]} */
     #playerList = null;
+    /**@type {Board} */
     #board = null;
+    /**@type {Chat} */
     #chat = null;
 
+    /**
+     * Constructor to instanciate the lobby
+     */
     constructor(){
         this.#playerList = [];
         this.#board = new Board(600, 400, 0);
         this.#chat = new Chat();
     }
 
+    /**
+     * Add player to playerList (lobby)
+     * @param {Client} player player to add (client object)
+     */
     addPlayer(player){
         if (player instanceof Client){
             this.#playerList.push(player);
@@ -22,13 +32,21 @@ module.exports = class Lobby {
     }
 
     /**
-     * Get Player List
-     * @returns {Client[]}  list of players
+     * Get playerList to lobby
+     * @returns {Client[]} list of players
      */
     getPlayerList(){
         return this.#playerList;
     }
 
+    /**
+     * Process the draw action on the board
+     * @param {int} x coordinate
+     * @param {int} y coordinate
+     * @param {int} color int color code
+     * @param {int} thickness thickness
+     * @param {string} cid clinet unique ID
+     */
     draw(x, y, color, thickness, cid) {
         //TODO: CHECK PERMISSION OF CID
         this.#board.draw(x,y,color,thickness);

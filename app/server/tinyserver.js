@@ -13,7 +13,9 @@ const ws = require("ws");
 const ClientList = require("./users/clientList");
 
 module.exports = class TinyServer {
+  /**@type {ClientList} */
   #clients;
+  
   /**
    * Constructor to instanciate the WebsocketServer
    * @param {int} port port number
@@ -36,6 +38,7 @@ module.exports = class TinyServer {
   /**
    * Configures the connection to the connecting client
    * @param {WebSocket} websocket websocket - client
+   * @param {http.IncomingMessage} request client request
    */
   connectWs(websocket, request) {
     const cookies = request.headers.cookie;
@@ -97,6 +100,7 @@ module.exports = class TinyServer {
 
   /**
    * Recieves and processes a message from the client
+   * @param {WebSocket} websocket websocket - client
    * @param {string} data client request
    */
   processWsRequest(websocket, data) {
@@ -122,7 +126,8 @@ module.exports = class TinyServer {
    * @param {string} cid user unique ID
    * @param {string} data server response
    * @param {boolean} isBinary is data binary
-   * @param {string} broadcastType send - all | allWithoutSender | onlySender - client
+   * @param {string} broadcastType send - all | allWithoutSender | onlySender | allInLobby | allInLobbyWithoutSender - client
+   * @param {Client[]} clientsInLobby list of clients in lobby
    */
   broadcastWsMessage(cid, data, isBinary, broadcastType, clientsInLobby) {
     let broadcastFunction = function each(client) {}; // empty function
@@ -206,8 +211,8 @@ module.exports = class TinyServer {
   }
 
   /**
-   * Returns the client list
-   * @returns {ClientList} client list
+   * Returns the client list object
+   * @returns {ClientList} client list object
    */
   getClients(){
     return this.#clients;

@@ -22,7 +22,7 @@ module.exports = class ServerGame {
   }
 
   /**
-   * Creates a board, sets and starts the interval for the send function
+   * Creates a lobby, sets and starts the interval for the send function
    */
   start() {
     let lobby = new Lobby();
@@ -49,6 +49,10 @@ module.exports = class ServerGame {
     this.tickCallback();
   }
 
+  /**
+   * Get the lobbies
+   * @returns {Lobby[]} list of lobbies
+   */
   getLobbies(){
     return this.#lobbies;
   }
@@ -68,7 +72,7 @@ module.exports = class ServerGame {
       }
     });
 
-    // add Player Referenz/Object to lobby
+    // add Player Object to lobby
     if(request instanceof Client){
       this.#lobbies[lobbyID].addPlayer(request);
       return;
@@ -102,7 +106,7 @@ module.exports = class ServerGame {
    * Processes the draw action
    * @param {Object} action draw action
    * @param {string} cid user unique ID
-   * @param {int} lobbyID lobbyID
+   * @param {int} lobbyID index of the lobby
    */
   #processDrawAction(action, cid, lobbyID) {
 
@@ -137,9 +141,9 @@ module.exports = class ServerGame {
   }
 
   /**
-   * Sends the current canvas to all clients
+   * Sends the current canvas to all clients in the lobby
    * @param {string} cid user unique ID
-   * @param {int} lobbyID lobbyID 
+   * @param {int} lobbyID index of the lobby 
   */
   #processGetCanvasAction(cid, lobbyID) {
     let playerInLobby = this.#lobbies[lobbyID].getPlayerList();
@@ -148,10 +152,10 @@ module.exports = class ServerGame {
   }
 
   /**
-   * Processes the chat action (send a message to all clients)
+   * Processes the chat action (send a message to all clients in the lobby)
    * @param {string} chatMsg chat message
    * @param {string} cid user unique ID
-   * @param {int} lobbyID lobbyID
+   * @param {int} lobbyID index of the lobby
    */
   #processChatAction(chatMsg, cid, lobbyID) {
     this.#lobbies[lobbyID].addMessage(chatMsg, cid);
@@ -175,9 +179,9 @@ module.exports = class ServerGame {
   }
 
   /**
-   * Sends all chat messages to the client
+   * Sends all chat messages to the request client
    * @param {string} cid user unique ID
-   * @param {*} lobbyID lobbyID
+   * @param {int} lobbyID index of the lobby
    */
   #processGetChatAction(cid, lobbyID) {
     let messages = this.#lobbies[lobbyID].getMessages(cid);
@@ -195,7 +199,11 @@ module.exports = class ServerGame {
     this.#server.broadcastWsMessage(cid, jsonMessage, false, "onlySender");
   }
 
-  
+  /**
+   * Sends a playerList of the lobby to all clients in the lobby
+   * @param {string} cid client unique ID
+   * @param {int} lobbyID index of the lobby
+   */
   #processGetUserListAction(cid, lobbyID) {
     let playerInLobby = this.#lobbies[lobbyID].getPlayerList();
     let sendPlayerList = [];

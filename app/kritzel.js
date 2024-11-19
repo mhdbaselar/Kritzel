@@ -8,16 +8,6 @@ let server = new TinyServer(8123, (uid, data) => {
   receive(uid, data);
 });
 
-// Compares two arrays (Compare if two canvas are identical)
-function arraysAreIdentical(arr1, arr2) {
-  return (
-    arr1.length === arr2.length &&
-    arr1.every((el, i) =>
-      Array.isArray(el) ? arraysAreIdentical(el, arr2[i]) : el === arr2[i]
-    )
-  );
-}
-
 // Creates a ServerGame (organizes game logic server-side)
 let game = new ServerGame(server, () => {
 
