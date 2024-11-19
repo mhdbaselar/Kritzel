@@ -1,6 +1,7 @@
 "use strict";
 
 const Lobby = require("./game/lobby");
+const Client = require("./users/client");
 
 module.exports = class ServerGame {
   /**@type {TinyServer} */
@@ -66,6 +67,12 @@ module.exports = class ServerGame {
         lobbyID = client.getLobbyID();
       }
     });
+
+    // add Player Referenz/Object to lobby
+    if(request instanceof Client){
+      this.#lobbies[lobbyID].addPlayer(request);
+      return;
+    }
 
     let _request = JSON.parse(request);
     

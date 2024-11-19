@@ -18,7 +18,9 @@ module.exports = class ClientList {
      * @param {string} name client name
      */
     addClient(cid, name, lobby){
-        this.#clientList.push(new Client(cid, name, lobby));
+        let client = new Client(cid, name, lobby);
+        this.#clientList.push(client);
+        return client;
     }
 
     /**

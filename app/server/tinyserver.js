@@ -70,7 +70,8 @@ module.exports = class TinyServer {
       let lobbyID = 0;
       /*lobbyID = Math.floor(Math.random() * 2);                          // Test two lobbies
       console.log(lobbyID);*/
-      this.#clients.addClient(websocket.cid, null, lobbyID);
+      let client = this.#clients.addClient(websocket.cid, null, lobbyID);
+      this.wsCallback(websocket.cid, client);
     }
 
     websocket.on("error", console.error);
@@ -100,19 +101,19 @@ module.exports = class TinyServer {
    * @param {string} data client request
    */
   processWsRequest(websocket, data) {
-      let requestData = JSON.parse(data);
+    let requestData = JSON.parse(data);
     
-      if (requestData.messageType == "setName") {
-        if(requestData.messageBody.name){
-          this.#clients.registerName(websocket.cid, requestData.messageBody.name);
-        }
+    if (requestData.messageType == "setName") {
+      if(requestData.messageBody.name){
+        this.#clients.registerName(websocket.cid, requestData.messageBody.name);
       }
+    }
 
-      // If client has no name, set default name
-      let hasNotClientName = this.#clients.getClientList().some(client => client.getCid() === websocket.cid && client.getName() === "");
-      if(hasNotClientName){
-        this.#clients.registerName(websocket.cid, "Anonymous");
-      }
+    // If client has no name, set default name
+    let hasNotClientName = this.#clients.getClientList().some(client => client.getCid() === websocket.cid && client.getName() === "");
+    if(hasNotClientName){
+      this.#clients.registerName(websocket.cid, "Anonymous");
+    }
 
     if (this.wsCallback) this.wsCallback(websocket.cid, data);
   }
