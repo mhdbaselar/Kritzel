@@ -3,6 +3,7 @@
 const Client = require('../users/client');
 const Board = require('./board');
 const Chat = require('./chat');
+const Game = require('./game');
 
 module.exports = class Lobby {
     /**@type {Client[]} */
@@ -11,6 +12,8 @@ module.exports = class Lobby {
     #board = null;
     /**@type {Chat} */
     #chat = null;
+    /**@type {Game} */
+    #game = null;
 
     /**
      * Constructor to instanciate the lobby
@@ -19,6 +22,7 @@ module.exports = class Lobby {
         this.#playerList = [];
         this.#board = new Board(600, 400, 0);
         this.#chat = new Chat();
+        this.#game = new Game();
     }
 
     /**
