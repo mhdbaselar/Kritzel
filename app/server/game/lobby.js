@@ -5,18 +5,17 @@ const Board = require('./board');
 const Chat = require('./chat');
 
 module.exports = class Lobby {
-    // Player werden aktuell über lobbyId in client organisiert, da sonst doppelte Einträge mit unterschiedlichen Objekten
-    //#playerList = null;
+    #playerList = null;
     #board = null;
     #chat = null;
 
     constructor(){
-        //this.#playerList = [];
+        this.#playerList = [];
         this.#board = new Board(600, 400, 0);
         this.#chat = new Chat();
     }
 
-    /*addPlayer(player){
+    addPlayer(player){
         if (player instanceof Client){
             this.#playerList.push(player);
         }
@@ -24,7 +23,7 @@ module.exports = class Lobby {
 
     getPlayerList(){
         return this.#playerList;
-    }*/
+    }
 
     draw(x, y, color, thickness, cid) {
         //TODO: CHECK PERMISSION OF CID
