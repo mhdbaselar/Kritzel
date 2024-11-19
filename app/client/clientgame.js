@@ -17,6 +17,7 @@ const HexColorConverter = require("./class/hexColorConverter");
 const converter = new HexColorConverter();
 
 module.exports = class ClientGame {
+  /**@type {string} */
   #name;  // user name
 
   /**
@@ -79,8 +80,6 @@ module.exports = class ClientGame {
         const chatMessages = document.querySelector(".chat-messages");
         displayChatMessageList(chatMessages, data.data, data.cid);
       } else if (data.type == "chatMsg") {
-        console.log(`${data.cid}: ${data.data} : ${data.name}`); // Chat output console.log
-
         // Update the chat display
         const chatMessages = document.querySelector(".chat-messages");
         displayChatMessage(chatMessages, data.data, data.cid, data.name);
@@ -374,6 +373,9 @@ module.exports = class ClientGame {
     this.send(JSON.stringify(message));
   }
 
+  /**
+   * Requests the server to send the user list
+   */
   sendGetUserListAction() {
     let message = new Message("getUserListAction", null);
     this.send(JSON.stringify(message));

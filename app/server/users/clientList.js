@@ -16,6 +16,8 @@ module.exports = class ClientList {
      * Adds a client to the list
      * @param {string} cid client unique ID
      * @param {string} name client name
+     * @param {int} lobby index of the lobby
+     * @returns {Client} new client object
      */
     addClient(cid, name, lobby){
         let client = new Client(cid, name, lobby);
@@ -73,22 +75,5 @@ module.exports = class ClientList {
         });
 
         return name;
-    }
-
-    getLobbyIDByCid(cid){
-        let lobbyID = 0;
-
-        this.#clientList.forEach(client => {
-            if(client.getCid() == cid){
-                lobbyID = client.getLobbyID();
-            }
-        });
-
-        return lobbyID;
-    }
-
-    getClientsByLobbyID(lobbyID){
-        let clientsInLobby = this.#clientList.filter(client => client.getLobbyID() == lobbyID);
-        return clientsInLobby;
     }
 }

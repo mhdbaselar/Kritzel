@@ -61,14 +61,26 @@ module.exports = class Client {
         this.#name = name;
     }
 
+    /**
+     * Returns the client score
+     * @returns {int} client score
+     */
     getPoints() {
         return this.#score;
     }
 
+    /**
+     * Sets the client score
+     * @param {int} points client score
+     */
     setPoints(points) {
         this.#score = points;
     }
 
+    /**
+     * Returns the client lobby index
+     * @returns {int} index of the lobby
+     */
     getLobbyID(){
         return this.#lobbyID;
     }
