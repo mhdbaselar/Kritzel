@@ -64,12 +64,11 @@ module.exports = class TinyServer {
       websocket.cid = cid;
     }
     else {    // create new client
-
       websocket.cid = this.getUniqueID();
       websocket.send(JSON.stringify({ type: "init", data: websocket.cid }));
       let lobbyID = 0;
       /*lobbyID = Math.floor(Math.random() * 2);                          // Test two lobbies
-      console.log(lobbyID);*/
+      console.log("lobbyID: " + lobbyID);*/
       let client = this.#clients.addClient(websocket.cid, null, lobbyID);
       this.wsCallback(websocket.cid, client);
     }
@@ -125,7 +124,7 @@ module.exports = class TinyServer {
    * @param {boolean} isBinary is data binary
    * @param {string} broadcastType send - all | allWithoutSender | onlySender - client
    */
-  broadcastWsMessage(cid, data, isBinary, broadcastType, lobbyID) {
+  broadcastWsMessage(cid, data, isBinary, broadcastType, clientsInLobby) {
     let broadcastFunction = function each(client) {}; // empty function
 
     if (broadcastType == "all") {
@@ -150,20 +149,15 @@ module.exports = class TinyServer {
         }
       };
     } else if (broadcastType == "allInLobbyWithoutSender"){
-      let clientsInLobby = this.#clients.getClientsByLobbyID(lobbyID);
-
       broadcastFunction = function each(client) {
-        if (client.readyState === ws.OPEN && client.cid != cid && (clientsInLobby.some(clientInLobby => clientInLobby.getCid() === client.cid))) {
+        if (client.readyState === ws.OPEN && client.cid != cid && (clientsInLobby.some((clientInLobby) => clientInLobby.getCid() === client.cid))) {
           // send all clients in lobby without sender
           client.send(data, { binary: isBinary });
         }
       };
-    }
-    else if (broadcastType == "allInLobby"){
-      let clientsInLobby = this.#clients.getClientsByLobbyID(lobbyID);
-      
+    } else if (broadcastType == "allInLobby"){
       broadcastFunction = function each(client) {
-        if (client.readyState === ws.OPEN && (clientsInLobby.some(clientInLobby => clientInLobby.getCid() === client.cid))) {
+        if (client.readyState === ws.OPEN && (clientsInLobby.some((clientInLobby) => clientInLobby.getCid() === client.cid))) {
           // send all clients in lobby
           client.send(data, { binary: isBinary });
         }

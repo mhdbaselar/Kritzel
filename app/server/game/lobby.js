@@ -21,6 +21,10 @@ module.exports = class Lobby {
         }
     }
 
+    /**
+     * Get Player List
+     * @returns {Client[]}  list of players
+     */
     getPlayerList(){
         return this.#playerList;
     }

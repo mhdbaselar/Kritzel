@@ -32,8 +32,9 @@ let game = new ServerGame(server, () => {
 
     // Only send if there is data
     if (data.length === 0) {continue;}
+    let playerInLobby = lobbies[lobbyID].getPlayerList();
 
-    server.broadcastWsMessage(null, json, false, "allInLobby", lobbyID);
+    server.broadcastWsMessage(null, json, false, "allInLobby", playerInLobby);
   } 
 });
 
