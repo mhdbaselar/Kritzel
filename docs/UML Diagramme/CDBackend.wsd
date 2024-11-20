@@ -131,5 +131,6 @@ Lobby --> Chat
 Lobby --> Game
 Lobby --> Client
 ClientList --> Client
+Game --> Client
 
 @enduml
