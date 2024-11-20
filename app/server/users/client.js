@@ -5,31 +5,35 @@ module.exports = class Client {
     /**@type {string} */
     #name;
     /**@type {int} */
-    #boardID;
+    #score;
+    /**@type {boolean} */
+    #isActivePlayer;
     /**@type {int} */
-    #points;
+    #lobbyID;
+
 
     /**
      * Constructor to instanciate the client
-     * @param {*} cid client unique ID (for cookie)
-     * @param {*} name client name
+     * @param {string} cid client unique ID (for cookie)
+     * @param {string} name client name
+     * @param {int} lobbyID Lobby Index
      */
-    constructor(cid, name, boardID, points){
+    constructor(cid, name, lobbyID) {
         this.#cid = cid;
-        if(name){
+        if (name) {
             this.#name = name;
         } else {
             this.#name = "";
         }
-        this.#boardID = 0;
-        this.#points = 0;
+        this.#score = 0;
+        this.#lobbyID = lobbyID;
     }
 
     /**
      * Returns the client unique ID
      * @returns {string} client unique ID
      */
-    getCid(){
+    getCid() {
         return this.#cid;
     }
 
@@ -37,7 +41,7 @@ module.exports = class Client {
      * Sets the client unique ID
      * @param {string} cid client unique ID
      */
-    setCid(cid){
+    setCid(cid) {
         this.#cid = cid;
     }
 
@@ -45,7 +49,7 @@ module.exports = class Client {
      * Returns the client name
      * @returns {string} client name
      */
-    getName(){
+    getName() {
         return this.#name;
     }
 
@@ -53,23 +57,31 @@ module.exports = class Client {
      * Sets the client name
      * @param {string} name client name
      */
-    setName(name){
+    setName(name) {
         this.#name = name;
     }
 
-    getBoardID(){
-        return this.#boardID;
+    /**
+     * Returns the client score
+     * @returns {int} client score
+     */
+    getPoints() {
+        return this.#score;
     }
 
-    setBoardID(boardID){
-        this.#boardID = boardID;
+    /**
+     * Sets the client score
+     * @param {int} points client score
+     */
+    setPoints(points) {
+        this.#score = points;
     }
 
-    getPoints(){
-        return this.#points;
-    }
-
-    setPoints(points){
-        this.#points = points;
+    /**
+     * Returns the client lobby index
+     * @returns {int} index of the lobby
+     */
+    getLobbyID(){
+        return this.#lobbyID;
     }
 }

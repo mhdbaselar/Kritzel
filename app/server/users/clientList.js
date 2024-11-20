@@ -16,9 +16,13 @@ module.exports = class ClientList {
      * Adds a client to the list
      * @param {string} cid client unique ID
      * @param {string} name client name
+     * @param {int} lobby index of the lobby
+     * @returns {Client} new client object
      */
-    addClient(cid, name){
-        this.#clientList.push(new Client(cid, name));
+    addClient(cid, name, lobby){
+        let client = new Client(cid, name, lobby);
+        this.#clientList.push(client);
+        return client;
     }
 
     /**

@@ -1,12 +1,19 @@
 "use strict";
 
 module.exports = class Board {
+  /**@type {int[][]} */
   #canvas; // 2D with int colors codes
+  /**@type {int} */
   #rows;
+  /**@type {int} */
   #columns;
-  #initialColor; // int color at start
+  /**@type {int} */
+  #initialColor;
+  /**@type {int} */
   #backgroundColor;
+  /**@type {{x0: int, y0: int}} */
   #previousPoint; // previous point for line generation
+  /**@type {{x: int, y: int, color: int}[]} */
   #points; // transfer points list
 
   /**

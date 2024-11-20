@@ -13,7 +13,9 @@ const ws = require("ws");
 const ClientList = require("./users/clientList");
 
 module.exports = class TinyServer {
+  /**@type {ClientList} */
   #clients;
+  
   /**
    * Constructor to instanciate the WebsocketServer
    * @param {int} port port number
@@ -36,6 +38,7 @@ module.exports = class TinyServer {
   /**
    * Configures the connection to the connecting client
    * @param {WebSocket} websocket websocket - client
+   * @param {http.IncomingMessage} request client request
    */
   connectWs(websocket, request) {
     const cookies = request.headers.cookie;
@@ -66,7 +69,11 @@ module.exports = class TinyServer {
     else {    // create new client
       websocket.cid = this.getUniqueID();
       websocket.send(JSON.stringify({ type: "init", data: websocket.cid }));
-      this.#clients.addClient(websocket.cid, null);
+      let lobbyID = 0;
+      /*lobbyID = Math.floor(Math.random() * 2);                          // Test two lobbies
+      console.log("lobbyID: " + lobbyID);*/
+      let client = this.#clients.addClient(websocket.cid, null, lobbyID);
+      this.wsCallback(websocket.cid, client);
     }
 
     websocket.on("error", console.error);
@@ -93,11 +100,12 @@ module.exports = class TinyServer {
 
   /**
    * Recieves and processes a message from the client
+   * @param {WebSocket} websocket websocket - client
    * @param {string} data client request
    */
   processWsRequest(websocket, data) {
     let requestData = JSON.parse(data);
-
+    
     if (requestData.messageType == "setName") {
       if(requestData.messageBody.name){
         this.#clients.registerName(websocket.cid, requestData.messageBody.name);
@@ -118,9 +126,10 @@ module.exports = class TinyServer {
    * @param {string} cid user unique ID
    * @param {string} data server response
    * @param {boolean} isBinary is data binary
-   * @param {string} broadcastType send - all | allWithoutSender | onlySender - client
+   * @param {string} broadcastType send - all | allWithoutSender | onlySender | allInLobby | allInLobbyWithoutSender - client
+   * @param {Client[]} clientsInLobby list of clients in lobby
    */
-  broadcastWsMessage(cid, data, isBinary, broadcastType) {
+  broadcastWsMessage(cid, data, isBinary, broadcastType, clientsInLobby) {
     let broadcastFunction = function each(client) {}; // empty function
 
     if (broadcastType == "all") {
@@ -141,6 +150,20 @@ module.exports = class TinyServer {
       broadcastFunction = function each(client) {
         if (client.readyState === ws.OPEN && client.cid == cid) {
           // send only sender client
+          client.send(data, { binary: isBinary });
+        }
+      };
+    } else if (broadcastType == "allInLobbyWithoutSender"){
+      broadcastFunction = function each(client) {
+        if (client.readyState === ws.OPEN && client.cid != cid && (clientsInLobby.some((clientInLobby) => clientInLobby.getCid() === client.cid))) {
+          // send all clients in lobby without sender
+          client.send(data, { binary: isBinary });
+        }
+      };
+    } else if (broadcastType == "allInLobby"){
+      broadcastFunction = function each(client) {
+        if (client.readyState === ws.OPEN && (clientsInLobby.some((clientInLobby) => clientInLobby.getCid() === client.cid))) {
+          // send all clients in lobby
           client.send(data, { binary: isBinary });
         }
       };
@@ -188,8 +211,8 @@ module.exports = class TinyServer {
   }
 
   /**
-   * Returns the client list
-   * @returns {ClientList} client list
+   * Returns the client list object
+   * @returns {ClientList} client list object
    */
   getClients(){
     return this.#clients;
