@@ -124,7 +124,7 @@ class Game {
 Kritzel --> TinyServer
 Kritzel --> ServerGame
 TinyServer --> ClientList
-TinyServer --> ServerGame
+ServerGame --> TinyServer
 ServerGame --> Lobby
 Lobby --> Board
 Lobby --> Chat
