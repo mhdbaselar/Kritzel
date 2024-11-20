@@ -3,90 +3,79 @@ class Kritzel {
     - server: TinyServer
     - game: ServerGame
     + receive(uid: string, message: Message)
-
 }
+
 class TinyServer {
     - clients: ClientList
     - wsCallback: function
     - server: http.Server
     - websocketServer: ws.WebSocketServer
     + constructor(port: int, wsCallback: function)
-    + connectWs(websocket: WebSocket)
+    + connectWs(websocket: WebSocket, request: http.IncomingMessage)
     + getUniqueID(): string
     + processWsRequest(websocket: WebSocket, data: string)
-    + broadcastWsMessage(cid: string, data: string, isBinary: boolean, broadcastType: string)
+    + broadcastWsMessage(cid: string, data: string, isBinary: boolean, broadcastType: string, clientsInLobby: Client[])
     + processHttpRequest(req: http.IncomingMessage, res: http.ServerResponse)
     + getClients(): ClientList
 }
 
 class ServerGame {
-    - board: Board
-    - isSendPointList: boolean
-    - chat: Chat
     - server: TinyServer
+    - lobbies: Lobby[]
     - intervalReference: NodeJS.Timeout
     - tickCallback: function
     + constructor(server: TinyServer, tickCallback: function)
     + start()
     + stop()
     + tick()
-    + getBoard(): Board
-    + getIsSendPointList(): boolean
-    + setIsSendPointList(bool: boolean)
+    + getLobbies(): Lobby[]
     + processInput(cid: string, request: Message)
-    - processDrawAction(action: Object, cid: string)
-    - processGetCanvasAction(cid: string)
-    - processChatAction(chatMsg: string, cid: string)
-    - processGetChatAction(cid: string)
+    - processDrawAction(action: Object, cid: string, lobbyID: int)
+    - processGetCanvasAction(cid: string, lobbyID: int)
+    - processChatAction(chatMsg: string, cid: string, lobbyID: int)
+    - processGetChatAction(cid: string, lobbyID: int)
+    - processGetUserListAction(cid: string, lobbyID: int)
 }
 
-class ClientList {
-    - clientList: Client[]
+class Lobby {
+    - playerList: Client[]
+    - board: Board
+    - chat: Chat
+    - game: Game
     + constructor()
-    + addClient(cid: string, name: string)
-    + replaceCid(oldCid: string, newCid: string)
-    + getClientList(): Client[]
-    + registerName(cid: string, name: string)
-    + getNameByCid(cid: string): string
-}
-
-class Client {
-    - cid: string
-    - name: string
-    - boardID: int
-    - points: int
-    + constructor(cid: string, name: string, boardID: int, points: int)
-    + getCid(): string
-    + setCid(cid: string)
-    + getName(): string
-    + setName(name: string)
-    + getBoardID(): int
-    + setBoardID(boardID: int)
-    + getPoints(): int
-    + setPoints(points: int)
+    + addPlayer(player: Client)
+    + getPlayerList(): Client[]
+    + draw(x: int, y: int, color: int, thickness: int, cid: string)
+    + erase(x: int, y: int, thickness: int, cid: string)
+    + fill(x: int, y: int, color: int, cid: string): boolean
+    + clear(cid: string)
+    + getBoardCanvas(): int[][]
+    + getBoard(): Board
+    + addMessage(message: string, cid: string)
+    + getMessages(cid: string): {uid: string, msg: string}[]
 }
 
 class Board {
-    - canvas: string[][]
+    - canvas: int[][]
     - rows: int
     - columns: int
-    - initialColor: string
-    - backgroundColor: string
+    - initialColor: int
+    - backgroundColor: int
     - previousPoint: {x0: int, y0: int}
-    - points: {x: int, y: int, color: string}[]
-    + constructor(columns: int, rows: int, initialColor: string)
-    + draw(x: int, y: int, color: string, thickness: int)
+    - points: {x: int, y: int, color: int}[]
+    + constructor(columns: int, rows: int, initialColor: int)
+    + draw(x: int, y: int, color: int, thickness: int)
     + erase(x: int, y: int, thickness: int)
     + clear()
-    + fillBackground(color: string)
-    + fill(x: int, y: int, color: string)
-    + iterativefill(x: int, y: int, color: string, previousColor: string)
-    + getBoard(): string[][]
-    + getPoints(): {x: int, y: int, color: string}[]
+    + fillBackground(color: int)
+    + fill(x: int, y: int, color: int): boolean
+    + iterativefill(x: int, y: int, color: int, previousColor: int)
+    + getBoard(): int[][]
+    + getPoints(): {x: int, y: int, color: int}[]
     + setPointsEmpty()
-    - drawLine(x0: int, y0: int, x1: int, y1: int, color: string, thickness: int): {x: int, y: int, color: string}[]
-    - drawPoint(x: int, y: int, color: string, thickness: int): {x: int, y: int, color: string}[]
-    - setWholeBoard(color: string)
+    - drawLine(x0: int, y0: int, x1: int, y1: int, color: int, thickness: int): {x: int, y: int, color: int}[]
+    - drawPoint(x: int, y: int, color: int, thickness: int): {x: int, y: int, color: int}[]
+    - setWholeBoard(color: int)
 }
 
 class Chat {
@@ -96,13 +85,51 @@ class Chat {
     + getMessages(): {cid: string, msg: string}[]
 }
 
+class ClientList {
+    - clientList: Client[]
+    + constructor()
+    + addClient(cid: string, name: string, lobby: int): Client
+    + replaceCid(oldCid: string, newCid: string)
+    + getClientList(): Client[]
+    + registerName(cid: string, name: string)
+    + getNameByCid(cid: string): string
+}
+
+class Client {
+    - cid: string
+    - name: string
+    - score: int
+    - isActivePlayer: boolean
+    - lobbyID: int
+    + constructor(cid: string, name: string, lobbyID: int)
+    + getCid(): string
+    + setCid(cid: string)
+    + getName(): string
+    + setName(name: string)
+    + getPoints(): int
+    + setPoints(points: int)
+    + getLobbyID(): int
+}
+
+class Game {
+    - playerList: Client[]
+    - state: string
+    + constructor()
+    + start(playerList: Client[])
+    + getState(): string
+    - nextState()
+    + getActivePlayer(): Client
+}
+
 Kritzel --> TinyServer
 Kritzel --> ServerGame
 TinyServer --> ClientList
 TinyServer --> ServerGame
-ServerGame --> Board
-ServerGame --> Chat
-ServerGame --> TinyServer
+ServerGame --> Lobby
+Lobby --> Board
+Lobby --> Chat
+Lobby --> Game
+Lobby --> Client
 ClientList --> Client
 
 @enduml
