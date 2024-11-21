@@ -1,11 +1,22 @@
 # Kritzel
 
+**Kritzel** ist ein kreatives Multiplayer-Zeichenspiel, das es Benutzern ermöglicht, gemeinsam in Echtzeit auf einer Leinwand zu zeichnen, Nachrichten auszutauschen und Punkte zu sammeln. Es ist inspiriert von bekannten Spielen wie Skribbl.io, aber mit einer individuellen Umsetzung.
+
+---
+
+## 📋 Features
+
+- **Echtzeit-Zeichnen**: Zeichne mit Freunden auf derselben Leinwand.
+- **Benutzernamen-Eingabe**: Benutzer können ihren Namen eingeben, der im Spiel und im Chat angezeigt wird.
+- **Farben und Stiftgrößen**: Wähle aus verschiedenen Farben und Stiftgrößen für maximale Kreativität.
+- **Punktesystem**: Verfolge deine Punkte in einer Benutzerliste.
+- **Chat-Funktion**: Kommuniziere mit anderen Spielern im Chat.
+- **Docker-Unterstützung**: Einfacher Start über Docker für eine einheitliche Umgebung.
+
 ## Konflikte zwischen Windows und Git
 
-Da Microsoft kläglich mit ihrer Marktmacht versuchte, ein eigenes Dateisystem (DOS-Dateisystem) in die Welt zu setzen und damit das Unix-Dateisystem (Linux, MacOS, Git und basically ALLES andere) zu verdrängen, haben wir, da wir in der Gruppe beide Dateisysteme verwenden, nun das Vergnügen, dass es immer mal wieder zu Konflikten bei Windows und Git kommen wird. Alle Windows-Nutzer sollten deshalb bei sich auf dem Windows-System die folgende Einstellung (einfach irgendwo im CMD) vornehmen:
+Alle Windows-Nutzer sollten bei sich auf dem Windows-System die folgende Einstellung (einfach irgendwo im CMD) vornehmen:
 > git config --global core.autocrlf true
-
-Sollte es danach noch zu Fehlern kommen, sollte sich von den betroffenen Nutzern ernsthaft über die Anschaffung eines vernünftigen (Unix-Like) Betriebssystem Gedanken gemacht werden, da ich hier mit Microsofts "Wir kochen hier unser eigenes Ding und begeben uns auf keinen Fall auf bestehende Standards aller anderen hinab"-Gehabe fertig habe und auch nicht mehr weiter weiß, wenn es jetzt noch zu Konflikten kommt.
 
 ## Lokale Ausführung
 
@@ -26,3 +37,4 @@ Im Buildprozess wird automatisch auf Grundlage des Quelltextes eine aktualisiert
 > node ./kritzel.js
 
 Bitte beachtet, dass der Docker-Container sicherstellt, dass sich die Software im Deployment genau so verhält wie bei euch lokal auf dem Rechner. Die Arbeit ohne Docker-Container, sondern nur mit lokalem Environment, kann zu unvorhergesehenen Bugs führen.
+
