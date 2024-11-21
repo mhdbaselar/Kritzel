@@ -2,8 +2,6 @@
 
 **Kritzel** ist ein kreatives Multiplayer-Zeichenspiel, das es Benutzern ermöglicht, gemeinsam in Echtzeit auf einer Leinwand zu zeichnen, Nachrichten auszutauschen und Punkte zu sammeln. Es ist inspiriert von bekannten Spielen wie Skribbl.io, aber mit einer individuellen Umsetzung.
 
----
-
 ## 📋 Features
 
 - **Echtzeit-Zeichnen**: Zeichne mit Freunden auf derselben Leinwand.
@@ -37,4 +35,3 @@ Im Buildprozess wird automatisch auf Grundlage des Quelltextes eine aktualisiert
 > node ./kritzel.js
 
 Bitte beachtet, dass der Docker-Container sicherstellt, dass sich die Software im Deployment genau so verhält wie bei euch lokal auf dem Rechner. Die Arbeit ohne Docker-Container, sondern nur mit lokalem Environment, kann zu unvorhergesehenen Bugs führen.
-
