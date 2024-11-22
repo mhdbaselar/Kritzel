@@ -3,6 +3,8 @@
 
 const Client = require('../users/client');
 const Dictionary = require('./dictionary');
+const responseTypes = require("./../../client/class/responseTypes");
+const broadcastTypes = require('../broadcastTypes');
 
 const stateTypes = {
     gameStarted : 1,
@@ -88,11 +90,11 @@ module.exports = class Game {
             this.#wordChoicesList.push(Dictionary.getRandomWord());
         }
 
-        let jsonMessageDrawer = JSON.stringify({type: "wordChoicesList" ,data: this.#wordChoicesList});
-        let jsonMessageGuesser = JSON.stringify({type: "choosingWordNotification", data: this.#drawer.getName()});
+        let jsonMessageDrawer = JSON.stringify({type: responseTypes.wordChoiceList ,data: this.#wordChoicesList});
+        let jsonMessageGuesser = JSON.stringify({type: responseTypes.choosingWordNotification, data: this.#drawer.getName()});
 
-        this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessageDrawer, false, "onlySender");
-        this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessageGuesser, false, "allInLobbyWithoutSender");
+        this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessageDrawer, false, broadcastTypes.onlyOneClient);
+        this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessageGuesser, false, broadcastTypes.allInLobbyWithoutOneClient, this.#playerList);
 
         this.#wordSelectionTimeout = setTimeout(() => {      // 10s to select a word;
             this.#state = stateTypes.wordSelected;
@@ -165,8 +167,8 @@ module.exports = class Game {
         if (this.#state === this.stateTypes.drawerSelected && this.#drawer.getCid() === cid){  // after wordSelected and the drawer is the player
             this.#word = word;
             clearTimeout(this.#wordSelectionTimeout);
-            let jsonMessageGuesser = JSON.stringify({type: "endChoosingWordNotification", data: this.#drawer.getName()});
-            this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessageGuesser, false, "allInLobbyWithoutSender");
+            let jsonMessageGuesser = JSON.stringify({type: responseTypes.endChoosingWordNotification, data: this.#drawer.getName()});
+            this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessageGuesser, false, broadcastTypes.allInLobbyWithoutOneClient, this.#playerList);
         }
     }
 }

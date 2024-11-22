@@ -3,6 +3,8 @@
 const Lobby = require("./game/lobby");
 const Client = require("./users/client");
 const requestTypes = require("./../client/class/requestTypes");
+const responseTypes = require("./../client/class/responseTypes");
+const broadcastTypes = require("./broadcastTypes");
 
 module.exports = class ServerGame {
   /**@type {TinyServer} */
@@ -95,8 +97,10 @@ module.exports = class ServerGame {
 
     } else if (_request.messageType == requestTypes.getUserList) {
       this.#processGetUserListAction(cid, lobbyID);
+
     } else if (_request.messageType == requestTypes.setWord){
       this.#processSetWordAction(cid, _request.messageBody, lobbyID);
+      
     }
 
   }
@@ -124,16 +128,16 @@ module.exports = class ServerGame {
     if (action.tool == "clear") {
       this.#lobbies[lobbyID].clear(cid);
       let playerInLobby = this.#lobbies[lobbyID].getPlayerList();
-      let jsonMessage = JSON.stringify({ type: "initWhiteCanvas", data: [0] });
-      this.#server.broadcastWsMessage(cid, jsonMessage, false, "allInLobby", playerInLobby);
+      let jsonMessage = JSON.stringify({ type: responseTypes.initWhiteCanvas, data: [0] });
+      this.#server.broadcastWsMessage(cid, jsonMessage, false, broadcastTypes.allInLobby, playerInLobby);
     }
 
     if (action.tool == "fill") {
       let hasChanged = this.#lobbies[lobbyID].fill(action.x, action.y, action.color, cid);
       if (hasChanged) {
         let playerInLobby = this.#lobbies[lobbyID].getPlayerList();
-        let jsonMessage = JSON.stringify({ type: "2d", data: this.#lobbies[lobbyID].getBoardCanvas() });
-        this.#server.broadcastWsMessage(cid, jsonMessage, false, "allInLobby", playerInLobby);
+        let jsonMessage = JSON.stringify({ type: responseTypes.canvas2D, data: this.#lobbies[lobbyID].getBoardCanvas() });
+        this.#server.broadcastWsMessage(cid, jsonMessage, false, broadcastTypes.allInLobby, playerInLobby);
       }
     }
 
@@ -150,8 +154,8 @@ module.exports = class ServerGame {
   */
   #processGetCanvasAction(cid, lobbyID) {
     let playerInLobby = this.#lobbies[lobbyID].getPlayerList();
-    let jsonMessage = JSON.stringify({ type: "2d", data: this.#lobbies[lobbyID].getBoardCanvas() });
-    this.#server.broadcastWsMessage(cid, jsonMessage, false, "allInLobby", playerInLobby);
+    let jsonMessage = JSON.stringify({ type: responseTypes.canvas2D, data: this.#lobbies[lobbyID].getBoardCanvas() });
+    this.#server.broadcastWsMessage(cid, jsonMessage, false, broadcastTypes.allInLobby, playerInLobby);
   }
 
   /**
@@ -167,7 +171,7 @@ module.exports = class ServerGame {
 
     let playerInLobby = this.#lobbies[lobbyID].getPlayerList();
     let jsonMessage = JSON.stringify({
-      type: "chatMsg",
+      type: responseTypes.chatMsg,
       data: chatMsg,
       cid: cid,
       name: name
@@ -176,7 +180,7 @@ module.exports = class ServerGame {
       cid,
       jsonMessage,
       false,
-      "allInLobbyWithoutSender",
+      broadcastTypes.allInLobbyWithoutOneClient,
       playerInLobby
     );
   }
@@ -195,11 +199,11 @@ module.exports = class ServerGame {
     });
 
     let jsonMessage = JSON.stringify({
-      type: "chatMsgList",
+      type: responseTypes.chatMsgList,
       data: data,
       cid: cid,
     });
-    this.#server.broadcastWsMessage(cid, jsonMessage, false, "onlySender");
+    this.#server.broadcastWsMessage(cid, jsonMessage, false, broadcastTypes.onlyOneClient);
   }
 
   /**
@@ -216,9 +220,9 @@ module.exports = class ServerGame {
     });
 
 
-    let jsonMessage = JSON.stringify({ type: "userList", data: sendPlayerList });
+    let jsonMessage = JSON.stringify({ type: responseTypes.userList, data: sendPlayerList });
 
-    this.#server.broadcastWsMessage(cid, jsonMessage, false, "allInLobby", playerInLobby);
+    this.#server.broadcastWsMessage(cid, jsonMessage, false, broadcastTypes.allInLobby, playerInLobby);
   }
 
   /**

@@ -10,6 +10,7 @@ const {
 } = require("./components/userInterface");
 const HexColorConverter = require("./class/hexColorConverter");
 const requestTypes = require("./class/requestTypes");
+const responseTypes = require("./class/responseTypes");
 
 /**
  * Instance of the HexColorConverter class.
@@ -76,36 +77,36 @@ module.exports = class ClientGame {
     // Event handler for receiving messages from the server
     this.socket.onmessage = (event) => {
       let data = JSON.parse(event.data);
-      if (data.type == "chatMsgList") {
+      if (data.type == responseTypes.chatMsgList) {
         // Update the chat display
         const chatMessages = document.querySelector(".chat-messages");
         displayChatMessageList(chatMessages, data.data, data.cid);
-      } else if (data.type == "chatMsg") {
+      } else if (data.type == responseTypes.chatMsg) {
         // Update the chat display
         const chatMessages = document.querySelector(".chat-messages");
         displayChatMessage(chatMessages, data.data, data.cid, data.name);
-      } else if (data.type === "pl") {
+      } else if (data.type === responseTypes.pointList) {
         // 'pl' = PointList
         this.updateWithPoints(data.data);
-      } else if (data.type === "2d") {
+      } else if (data.type === responseTypes.canvas2D) {
         // '2d' = Canvas data
         this.update(data.data);
-      } else if (data.type === "initWhiteCanvas") {
+      } else if (data.type === responseTypes.initWhiteCanvas) {
         data.data = Array.from({ length: 400 }, () => Array(600).fill(0));
         this.update(data.data);
-      } else if (data.type === "init") {
+      } else if (data.type === responseTypes.cookie) {
         this.setSessionCookie(data.data);
-      } else if (data.type === "userList"){
+      } else if (data.type === responseTypes.userList){
         this.setUserList(data.data);
-      } else if (data.type === "wordChoicesList"){
+      } else if (data.type === responseTypes.wordChoiceList){
         console.log(data.data);   // wordList
-        // Todo: Frontend anzeigen der Worterauswahl
-      } else if (data.type === "choosingWordNotification"){
+        // TODO: Frontend anzeigen der Worterauswahl
+      } else if (data.type === responseTypes.choosingWordNotification){
         console.log(data.data);   // name from the drawer
-        // Todo: Frontend anzeigen der Notification ("<Bob> is choosing a word")
-      } else if (data.type === "endChoosingWordNotification"){
+        // TODO: Frontend anzeigen der Notification ("<Bob> is choosing a word")
+      } else if (data.type === responseTypes.endChoosingWordNotification){
         console.log(data.data);   // name from the drawer
-        // Todo: Frontend anzeigen der Notification ("<Bob> is choosing a word")
+        // TODO: Frontend anzeigen der Notification ("<Bob> is choosing a word")
       }
     };
   }

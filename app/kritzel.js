@@ -2,6 +2,7 @@
 
 const TinyServer = require("./server/tinyserver");
 const ServerGame = require("./server/servergame");
+const responseTypes = require("./client/class/responseTypes");
 
 // Creates a Server (organizes WebSocketServer)
 let server = new TinyServer(8123, (uid, data) => {
@@ -15,7 +16,7 @@ let game = new ServerGame(server, () => {
 
   for(let lobbyID = 0; lobbyID < lobbies.length; lobbyID++){
     let data = lobbies[lobbyID].getBoard().getPoints();
-    let type = "pl";
+    let type = responseTypes.pointList;
 
     let json = JSON.stringify({ type: type, data: data });
     lobbies[lobbyID].getBoard().setPointsEmpty();
@@ -24,7 +25,7 @@ let game = new ServerGame(server, () => {
     if (data.length === 0) {continue;}
     let playerInLobby = lobbies[lobbyID].getPlayerList();
 
-    server.broadcastWsMessage(null, json, false, "allInLobby", playerInLobby);
+    server.broadcastWsMessage(null, json, false, broadcastTypes.allInLobby, playerInLobby);
   } 
 });
 

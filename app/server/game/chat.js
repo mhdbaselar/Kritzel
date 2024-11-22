@@ -18,7 +18,6 @@ module.exports = class Chat{
      * @param {Date} timestamp timestamp of message 
      */
     addMessage(cid, message, timestamp){
-        console.log(timestamp);
         this.#messages.push({cid : cid, msg : message, timestamp : timestamp });
     }
 
