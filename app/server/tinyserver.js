@@ -65,6 +65,11 @@ module.exports = class TinyServer {
 
     if (cid && isClientInList){
       websocket.cid = cid;
+      this.#clients.getClientList().forEach((client) => {
+        if(client.getCid() === websocket.cid){
+          client.setIsConnected(true);
+        }
+      });
     }
     else {    // create new client
       websocket.cid = this.getUniqueID();
@@ -81,6 +86,11 @@ module.exports = class TinyServer {
       this.processWsRequest(websocket, data);
     });
     websocket.on("close", () => {
+      this.#clients.getClientList().forEach((client) => {
+        if(client.getCid() === websocket.cid){
+          client.setIsConnected(false);
+        }
+      });
       console.log("close");
     });
   }

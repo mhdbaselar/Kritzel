@@ -6,10 +6,10 @@ module.exports = class Client {
     #name;
     /**@type {int} */
     #score;
-    /**@type {boolean} */
-    #isActivePlayer;
     /**@type {int} */
     #lobbyID;
+    /**@type {boolean} */
+    #isConnected;
 
 
     /**
@@ -27,6 +27,7 @@ module.exports = class Client {
         }
         this.#score = 0;
         this.#lobbyID = lobbyID;
+        this.#isConnected = true;
     }
 
     /**
@@ -83,5 +84,13 @@ module.exports = class Client {
      */
     getLobbyID(){
         return this.#lobbyID;
+    }
+
+    getIsConnected(){
+        return this.#isConnected;
+    }
+
+    setIsConnected(isConnected){
+        this.#isConnected = isConnected;
     }
 }
