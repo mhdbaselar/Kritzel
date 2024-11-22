@@ -221,6 +221,12 @@ module.exports = class ServerGame {
     this.#server.broadcastWsMessage(cid, jsonMessage, false, "allInLobby", playerInLobby);
   }
 
+  /**
+   * Set the word form the drawer
+   * @param {string} cid client unique ID
+   * @param {string} word choosen word
+   * @param {int} lobbyID index of the lobby
+   */
   #processSetWordAction(cid, word, lobbyID){
     this.#lobbies[lobbyID].setWord(word, cid);
   }

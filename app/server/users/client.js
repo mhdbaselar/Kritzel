@@ -86,10 +86,18 @@ module.exports = class Client {
         return this.#lobbyID;
     }
 
+    /**
+     * Returns the client connection state (boolean)
+     * @returns {boolean} is client connected
+     */
     getIsConnected(){
         return this.#isConnected;
     }
 
+    /**
+     * Sets the client connection state
+     * @param {boolean} isConnected is client connected
+     */
     setIsConnected(isConnected){
         this.#isConnected = isConnected;
     }

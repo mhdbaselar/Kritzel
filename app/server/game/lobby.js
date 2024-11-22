@@ -133,6 +133,7 @@ module.exports = class Lobby {
     /**
      * Set the word for the game
      * @param {string} word word to set
+     * @param {string} cid client unique ID
      */
     setWord(word, cid){
         this.#game.setWord(word);

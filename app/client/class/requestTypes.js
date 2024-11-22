@@ -1,3 +1,7 @@
+/**
+ * @module requestTypes
+ * @description Contains all the request types
+ */
 module.exports = requestTypes = {
     draw : "drawAction",
     getCanvas : "getCanvasAction",
