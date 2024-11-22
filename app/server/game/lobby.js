@@ -25,6 +25,10 @@ module.exports = class Lobby {
         this.#game = new Game();
     }
 
+    startGame(){
+        setTimeout(() => {this.#game.startGame(this.#playerList, 1)}, 0);  // async operation (not wait) execute a lobby game parallel
+    }
+
     /**
      * Add player to playerList (lobby)
      * @param {Client} player player to add (client object)
