@@ -4,13 +4,13 @@
 const Client = require('../users/client');
 
 const stateTypes = {
-    gameStarted : 0,
-    roundStarted : 1,
-    drawerSelected : 2,
-    wordSelected : 3,
-    drawAndGuessStarted : 4,
-    roundEnded : 5,
-    gameEnded : 6
+    gameStarted : 1,
+    roundStarted : 2,
+    drawerSelected : 3,
+    wordSelected : 4,
+    drawAndGuessStarted : 5,
+    roundEnded : 6,
+    gameEnded : 7
 }
 
 module.exports = class Game {
@@ -58,10 +58,14 @@ module.exports = class Game {
 
     #startDrawAndGuess(){
         this.#state = stateTypes.drawAndGuessStarted;
+        // TODO: set DrawTimer
+
         this.#nextState();
     }
 
     #endRound(){
+        // TODO: end DrawTimer, Punktevergabe
+
         this.#state = stateTypes.roundEnded;
         this.#nextState();
     }
@@ -75,21 +79,21 @@ module.exports = class Game {
     }
 
     #nextState(){
-        if(stateTypes.gameStarted){
+        if(stateTypes.gameStarted === this.#state){
             this.#startRound();
-        } else if (this.stateTypes.roundStarted){
+        } else if (stateTypes.roundStarted === this.#state){
             this.#selectDrawer();
-        } else if (this.stateTypes.drawerSelected){
+        } else if (stateTypes.drawerSelected === this.#state){
             this.#selectWord();
-        } else if (this.stateTypes.wordSelected){
+        } else if (stateTypes.wordSelected === this.#state){
             if(this.#word){
                 this.#startDrawAndGuess();
             } else {
                 this.#endRound();
             }
-        } else if (this.stateTypes.drawAndGuessStarted){
+        } else if (stateTypes.drawAndGuessStarted === this.#state){
             this.#endRound();
-        } else if (this.stateTypes.roundEnded){
+        } else if (stateTypes.roundEnded === this.#state){
             if(this.#currentRound === this.#playerList.length && this.#totalCycle === this.#currentCycle){
                 this.#endGame();
             } else {
