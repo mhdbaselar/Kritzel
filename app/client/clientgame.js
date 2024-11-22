@@ -9,6 +9,7 @@ const {
   displayChatMessageList,
 } = require("./components/userInterface");
 const HexColorConverter = require("./class/hexColorConverter");
+const requestTypes = require("./class/requestTypes");
 
 /**
  * Instance of the HexColorConverter class.
@@ -310,7 +311,7 @@ module.exports = class ClientGame {
       converter.hexToInt(color),
       thickness
     );
-    let message = new Message("drawAction", action);
+    let message = new Message(requestTypes.draw, action);
 
     let _message = JSON.stringify(message);
 
@@ -322,7 +323,7 @@ module.exports = class ClientGame {
    */
   sendClearAction() {
     let action = new DrawAction("clear", 0, 0, "", 0);
-    let message = new Message("drawAction", action);
+    let message = new Message(requestTypes.draw, action);
 
     this.send(JSON.stringify(message));
   }
@@ -333,7 +334,7 @@ module.exports = class ClientGame {
    */
   sendFillAction(x = 0, y = 0, color = "#000000") {
     let action = new DrawAction("fill", x, y, converter.hexToInt(color), 0);
-    let message = new Message("drawAction", action);
+    let message = new Message(requestTypes.draw, action);
 
     this.send(JSON.stringify(message));
   }
@@ -342,7 +343,7 @@ module.exports = class ClientGame {
    * Requests the server to send the current Canvas data
    */
   sendGetCanvasAction() {
-    let message = new Message("getCanvasAction", null);
+    let message = new Message(requestTypes.getCanvas, null);
     this.send(JSON.stringify(message));
   }
 
@@ -353,7 +354,7 @@ module.exports = class ClientGame {
   sendChatAction(chatMessage) {
     let timestamp = new Date();
     let action = new ChatAction(chatMessage, timestamp);
-    let message = new Message("chatAction", action);
+    let message = new Message(requestTypes.addChatMsg, action);
     this.send(JSON.stringify(message));
   }
 
@@ -361,7 +362,7 @@ module.exports = class ClientGame {
    * Requests the server to send the all chat messages
    */
   sendGetChatAction() {
-    let message = new Message("getChatAction", null);
+    let message = new Message(requestTypes.getAllChatMsg, null);
     this.send(JSON.stringify(message));
   }
 
@@ -370,7 +371,7 @@ module.exports = class ClientGame {
    * @param {string} name client name
    */
   sendNameAction(name) {
-    let message = new Message("setName", { name: name });
+    let message = new Message(requestTypes.setName, { name: name });
     this.send(JSON.stringify(message));
   }
 
@@ -378,12 +379,12 @@ module.exports = class ClientGame {
    * Requests the server to send the user list
    */
   sendGetUserListAction() {
-    let message = new Message("getUserListAction", null);
+    let message = new Message(requestTypes.getUserList, null);
     this.send(JSON.stringify(message));
   }
 
   sendWordAction(word){
-    let message = new Message("setWord", word);
+    let message = new Message(requestTypes.setWord, word);
     this.send(JSON.stringify(message));
   }
 

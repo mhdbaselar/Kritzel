@@ -2,6 +2,7 @@
 
 const Lobby = require("./game/lobby");
 const Client = require("./users/client");
+const requestTypes = require("./../client/class/requestTypes");
 
 module.exports = class ServerGame {
   /**@type {TinyServer} */
@@ -80,21 +81,21 @@ module.exports = class ServerGame {
 
     let _request = JSON.parse(request);
 
-    if (_request.messageType == "drawAction") {
+    if (_request.messageType == requestTypes.draw) {
       this.#processDrawAction(_request.messageBody, cid, lobbyID);
 
-    } else if (_request.messageType == "getCanvasAction") {
+    } else if (_request.messageType == requestTypes.getCanvas) {
       this.#processGetCanvasAction(cid, lobbyID);
 
-    } else if (_request.messageType == "chatAction") {
+    } else if (_request.messageType == requestTypes.addChatMsg) {
       this.#processChatAction(_request.messageBody.message, cid, _request.messageBody.timestamp, lobbyID);
 
-    } else if (_request.messageType == "getChatAction") {
+    } else if (_request.messageType == requestTypes.getAllChatMsg) {
       this.#processGetChatAction(cid, lobbyID);
 
-    } else if (_request.messageType == "getUserListAction") {
+    } else if (_request.messageType == requestTypes.getUserList) {
       this.#processGetUserListAction(cid, lobbyID);
-    } else if (_request.messageType == "setWord"){
+    } else if (_request.messageType == requestTypes.setWord){
       this.#processSetWordAction(cid, _request.messageBody, lobbyID);
     }
 

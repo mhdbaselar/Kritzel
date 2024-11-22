@@ -11,6 +11,7 @@ const fs = require("fs");
 const path = require("path");
 const ws = require("ws");
 const ClientList = require("./users/clientList");
+const requestTypes = require("./../client/class/requestTypes");
 
 module.exports = class TinyServer {
   /**@type {ClientList} */
@@ -116,7 +117,7 @@ module.exports = class TinyServer {
   processWsRequest(websocket, data) {
     let requestData = JSON.parse(data);
     
-    if (requestData.messageType == "setName") {
+    if (requestData.messageType == requestTypes.setName) {
       if(requestData.messageBody.name){
         this.#clients.registerName(websocket.cid, requestData.messageBody.name);
       }
