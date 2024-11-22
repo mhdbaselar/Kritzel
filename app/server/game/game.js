@@ -14,13 +14,21 @@ const stateTypes = {
 }
 
 module.exports = class Game {
+    /** @type {Client[]} */
     #playerList = null;
+    /** @type {int} */
     #state = null;
+    /** @type {string} */
     #word = null;
+    /** @type {int} */
     #totalCycle = null;
+    /** @type {int} */
     #currentCycle = null;
+    /** @type {int} */
     #currentRound = null;
+    /** @type {Client} */
     #drawer = null;
+    /** @type {int} */
     #wordTimeout = 10000; // 10s
 
     constructor(){}
@@ -60,14 +68,14 @@ module.exports = class Game {
 
     #selectWord(){
         // TODO: Sequence:
-        // -> send word choices to player 
-        // -> client choose word 
-        // -> client send choosen word to server 
-        // -> server check word is set and clear Timeout? 
+        // -> send word choices to player
+        // -> client choose word
+        // -> client send choosen word to server
+        // -> server check word is set and clear Timeout?
         // -> server send to client (frontend) remove word choice display
 
         let wordSelectTimeout = null;
-        
+
         wordSelectTimeout = setTimeout(() => {      // 10s to select a word;
             this.#state = stateTypes.wordSelected;
             this.#nextState();
@@ -77,9 +85,9 @@ module.exports = class Game {
     #startDrawAndGuess(){
         // TODO: set DrawTimer, and end DrawTimer
         // Sequence:
-        // client send chat messages to sever 
+        // client send chat messages to sever
         // -> server: check chat Msg == answer and DrawTimer not expired and player != drawer
-        // -> rigth answer save Time for player when the answer was send 
+        // -> rigth answer save Time for player when the answer was send
         // -> send client "you have the right answer" -> other clients dont get the answer message in chat
 
         this.#state = stateTypes.drawAndGuessStarted;
@@ -133,5 +141,11 @@ module.exports = class Game {
 
     hasPermissionToDraw(cid){
         return this.#drawer.getCid() === cid && this.#state === this.stateTypes.wordSelected;   // after wordSelected
+    }
+
+    setWord(word, cid){
+        if (this.#state === this.stateTypes.drawerSelected && this.#drawer.getCid() === cid){  // after wordSelected and the drawer is the player
+            this.#word = word;
+        }
     }
 }

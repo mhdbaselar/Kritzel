@@ -79,7 +79,7 @@ module.exports = class ServerGame {
     }
 
     let _request = JSON.parse(request);
-    
+
     if (_request.messageType == "drawAction") {
       this.#processDrawAction(_request.messageBody, cid, lobbyID);
 
@@ -94,6 +94,8 @@ module.exports = class ServerGame {
 
     } else if (_request.messageType == "getUserListAction") {
       this.#processGetUserListAction(cid, lobbyID);
+    } else if (_request.messageType == "setWord"){
+      this.#processSetWordAction(cid, _request.messageBody, lobbyID);
     }
 
   }
@@ -143,7 +145,7 @@ module.exports = class ServerGame {
   /**
    * Sends the current canvas to all clients in the lobby
    * @param {string} cid user unique ID
-   * @param {int} lobbyID index of the lobby 
+   * @param {int} lobbyID index of the lobby
   */
   #processGetCanvasAction(cid, lobbyID) {
     let playerInLobby = this.#lobbies[lobbyID].getPlayerList();
@@ -212,10 +214,14 @@ module.exports = class ServerGame {
       sendPlayerList.push({ name: player.getName(), points: player.getPoints() });
     });
 
-    
+
     let jsonMessage = JSON.stringify({ type: "userList", data: sendPlayerList });
 
     this.#server.broadcastWsMessage(cid, jsonMessage, false, "allInLobby", playerInLobby);
+  }
+
+  #processSetWordAction(cid, word, lobbyID){
+    this.#lobbies[lobbyID].setWord(word, cid);
   }
 };
 

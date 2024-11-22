@@ -78,7 +78,7 @@ module.exports = class Lobby {
      * @param {int} y coordinate
      * @param {int} color int color code
      * @param {string} cid clinet unique ID
-     */    
+     */
     fill(x, y, color, cid){
         //TODO: CHECK PERMISSION OF CID
         let hasChanged = this.#board.fill(x, y, color);
@@ -87,7 +87,7 @@ module.exports = class Lobby {
 
     /**
      * Process the clear action on the lobby board
-     * @param {string} cid 
+     * @param {string} cid
      */
     clear(cid) {
         //TODO: CHECK PERMISSION OF CID
@@ -128,5 +128,13 @@ module.exports = class Lobby {
     getMessages(cid){
         //TODO: CHECK PERMISSION OF CID
         return this.#chat.getMessages();
+    }
+
+    /**
+     * Set the word for the game
+     * @param {string} word word to set
+     */
+    setWord(word, cid){
+        this.#game.setWord(word);
     }
 }

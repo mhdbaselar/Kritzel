@@ -382,6 +382,11 @@ module.exports = class ClientGame {
     this.send(JSON.stringify(message));
   }
 
+  sendWordAction(word){
+    let message = new Message("setWord", word);
+    this.send(JSON.stringify(message));
+  }
+
   //-------------------------------------
   //-----------HELP FUNCTIONS------------
   //-------------------------------------
