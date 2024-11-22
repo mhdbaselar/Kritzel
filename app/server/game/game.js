@@ -63,28 +63,15 @@ module.exports = class Game {
         // -> send word choices to player 
         // -> client choose word 
         // -> client send choosen word to server 
-        // -> server check word is set? 
+        // -> server check word is set and clear Timeout? 
         // -> server send to client (frontend) remove word choice display
 
-        let isTimerNotStarted = true;
         let wordSelectTimeout = null;
-        let wordSelectInterval = setInterval(() => {
-            
-            if(isTimerNotStarted){                          //set Timeout for word choose
-                isTimerNotStarted = false;
-
-                wordSelectTimeout = setTimeout(() => {      // 10s to select a word;
-                    clearInterval(wordSelectInterval);
-                    this.#state = stateTypes.wordSelected;
-                    this.#nextState();
-                }, this.#wordTimeout); 
-            }
-
-            if(this.#word){                                 // check if word is set before 10s
-                clearTimeout(wordSelectTimeout);
-                clearInterval(wordSelectInterval);
-            }
-        }, 100);   
+        
+        wordSelectTimeout = setTimeout(() => {      // 10s to select a word;
+            this.#state = stateTypes.wordSelected;
+            this.#nextState();
+        }, this.#wordTimeout);
     }
 
     #startDrawAndGuess(){
@@ -140,7 +127,7 @@ module.exports = class Game {
         }
     }
 
-    getActivePlayer(){
+    getDrawer(){
         return this.#drawer;
     }
 

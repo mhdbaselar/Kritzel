@@ -115,9 +115,9 @@ module.exports = class Lobby {
      * @param {string} message message to add
      * @param {string} cid client unique ID
      */
-    addMessage(message, cid){
+    addMessage(message, cid, timestamp){
         //TODO: CHECK PERMISSION OF CID
-        this.#chat.addMessage(cid, message);
+        this.#chat.addMessage(cid, message, timestamp);
     }
 
     /**

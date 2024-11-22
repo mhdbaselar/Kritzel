@@ -15,9 +15,11 @@ module.exports = class Chat{
      * Adds the user chat meesage to the messages List
      * @param {*} cid user unique ID
      * @param {*} message chat message
+     * @param {*} timestamp timestamp of message 
      */
-    addMessage(cid, message){
-        this.#messages.push({cid : cid, msg: message});
+    addMessage(cid, message, timestamp){
+        console.log(timestamp);
+        this.#messages.push({cid : cid, msg : message, timestamp : timestamp });
     }
 
     /**

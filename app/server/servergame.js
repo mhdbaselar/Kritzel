@@ -87,7 +87,7 @@ module.exports = class ServerGame {
       this.#processGetCanvasAction(cid, lobbyID);
 
     } else if (_request.messageType == "chatAction") {
-      this.#processChatAction(_request.messageBody.message, cid, lobbyID);
+      this.#processChatAction(_request.messageBody.message, cid, _request.messageBody.timestamp, lobbyID);
 
     } else if (_request.messageType == "getChatAction") {
       this.#processGetChatAction(cid, lobbyID);
@@ -157,8 +157,8 @@ module.exports = class ServerGame {
    * @param {string} cid user unique ID
    * @param {int} lobbyID index of the lobby
    */
-  #processChatAction(chatMsg, cid, lobbyID) {
-    this.#lobbies[lobbyID].addMessage(chatMsg, cid);
+  #processChatAction(chatMsg, cid, timestamp, lobbyID) {
+    this.#lobbies[lobbyID].addMessage(chatMsg, cid, timestamp);
 
     let name = this.#server.getClients().getNameByCid(cid);
 

@@ -351,7 +351,8 @@ module.exports = class ClientGame {
    * @param {*} chatMessage client chat message
    */
   sendChatAction(chatMessage) {
-    let action = new ChatAction(chatMessage);
+    let timestamp = new Date();
+    let action = new ChatAction(chatMessage, timestamp);
     let message = new Message("chatAction", action);
     this.send(JSON.stringify(message));
   }
