@@ -14,15 +14,18 @@ module.exports = class Lobby {
     #chat = null;
     /**@type {Game} */
     #game = null;
+    /**@type {TinyServer} */
+    #server;
 
     /**
      * Constructor to instanciate the lobby
      */
-    constructor(){
+    constructor(server){
+        this.#server = server;
         this.#playerList = [];
         this.#board = new Board(600, 400, 0);
         this.#chat = new Chat();
-        this.#game = new Game();
+        this.#game = new Game(this.#server);
     }
 
     startGame(){

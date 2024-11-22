@@ -97,7 +97,15 @@ module.exports = class ClientGame {
         this.setSessionCookie(data.data);
       } else if (data.type === "userList"){
         this.setUserList(data.data);
-
+      } else if (data.type === "wordChoicesList"){
+        console.log(data.data);   // wordList
+        // Todo: Frontend anzeigen der Worterauswahl
+      } else if (data.type === "choosingWordNotification"){
+        console.log(data.data);   // name from the drawer
+        // Todo: Frontend anzeigen der Notification ("<Bob> is choosing a word")
+      } else if (data.type === "endChoosingWordNotification"){
+        console.log(data.data);   // name from the drawer
+        // Todo: Frontend anzeigen der Notification ("<Bob> is choosing a word")
       }
     };
   }

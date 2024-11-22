@@ -26,7 +26,7 @@ module.exports = class ServerGame {
    * Creates a lobby, sets and starts the interval for the send function
    */
   start() {
-    let lobby = new Lobby();
+    let lobby = new Lobby(this.#server);
     this.#lobbies.push(lobby);
 
     /*let lobby2 = new Lobby();       // Test for two lobbies

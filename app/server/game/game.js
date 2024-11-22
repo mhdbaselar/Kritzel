@@ -2,6 +2,7 @@
 //TODO: Spiel Zustandsverwaltung, Rechte, Rollen ...
 
 const Client = require('../users/client');
+const Dictionary = require('./dictionary');
 
 const stateTypes = {
     gameStarted : 1,
@@ -30,8 +31,17 @@ module.exports = class Game {
     #drawer = null;
     /** @type {int} */
     #wordTimeout = 10000; // 10s
+    /** @type {int} */
+    #wordChoicesCount = 3;
+    /** @type {string[]} */
+    #wordChoicesList;
+    /**@type {TinyServer} */
+    #server;
+    #wordSelectionTimeout;
 
-    constructor(){}
+    constructor(server){
+        this.#server = server;
+    }
 
     /**
      * Starting the game with a commited set of players
@@ -54,6 +64,7 @@ module.exports = class Game {
             this.#currentRound = 1;
         } else {this.#currentRound++;}
         this.#word = null;
+        this.#wordChoicesList = null;
 
         this.#state = stateTypes.roundStarted;
         this.#nextState();
@@ -66,17 +77,24 @@ module.exports = class Game {
         this.#nextState();
     }
 
-    #selectWord(){
-        // TODO: Sequence:
+    //Sequence:
         // -> send word choices to player
         // -> client choose word
         // -> client send choosen word to server
         // -> server check word is set and clear Timeout?
         // -> server send to client (frontend) remove word choice display
+    #selectWord(){
+        for(let i = 0; i < wordCount; i++){
+            this.#wordChoicesList.push(Dictionary.getRandomWord());
+        }
 
-        let wordSelectTimeout = null;
+        let jsonMessageDrawer = JSON.stringify({type: "wordChoicesList" ,data: this.#wordChoicesList});
+        let jsonMessageGuesser = JSON.stringify({type: "choosingWordNotification", data: this.#drawer.getName()});
 
-        wordSelectTimeout = setTimeout(() => {      // 10s to select a word;
+        this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessageDrawer, false, "onlySender");
+        this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessageGuesser, false, "allInLobbyWithoutSender");
+
+        this.#wordSelectionTimeout = setTimeout(() => {      // 10s to select a word;
             this.#state = stateTypes.wordSelected;
             this.#nextState();
         }, this.#wordTimeout);
@@ -146,6 +164,9 @@ module.exports = class Game {
     setWord(word, cid){
         if (this.#state === this.stateTypes.drawerSelected && this.#drawer.getCid() === cid){  // after wordSelected and the drawer is the player
             this.#word = word;
+            clearTimeout(this.#wordSelectionTimeout);
+            let jsonMessageGuesser = JSON.stringify({type: "endChoosingWordNotification", data: this.#drawer.getName()});
+            this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessageGuesser, false, "allInLobbyWithoutSender");
         }
     }
 }
