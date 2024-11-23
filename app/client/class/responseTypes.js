@@ -1,0 +1,16 @@
+/**
+ * @module responseTypes
+ * @description Contains all the response types
+ */
+module.exports = responseTypes = {
+    pointList : "pl",
+    canvas2D : "2d",
+    initWhiteCanvas : "initWhiteCanvas",
+    cookie : "cookie",
+    userList : "userList",
+    wordChoiceList : "wordChoicesList",
+    choosingWordNotification : "choosingWordNotification",
+    endChoosingWordNotification : "endChoosingWordNotification",
+    chatMsg : "chatMsg",
+    chatMsgList : "chatMsgList"
+}

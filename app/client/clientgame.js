@@ -9,6 +9,8 @@ const {
   displayChatMessageList,
 } = require("./components/userInterface");
 const HexColorConverter = require("./class/hexColorConverter");
+const requestTypes = require("./class/requestTypes");
+const responseTypes = require("./class/responseTypes");
 
 /**
  * Instance of the HexColorConverter class.
@@ -75,28 +77,36 @@ module.exports = class ClientGame {
     // Event handler for receiving messages from the server
     this.socket.onmessage = (event) => {
       let data = JSON.parse(event.data);
-      if (data.type == "chatMsgList") {
+      if (data.type == responseTypes.chatMsgList) {
         // Update the chat display
         const chatMessages = document.querySelector(".chat-messages");
         displayChatMessageList(chatMessages, data.data, data.cid);
-      } else if (data.type == "chatMsg") {
+      } else if (data.type == responseTypes.chatMsg) {
         // Update the chat display
         const chatMessages = document.querySelector(".chat-messages");
         displayChatMessage(chatMessages, data.data, data.cid, data.name);
-      } else if (data.type === "pl") {
+      } else if (data.type === responseTypes.pointList) {
         // 'pl' = PointList
         this.updateWithPoints(data.data);
-      } else if (data.type === "2d") {
+      } else if (data.type === responseTypes.canvas2D) {
         // '2d' = Canvas data
         this.update(data.data);
-      } else if (data.type === "initWhiteCanvas") {
+      } else if (data.type === responseTypes.initWhiteCanvas) {
         data.data = Array.from({ length: 400 }, () => Array(600).fill(0));
         this.update(data.data);
-      } else if (data.type === "init") {
+      } else if (data.type === responseTypes.cookie) {
         this.setSessionCookie(data.data);
-      } else if (data.type === "userList"){
+      } else if (data.type === responseTypes.userList){
         this.setUserList(data.data);
-
+      } else if (data.type === responseTypes.wordChoiceList){
+        console.log(data.data);   // wordList
+        // TODO: Frontend anzeigen der Worterauswahl
+      } else if (data.type === responseTypes.choosingWordNotification){
+        console.log(data.data);   // name from the drawer
+        // TODO: Frontend anzeigen der Notification ("<Bob> is choosing a word")
+      } else if (data.type === responseTypes.endChoosingWordNotification){
+        console.log(data.data);   // name from the drawer
+        // TODO: Frontend anzeigen der Notification ("<Bob> is choosing a word")
       }
     };
   }
@@ -310,7 +320,7 @@ module.exports = class ClientGame {
       converter.hexToInt(color),
       thickness
     );
-    let message = new Message("drawAction", action);
+    let message = new Message(requestTypes.draw, action);
 
     let _message = JSON.stringify(message);
 
@@ -322,7 +332,7 @@ module.exports = class ClientGame {
    */
   sendClearAction() {
     let action = new DrawAction("clear", 0, 0, "", 0);
-    let message = new Message("drawAction", action);
+    let message = new Message(requestTypes.draw, action);
 
     this.send(JSON.stringify(message));
   }
@@ -333,7 +343,7 @@ module.exports = class ClientGame {
    */
   sendFillAction(x = 0, y = 0, color = "#000000") {
     let action = new DrawAction("fill", x, y, converter.hexToInt(color), 0);
-    let message = new Message("drawAction", action);
+    let message = new Message(requestTypes.draw, action);
 
     this.send(JSON.stringify(message));
   }
@@ -342,7 +352,7 @@ module.exports = class ClientGame {
    * Requests the server to send the current Canvas data
    */
   sendGetCanvasAction() {
-    let message = new Message("getCanvasAction", null);
+    let message = new Message(requestTypes.getCanvas, null);
     this.send(JSON.stringify(message));
   }
 
@@ -351,8 +361,9 @@ module.exports = class ClientGame {
    * @param {*} chatMessage client chat message
    */
   sendChatAction(chatMessage) {
-    let action = new ChatAction(chatMessage);
-    let message = new Message("chatAction", action);
+    let timestamp = new Date();
+    let action = new ChatAction(chatMessage, timestamp);
+    let message = new Message(requestTypes.addChatMsg, action);
     this.send(JSON.stringify(message));
   }
 
@@ -360,7 +371,7 @@ module.exports = class ClientGame {
    * Requests the server to send the all chat messages
    */
   sendGetChatAction() {
-    let message = new Message("getChatAction", null);
+    let message = new Message(requestTypes.getAllChatMsg, null);
     this.send(JSON.stringify(message));
   }
 
@@ -369,7 +380,7 @@ module.exports = class ClientGame {
    * @param {string} name client name
    */
   sendNameAction(name) {
-    let message = new Message("setName", { name: name });
+    let message = new Message(requestTypes.setName, { name: name });
     this.send(JSON.stringify(message));
   }
 
@@ -377,7 +388,12 @@ module.exports = class ClientGame {
    * Requests the server to send the user list
    */
   sendGetUserListAction() {
-    let message = new Message("getUserListAction", null);
+    let message = new Message(requestTypes.getUserList, null);
+    this.send(JSON.stringify(message));
+  }
+
+  sendWordAction(word){
+    let message = new Message(requestTypes.setWord, word);
     this.send(JSON.stringify(message));
   }
 

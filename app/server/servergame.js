@@ -2,6 +2,9 @@
 
 const Lobby = require("./game/lobby");
 const Client = require("./users/client");
+const requestTypes = require("./../client/class/requestTypes");
+const responseTypes = require("./../client/class/responseTypes");
+const broadcastTypes = require("./broadcastTypes");
 
 module.exports = class ServerGame {
   /**@type {TinyServer} */
@@ -25,7 +28,7 @@ module.exports = class ServerGame {
    * Creates a lobby, sets and starts the interval for the send function
    */
   start() {
-    let lobby = new Lobby();
+    let lobby = new Lobby(this.#server);
     this.#lobbies.push(lobby);
 
     /*let lobby2 = new Lobby();       // Test for two lobbies
@@ -79,21 +82,25 @@ module.exports = class ServerGame {
     }
 
     let _request = JSON.parse(request);
-    
-    if (_request.messageType == "drawAction") {
+
+    if (_request.messageType == requestTypes.draw) {
       this.#processDrawAction(_request.messageBody, cid, lobbyID);
 
-    } else if (_request.messageType == "getCanvasAction") {
+    } else if (_request.messageType == requestTypes.getCanvas) {
       this.#processGetCanvasAction(cid, lobbyID);
 
-    } else if (_request.messageType == "chatAction") {
-      this.#processChatAction(_request.messageBody.message, cid, lobbyID);
+    } else if (_request.messageType == requestTypes.addChatMsg) {
+      this.#processChatAction(_request.messageBody.message, cid, _request.messageBody.timestamp, lobbyID);
 
-    } else if (_request.messageType == "getChatAction") {
+    } else if (_request.messageType == requestTypes.getAllChatMsg) {
       this.#processGetChatAction(cid, lobbyID);
 
-    } else if (_request.messageType == "getUserListAction") {
+    } else if (_request.messageType == requestTypes.getUserList) {
       this.#processGetUserListAction(cid, lobbyID);
+
+    } else if (_request.messageType == requestTypes.setWord){
+      this.#processSetWordAction(cid, _request.messageBody, lobbyID);
+      
     }
 
   }
@@ -121,16 +128,16 @@ module.exports = class ServerGame {
     if (action.tool == "clear") {
       this.#lobbies[lobbyID].clear(cid);
       let playerInLobby = this.#lobbies[lobbyID].getPlayerList();
-      let jsonMessage = JSON.stringify({ type: "initWhiteCanvas", data: [0] });
-      this.#server.broadcastWsMessage(cid, jsonMessage, false, "allInLobby", playerInLobby);
+      let jsonMessage = JSON.stringify({ type: responseTypes.initWhiteCanvas, data: [0] });
+      this.#server.broadcastWsMessage(cid, jsonMessage, false, broadcastTypes.allInLobby, playerInLobby);
     }
 
     if (action.tool == "fill") {
       let hasChanged = this.#lobbies[lobbyID].fill(action.x, action.y, action.color, cid);
       if (hasChanged) {
         let playerInLobby = this.#lobbies[lobbyID].getPlayerList();
-        let jsonMessage = JSON.stringify({ type: "2d", data: this.#lobbies[lobbyID].getBoardCanvas() });
-        this.#server.broadcastWsMessage(cid, jsonMessage, false, "allInLobby", playerInLobby);
+        let jsonMessage = JSON.stringify({ type: responseTypes.canvas2D, data: this.#lobbies[lobbyID].getBoardCanvas() });
+        this.#server.broadcastWsMessage(cid, jsonMessage, false, broadcastTypes.allInLobby, playerInLobby);
       }
     }
 
@@ -143,12 +150,12 @@ module.exports = class ServerGame {
   /**
    * Sends the current canvas to all clients in the lobby
    * @param {string} cid user unique ID
-   * @param {int} lobbyID index of the lobby 
+   * @param {int} lobbyID index of the lobby
   */
   #processGetCanvasAction(cid, lobbyID) {
     let playerInLobby = this.#lobbies[lobbyID].getPlayerList();
-    let jsonMessage = JSON.stringify({ type: "2d", data: this.#lobbies[lobbyID].getBoardCanvas() });
-    this.#server.broadcastWsMessage(cid, jsonMessage, false, "allInLobby", playerInLobby);
+    let jsonMessage = JSON.stringify({ type: responseTypes.canvas2D, data: this.#lobbies[lobbyID].getBoardCanvas() });
+    this.#server.broadcastWsMessage(cid, jsonMessage, false, broadcastTypes.allInLobby, playerInLobby);
   }
 
   /**
@@ -157,14 +164,14 @@ module.exports = class ServerGame {
    * @param {string} cid user unique ID
    * @param {int} lobbyID index of the lobby
    */
-  #processChatAction(chatMsg, cid, lobbyID) {
-    this.#lobbies[lobbyID].addMessage(chatMsg, cid);
+  #processChatAction(chatMsg, cid, timestamp, lobbyID) {
+    this.#lobbies[lobbyID].addMessage(chatMsg, cid, timestamp);
 
     let name = this.#server.getClients().getNameByCid(cid);
 
     let playerInLobby = this.#lobbies[lobbyID].getPlayerList();
     let jsonMessage = JSON.stringify({
-      type: "chatMsg",
+      type: responseTypes.chatMsg,
       data: chatMsg,
       cid: cid,
       name: name
@@ -173,7 +180,7 @@ module.exports = class ServerGame {
       cid,
       jsonMessage,
       false,
-      "allInLobbyWithoutSender",
+      broadcastTypes.allInLobbyWithoutOneClient,
       playerInLobby
     );
   }
@@ -192,11 +199,11 @@ module.exports = class ServerGame {
     });
 
     let jsonMessage = JSON.stringify({
-      type: "chatMsgList",
+      type: responseTypes.chatMsgList,
       data: data,
       cid: cid,
     });
-    this.#server.broadcastWsMessage(cid, jsonMessage, false, "onlySender");
+    this.#server.broadcastWsMessage(cid, jsonMessage, false, broadcastTypes.onlyOneClient);
   }
 
   /**
@@ -212,10 +219,20 @@ module.exports = class ServerGame {
       sendPlayerList.push({ name: player.getName(), points: player.getPoints() });
     });
 
-    
-    let jsonMessage = JSON.stringify({ type: "userList", data: sendPlayerList });
 
-    this.#server.broadcastWsMessage(cid, jsonMessage, false, "allInLobby", playerInLobby);
+    let jsonMessage = JSON.stringify({ type: responseTypes.userList, data: sendPlayerList });
+
+    this.#server.broadcastWsMessage(cid, jsonMessage, false, broadcastTypes.allInLobby, playerInLobby);
+  }
+
+  /**
+   * Set the word form the drawer
+   * @param {string} cid client unique ID
+   * @param {string} word choosen word
+   * @param {int} lobbyID index of the lobby
+   */
+  #processSetWordAction(cid, word, lobbyID){
+    this.#lobbies[lobbyID].setWord(word, cid);
   }
 };
 

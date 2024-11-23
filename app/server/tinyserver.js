@@ -11,6 +11,9 @@ const fs = require("fs");
 const path = require("path");
 const ws = require("ws");
 const ClientList = require("./users/clientList");
+const requestTypes = require("./../client/class/requestTypes");
+const responseTypes = require("./../client/class/responseTypes");
+const broadcastTypes = require("./broadcastTypes");
 
 module.exports = class TinyServer {
   /**@type {ClientList} */
@@ -65,10 +68,15 @@ module.exports = class TinyServer {
 
     if (cid && isClientInList){
       websocket.cid = cid;
+      this.#clients.getClientList().forEach((client) => {
+        if(client.getCid() === websocket.cid){
+          client.setIsConnected(true);
+        }
+      });
     }
     else {    // create new client
       websocket.cid = this.getUniqueID();
-      websocket.send(JSON.stringify({ type: "init", data: websocket.cid }));
+      websocket.send(JSON.stringify({ type: responseTypes.cookie, data: websocket.cid }));
       let lobbyID = 0;
       /*lobbyID = Math.floor(Math.random() * 2);                          // Test two lobbies
       console.log("lobbyID: " + lobbyID);*/
@@ -81,6 +89,11 @@ module.exports = class TinyServer {
       this.processWsRequest(websocket, data);
     });
     websocket.on("close", () => {
+      this.#clients.getClientList().forEach((client) => {
+        if(client.getCid() === websocket.cid){
+          client.setIsConnected(false);
+        }
+      });
       console.log("close");
     });
   }
@@ -106,7 +119,7 @@ module.exports = class TinyServer {
   processWsRequest(websocket, data) {
     let requestData = JSON.parse(data);
     
-    if (requestData.messageType == "setName") {
+    if (requestData.messageType == requestTypes.setName) {
       if(requestData.messageBody.name){
         this.#clients.registerName(websocket.cid, requestData.messageBody.name);
       }
@@ -132,35 +145,35 @@ module.exports = class TinyServer {
   broadcastWsMessage(cid, data, isBinary, broadcastType, clientsInLobby) {
     let broadcastFunction = function each(client) {}; // empty function
 
-    if (broadcastType == "all") {
+    if (broadcastType == broadcastTypes.all) {
       // send all clients
       broadcastFunction = function each(client) {
         if (client.readyState === ws.OPEN) {
           client.send(data, { binary: isBinary });
         }
       };
-    } else if (broadcastType == "allWithoutSender") {
+    } else if (broadcastType == broadcastTypes.allWithoutOneClient) {
       broadcastFunction = function each(client) {
         if (client.readyState === ws.OPEN && client.cid != cid) {
           // send all clients without sender
           client.send(data, { binary: isBinary });
         }
       };
-    } else if (broadcastType == "onlySender") {
+    } else if (broadcastType == broadcastTypes.onlyOneClient) {
       broadcastFunction = function each(client) {
         if (client.readyState === ws.OPEN && client.cid == cid) {
           // send only sender client
           client.send(data, { binary: isBinary });
         }
       };
-    } else if (broadcastType == "allInLobbyWithoutSender"){
+    } else if (broadcastType == broadcastTypes.allInLobbyWithoutOneClient){
       broadcastFunction = function each(client) {
         if (client.readyState === ws.OPEN && client.cid != cid && (clientsInLobby.some((clientInLobby) => clientInLobby.getCid() === client.cid))) {
           // send all clients in lobby without sender
           client.send(data, { binary: isBinary });
         }
       };
-    } else if (broadcastType == "allInLobby"){
+    } else if (broadcastType == broadcastTypes.allInLobby){
       broadcastFunction = function each(client) {
         if (client.readyState === ws.OPEN && (clientsInLobby.some((clientInLobby) => clientInLobby.getCid() === client.cid))) {
           // send all clients in lobby

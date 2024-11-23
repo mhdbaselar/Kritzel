@@ -14,15 +14,22 @@ module.exports = class Lobby {
     #chat = null;
     /**@type {Game} */
     #game = null;
+    /**@type {TinyServer} */
+    #server;
 
     /**
      * Constructor to instanciate the lobby
      */
-    constructor(){
+    constructor(server){
+        this.#server = server;
         this.#playerList = [];
         this.#board = new Board(600, 400, 0);
         this.#chat = new Chat();
-        this.#game = new Game();
+        this.#game = new Game(this.#server);
+    }
+
+    startGame(){
+        setTimeout(() => {this.#game.startGame(this.#playerList, 1)}, 0);  // async operation (not wait) execute a lobby game parallel
     }
 
     /**
@@ -74,7 +81,7 @@ module.exports = class Lobby {
      * @param {int} y coordinate
      * @param {int} color int color code
      * @param {string} cid clinet unique ID
-     */    
+     */
     fill(x, y, color, cid){
         //TODO: CHECK PERMISSION OF CID
         let hasChanged = this.#board.fill(x, y, color);
@@ -83,7 +90,7 @@ module.exports = class Lobby {
 
     /**
      * Process the clear action on the lobby board
-     * @param {string} cid 
+     * @param {string} cid
      */
     clear(cid) {
         //TODO: CHECK PERMISSION OF CID
@@ -111,9 +118,9 @@ module.exports = class Lobby {
      * @param {string} message message to add
      * @param {string} cid client unique ID
      */
-    addMessage(message, cid){
+    addMessage(message, cid, timestamp){
         //TODO: CHECK PERMISSION OF CID
-        this.#chat.addMessage(cid, message);
+        this.#chat.addMessage(cid, message, timestamp);
     }
 
     /**
@@ -124,5 +131,14 @@ module.exports = class Lobby {
     getMessages(cid){
         //TODO: CHECK PERMISSION OF CID
         return this.#chat.getMessages();
+    }
+
+    /**
+     * Set the word for the game
+     * @param {string} word word to set
+     * @param {string} cid client unique ID
+     */
+    setWord(word, cid){
+        this.#game.setWord(word);
     }
 }
