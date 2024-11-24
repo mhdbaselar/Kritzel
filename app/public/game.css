@@ -499,7 +499,6 @@ body {
   background-color: #0056b3;
 }
 
-
 /* Anweisungstext über der Wort-Auswahl */
 .word-selection-instruction {
   text-align: center;
@@ -515,13 +514,14 @@ body {
   /* Setzt den Container relativ, damit das absolute Positionieren der Box innerhalb des Containers möglich ist */
 }
 
+/* Container für das Wortauswahl Popup */
 .word-selection-popup {
   position: absolute;
   top: 50%; /* Vertikale Mitte */
   left: 50%; /* Horizontale Mitte */
   transform: translate(-50%, -50%); /* Zentriert die Box exakt */
   background-color: rgba(0, 0, 0, 0.7); /* Dunkler Hintergrund für besseren Kontrast */
-  color: white; /* Textfarbe für besseren Kontrast */
+  color: white; 
   border-radius: 10px; /* Abgerundete Ecken */
   padding: 10px 20px; /* Etwas mehr Abstand */
   display: flex;
@@ -529,9 +529,9 @@ body {
   align-items: center;
   z-index: 1001; /* Damit es immer über dem Canvas angezeigt wird */
   max-width: 90%; /* Maximale Breite */
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); /* Schattierung für 3D-Effekt */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); 
   text-align: center; /* Text zentrieren */
-  pointer-events: auto; /* Sicherstellen, dass das Popup Interaktionen zulässt */
+  pointer-events: auto; 
 }
 
 /* Styling der Wort-Optionen */

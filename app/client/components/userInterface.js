@@ -38,6 +38,7 @@ function renderUsers(users) {
     });
 }
 
+// Renders the list of the words to choose from on the screen
 function renderWordChoice(words) {
     const wordContainer = document.querySelector(".word-selection-popup")
     wordContainer.innerHTML = "";

@@ -417,26 +417,12 @@ window.addEventListener("load", () => {
   canvas.addEventListener("touchmove", draw);
 
   // -------------------------------
-  // User Rendering (Dummy Data)
+  // Word Choice List Rendering (Dummy Data)
   // -------------------------------
-  // const users = [
-  //   { name: "Player1", points: 0 },
-  //   { name: "Player2", points: 20 },
-  //   { name: "Player3", points: 15 },
-  // ];
-
-  // const users = clientGame.getUserList();
-  // console.log("USERS MAIN", users)
-
-  // Render the list of users
-  // renderUsers(users);
-
-
-  // -------------------------------
-  // Word List Rendering (Dummy Data)
-  // -------------------------------
+  
+  // TODO mit Backend verknuepfen
+  // Dummy Data in Form von wordChoiceList
   const wordChoiceList = ["Apfel", "Banane", "Kiwi"];
-  console.log(wordChoiceList);
   renderWordChoice(wordChoiceList)
 
   // -------------------------------
