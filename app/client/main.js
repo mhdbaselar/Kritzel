@@ -18,7 +18,7 @@
 
 // Import necessary modules
 const ClientGame = require("./clientgame");
-const { renderUsers, _submitUsername } = require("./components/userInterface");
+const { renderUsers, renderWordChoice, _submitUsername } = require("./components/userInterface");
 const { initializeToolbar } = require("./components/toolbar");
 const { initializeChat } = require("./components/chat");
 const {
@@ -430,6 +430,14 @@ window.addEventListener("load", () => {
 
   // Render the list of users
   // renderUsers(users);
+
+
+  // -------------------------------
+  // Word List Rendering (Dummy Data)
+  // -------------------------------
+  const wordChoiceList = ["Apfel", "Banane", "Kiwi"];
+  console.log(wordChoiceList);
+  renderWordChoice(wordChoiceList)
 
   // -------------------------------
   // Chat Functionality
