@@ -60,7 +60,7 @@ module.exports = class ClientGame {
       this.sendGetChatAction();
       this.sendGetCanvasAction();
       this.sendGetUserListAction();
-      //createStartGameButton(this);
+      //createStartGameButton(this);        // keywords: TESTING DELETE GAMESEQUENCE
       loadingOverlay.style.display = "none"; // Spinner verstecken
     };
 

@@ -38,6 +38,7 @@ function renderUsers(users) {
     });
 }
 
+// keywords: TESTING DELETE GAMESEQUENCE
 /*function createStartGameButton(clientGame) {
     const startButtonContainer = document.querySelector(".users-column");
     const startButton = document.createElement("button");
