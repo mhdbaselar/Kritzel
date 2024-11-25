@@ -58,6 +58,7 @@ module.exports = class Game {
      * @param {int} totalCycle Number of times a player takes a turn as a drawer (consists of round)
      */
     startGame(playerList, totalCycle){
+        console.log("Start Game");
         this.#playerList = playerList;
         this.#totalCycle = totalCycle;
         this.#currentCycle = 1;
@@ -68,6 +69,7 @@ module.exports = class Game {
     }
 
     #startRound(){
+        console.log("Start Round");
         if (this.#currentRound === this.#playerList.length){
             this.#currentCycle++;
             this.#currentRound = 1;
@@ -81,8 +83,8 @@ module.exports = class Game {
     }
 
     #selectDrawer(){
+        console.log("Select Drawer");
         this.#drawer = this.#playerList[this.#currentRound-1];
-
         this.#state = stateTypes.drawerSelected;
         this.#nextState();
     }
@@ -94,6 +96,7 @@ module.exports = class Game {
         // -> server check word is set and clear Timeout?
         // -> server send to client (frontend) remove word choice display
     #selectWord(){
+        console.log("Select Word");
         this.#wordChoicesList = this.#dictionary.getWords(this.#wordChoicesCount);
 
         let jsonMessageDrawer = JSON.stringify({type: responseTypes.wordChoiceList ,data: this.#wordChoicesList});
@@ -115,6 +118,7 @@ module.exports = class Game {
         // -> rigth answer save Time for player when the answer was send
         // -> send client "you have the right answer" -> other clients dont get the answer message in chat
     #startDrawAndGuess(){
+        console.log("Start Draw and Guess");
         this.#timeleft = this.#roundTimeout / 1000;
 
         // Set a timer for the clock send every 1s the time left
@@ -133,6 +137,7 @@ module.exports = class Game {
     }
 
     #endRound(){
+        console.log("End Round");
         // TODO: calculate score with the saved Times for the player and for the drawer
         // simple current only +50 points for the right answer pls change
         this.#answerTimeList.forEach((answer) => {
@@ -147,6 +152,7 @@ module.exports = class Game {
     }
 
     #endGame(){
+        console.log("End Game");
         // TODO: delete Game Object or maybe with a Button start a new Game
 
         this.#state = stateTypes.gameEnded;

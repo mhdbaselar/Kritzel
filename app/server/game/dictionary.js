@@ -7,7 +7,6 @@ module.exports = class Dictionary {
     constructor(){
         const data = fs.readFileSync('./server/data/words_german.json');
         this.#wordList = JSON.parse(data);
-        console.log(this.#wordList);
     }
 
     getWords(qty){
