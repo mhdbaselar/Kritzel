@@ -185,8 +185,7 @@ module.exports = class Game {
     }
 
     hasPermissionToDraw(cid){
-
-        return this.#drawer && this.#drawer.getCid() === cid && this.#state === this.stateTypes.wordSelected;   // after wordSelected
+        return this.#drawer && this.#drawer.getCid() === cid && this.#state === stateTypes.wordSelected;   // after wordSelected
     }
 
     setWord(word, cid){

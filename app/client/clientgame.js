@@ -400,6 +400,11 @@ module.exports = class ClientGame {
     this.send(JSON.stringify(message));
   }
 
+  sendGameStartAction(){
+    let message = new Message(requestTypes.startGame, null);
+    this.send(JSON.stringify(message));
+  }
+
   //-------------------------------------
   //-----------HELP FUNCTIONS------------
   //-------------------------------------

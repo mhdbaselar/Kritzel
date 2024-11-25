@@ -101,6 +101,8 @@ module.exports = class ServerGame {
     } else if (_request.messageType == requestTypes.setWord){
       this.#processSetWordAction(cid, _request.messageBody, lobbyID);
       
+    } else if(_request.messageType == requestTypes.startGame){
+      this.#lobbies[lobbyID].startGame();
     }
 
   }
