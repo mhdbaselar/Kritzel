@@ -38,6 +38,16 @@ function renderUsers(users) {
     });
 }
 
+/*function createStartGameButton(clientGame) {
+    const startButtonContainer = document.querySelector(".users-column");
+    const startButton = document.createElement("button");
+    startButton.textContent = "Start Game";
+    startButton.addEventListener("click", () => {
+        clientGame.sendGameStartAction();
+    });
+    startButtonContainer.appendChild(startButton);
+}*/
+
 
 // -------------------------------
 // Chat functionality
@@ -165,4 +175,4 @@ function _submitUsername(clientGame) {
 }
 
 
-module.exports = { renderUsers, initializeChat, displayChatMessage, displayChatMessageList, _submitUsername };
+module.exports = { renderUsers, initializeChat, displayChatMessage, displayChatMessageList, _submitUsername, createStartGameButton };

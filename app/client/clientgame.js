@@ -5,6 +5,7 @@ const DrawAction = require("./class/drawAction");
 const Message = require("./class/message");
 const ChatAction = require("./class/chatAction");
 const {
+  createStartGameButton,
   displayChatMessage,
   displayChatMessageList,
 } = require("./components/userInterface");
@@ -59,6 +60,7 @@ module.exports = class ClientGame {
       this.sendGetChatAction();
       this.sendGetCanvasAction();
       this.sendGetUserListAction();
+      //createStartGameButton(this);
       loadingOverlay.style.display = "none"; // Spinner verstecken
     };
 
