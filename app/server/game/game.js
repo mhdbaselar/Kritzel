@@ -45,6 +45,7 @@ module.exports = class Game {
     /**@type {{cid: string, timestamp: Date}[]} */
     #answerTimeList;
     #dictionary;
+    #timeleft;
 
     constructor(server){
         this.#server = server;
@@ -61,7 +62,6 @@ module.exports = class Game {
         this.#totalCycle = totalCycle;
         this.#currentCycle = 1;
         this.#currentRound = 0;
-        this.
 
         this.#state = stateTypes.gameStarted;
         this.#nextState();
@@ -72,6 +72,7 @@ module.exports = class Game {
             this.#currentCycle++;
             this.#currentRound = 1;
         } else {this.#currentRound++;}
+        this.#answerTimeList = [];
         this.#word = null;
         this.#wordChoicesList = null;
 
@@ -114,15 +115,32 @@ module.exports = class Game {
         // -> rigth answer save Time for player when the answer was send
         // -> send client "you have the right answer" -> other clients dont get the answer message in chat
     #startDrawAndGuess(){
+        this.#timeleft = this.#roundTimeout / 1000;
+
+        // Set a timer for the clock send every 1s the time left
+        const clockInterval = setInterval(() => {
+            let jsonMessage = JSON.stringify({type: responseTypes.clock, data: this.#timeleft});
+            this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
+            this.#timeleft -= 1;
+        }, 1000);
+
         // Set a timer for the drawing phase
         const drawTimer = setTimeout(() => {
+            clearInterval(clockInterval);
             this.#state = stateTypes.drawAndGuessStarted;
             this.#nextState();
-        }, this.#roundTimeout);
+        }, this.#roundTimeout);   
     }
 
     #endRound(){
         // TODO: calculate score with the saved Times for the player and for the drawer
+        // simple current only +50 points for the right answer pls change
+        this.#answerTimeList.forEach((answer) => {
+            let player = this.#playerList.find((player) => player.getCid() === answer.cid);
+            if(player){
+                player.setPoints(player.getPoints() + 50);
+            }
+        });
 
         this.#state = stateTypes.roundEnded;
         this.#nextState();
@@ -167,7 +185,8 @@ module.exports = class Game {
     }
 
     hasPermissionToDraw(cid){
-        return this.#drawer.getCid() === cid && this.#state === this.stateTypes.wordSelected;   // after wordSelected
+
+        return this.#drawer && this.#drawer.getCid() === cid && this.#state === this.stateTypes.wordSelected;   // after wordSelected
     }
 
     setWord(word, cid){
@@ -182,7 +201,7 @@ module.exports = class Game {
     }
 
     checkAnswer(answer){
-        if(this.#state === this.stateTypes.wordSelected &&
+        if(this.#state === stateTypes.wordSelected &&
               this.#drawer.getCid() !== cid &&
               answer.toLowerCase().trim() === this.#word.toLowerCase().trim()){
             return true;
