@@ -60,7 +60,9 @@ module.exports = class Lobby {
      */
     draw(x, y, color, thickness, cid) {
         //TODO: CHECK PERMISSION OF CID
-        this.#board.draw(x,y,color,thickness);
+        if(this.#game.hasPermissionToDraw()){
+            this.#board.draw(x,y,color,thickness);
+        }
     }
 
     /**
@@ -72,7 +74,9 @@ module.exports = class Lobby {
      */
     erase(x, y, thickness, cid) {
         //TODO: CHECK PERMISSION OF CID
-        this.#board.erase(x, y, thickness);
+        if(this.#game.hasPermissionToDraw()){
+            this.#board.erase(x, y, thickness);
+        }
     }
 
     /**
@@ -84,8 +88,11 @@ module.exports = class Lobby {
      */
     fill(x, y, color, cid){
         //TODO: CHECK PERMISSION OF CID
-        let hasChanged = this.#board.fill(x, y, color);
-        return hasChanged;
+        if(this.#game.hasPermissionToDraw()){
+            let hasChanged = this.#board.fill(x, y, color);
+            return hasChanged;
+        }
+        return false;
     }
 
     /**
@@ -94,7 +101,9 @@ module.exports = class Lobby {
      */
     clear(cid) {
         //TODO: CHECK PERMISSION OF CID
-        this.#board.clear();
+        if(this.#game.hasPermissionToDraw()){
+            this.#board.clear();
+        }
     }
 
     /**
