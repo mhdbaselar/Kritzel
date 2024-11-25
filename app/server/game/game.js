@@ -105,7 +105,7 @@ module.exports = class Game {
         this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessageDrawer, false, broadcastTypes.onlyOneClient);
         this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessageGuesser, false, broadcastTypes.allInLobbyWithoutOneClient, this.#playerList);
 
-        /*this.#word = this.#wordChoicesList[0]; // keywords: TESTING DELETE
+        /*this.#word = this.#wordChoicesList[0]; // keywords: TESTING DELETE GAMESEQUENCE
         console.log(this.#word);*/
 
         this.#wordSelectionTimeout = setTimeout(() => {      // 10s to select a word;

@@ -31,7 +31,7 @@ module.exports = class ServerGame {
     let lobby = new Lobby(this.#server);
     this.#lobbies.push(lobby);
 
-    /*let lobby2 = new Lobby();       // Test for two lobbies
+    /*let lobby2 = new Lobby();       // keywords: TESTING DELETE LOBBYS
     this.#lobbies.push(lobby2);*/
 
     this.intervalReference = setInterval(this.tick.bind(this), 100);
