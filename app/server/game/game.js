@@ -119,11 +119,6 @@ module.exports = class Game {
             this.#state = stateTypes.drawAndGuessStarted;
             this.#nextState();
         }, this.#roundTimeout);
-
-        this.#answerTimeList.push({cid : cid, timestamp : time});
-
-
-        this.#state = stateTypes.drawAndGuessStarted;
     }
 
     #endRound(){
@@ -187,13 +182,19 @@ module.exports = class Game {
     }
 
     checkAnswer(answer){
-        if(this.#state === this.stateTypes.wordSelected && this.#drawer.getCid() !== cid && answer === this.#word){
+        if(this.#state === this.stateTypes.wordSelected &&
+              this.#drawer.getCid() !== cid &&
+              answer.toLowerCase().trim() === this.#word.toLowerCase().trim()){
             return true;
         }
         return false;
     }
 
     addAnswer(cid, timestamp){
-        this.#answerTimeList.push({cid, timestamp});
+        let isRightAnswerAdded = this.#answerTimeList.some((answer) => {answer.cid === cid});
+        if(!isRightAnswerAdded){
+            this.#answerTimeList.push({cid, timestamp});
+            this.#server.broadcastWsMessage(cid, JSON.stringify({type: responseTypes.chatMsg}), false, broadcastTypes.allInLobby);
+        }
     }
 }
