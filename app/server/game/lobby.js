@@ -120,7 +120,12 @@ module.exports = class Lobby {
      */
     addMessage(message, cid, timestamp){
         //TODO: CHECK PERMISSION OF CID
-        this.#chat.addMessage(cid, message, timestamp);
+        if(this.#game.checkAnswer(message)){
+            this.#game.addMessage(cid, timestamp);
+        } else {
+            this.#chat.addMessage(cid, message, timestamp);
+        }
+
     }
 
     /**

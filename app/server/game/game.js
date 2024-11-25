@@ -34,15 +34,21 @@ module.exports = class Game {
     /** @type {int} */
     #wordTimeout = 10000; // 10s
     /** @type {int} */
+    #roundTimeout = 60000; // 60s
+    /** @type {int} */
     #wordChoicesCount = 3;
     /** @type {string[]} */
     #wordChoicesList;
     /**@type {TinyServer} */
     #server;
     #wordSelectionTimeout;
+    /**@type {{cid: string, timestamp: Date}[]} */
+    #answerTimeList;
+    #dictionary;
 
     constructor(server){
         this.#server = server;
+        this.#dictionary = new Dictionary();
     }
 
     /**
@@ -55,6 +61,7 @@ module.exports = class Game {
         this.#totalCycle = totalCycle;
         this.#currentCycle = 1;
         this.#currentRound = 0;
+        this.
 
         this.#state = stateTypes.gameStarted;
         this.#nextState();
@@ -86,9 +93,7 @@ module.exports = class Game {
         // -> server check word is set and clear Timeout?
         // -> server send to client (frontend) remove word choice display
     #selectWord(){
-        for(let i = 0; i < wordCount; i++){
-            this.#wordChoicesList.push(Dictionary.getRandomWord());
-        }
+        this.#wordChoicesList = this.#dictionary.getWords(this.#wordChoicesCount);
 
         let jsonMessageDrawer = JSON.stringify({type: responseTypes.wordChoiceList ,data: this.#wordChoicesList});
         let jsonMessageGuesser = JSON.stringify({type: responseTypes.choosingWordNotification, data: this.#drawer.getName()});
@@ -102,16 +107,23 @@ module.exports = class Game {
         }, this.#wordTimeout);
     }
 
-    #startDrawAndGuess(){
-        // TODO: set DrawTimer, and end DrawTimer
+    // TODO: set DrawTimer, and end DrawTimer
         // Sequence:
         // client send chat messages to sever
         // -> server: check chat Msg == answer and DrawTimer not expired and player != drawer
         // -> rigth answer save Time for player when the answer was send
         // -> send client "you have the right answer" -> other clients dont get the answer message in chat
+    #startDrawAndGuess(){
+        // Set a timer for the drawing phase
+        const drawTimer = setTimeout(() => {
+            this.#state = stateTypes.drawAndGuessStarted;
+            this.#nextState();
+        }, this.#roundTimeout);
+
+        this.#answerTimeList.push({cid : cid, timestamp : time});
+
 
         this.#state = stateTypes.drawAndGuessStarted;
-        this.#nextState();
     }
 
     #endRound(){
@@ -169,6 +181,19 @@ module.exports = class Game {
             clearTimeout(this.#wordSelectionTimeout);
             let jsonMessageGuesser = JSON.stringify({type: responseTypes.endChoosingWordNotification, data: this.#drawer.getName()});
             this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessageGuesser, false, broadcastTypes.allInLobbyWithoutOneClient, this.#playerList);
+            this.#state = stateTypes.wordSelected;
+            this.#nextState();
         }
+    }
+
+    checkAnswer(answer){
+        if(this.#state === this.stateTypes.wordSelected && this.#drawer.getCid() !== cid && answer === this.#word){
+            return true;
+        }
+        return false;
+    }
+
+    addAnswer(cid, timestamp){
+        this.#answerTimeList.push({cid, timestamp});
     }
 }
