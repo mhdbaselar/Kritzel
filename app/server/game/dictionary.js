@@ -1,23 +1,21 @@
+"use strict";
 const fs = require('fs');
 
 module.exports = class Dictionary {
     #wordList = null;
 
     constructor(){
-        fs.readFile('../data/words_german.json', function(err, data) {
-            if (err) throw err;
-
-            this.#wordList = JSON.parse(data);
-        });
+        const data = fs.readFileSync('./server/data/words_german.json');
+        this.#wordList = JSON.parse(data);
+        console.log(this.#wordList);
     }
-
     getRandomWord(){
-        random = Math.floor(Math.random() * wordList.length());
+        let random = Math.floor(Math.random() * wordList.length());
         return wordList[random];
     }
 
     getWords(qty){
-        _wordList = []
+        let _wordList = [];
 
         if(qty > 0){
             for(let i = 0; i < qty; i++){
