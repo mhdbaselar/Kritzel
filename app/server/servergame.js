@@ -126,10 +126,12 @@ module.exports = class ServerGame {
     }
 
     if (action.tool == "clear") {
-      this.#lobbies[lobbyID].clear(cid);
-      let playerInLobby = this.#lobbies[lobbyID].getPlayerList();
-      let jsonMessage = JSON.stringify({ type: responseTypes.initWhiteCanvas, data: [0] });
-      this.#server.broadcastWsMessage(cid, jsonMessage, false, broadcastTypes.allInLobby, playerInLobby);
+      let hasChanged = this.#lobbies[lobbyID].clear(cid);
+      if(hasChanged){
+        let playerInLobby = this.#lobbies[lobbyID].getPlayerList();
+        let jsonMessage = JSON.stringify({ type: responseTypes.initWhiteCanvas, data: [0] });
+        this.#server.broadcastWsMessage(cid, jsonMessage, false, broadcastTypes.allInLobby, playerInLobby);
+      }
     }
 
     if (action.tool == "fill") {

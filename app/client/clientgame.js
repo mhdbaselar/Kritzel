@@ -106,7 +106,10 @@ module.exports = class ClientGame {
         // TODO: Frontend anzeigen der Notification ("<Bob> is choosing a word")
       } else if (data.type === responseTypes.endChoosingWordNotification){
         console.log(data.data);   // name from the drawer
-        // TODO: Frontend anzeigen der Notification ("<Bob> is choosing a word")
+        // TODO: Frontend anzeigen der Notification ("<Bob> is choosing a word") ausblenden
+      } else if (data.type === responseTypes.clock){
+        console.log(data.data);   // time left
+        // TODO: Frontend anzeigen der Uhrzeit
       }
     };
   }
