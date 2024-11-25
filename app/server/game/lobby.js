@@ -132,11 +132,14 @@ module.exports = class Lobby {
     addMessage(message, cid, timestamp){
         //TODO: CHECK PERMISSION OF CID
         if(this.#game.checkAnswer(message)){
-            this.#game.addMessage(cid, timestamp);
+            if(this.#game.getDrawer().getCid() !== cid){
+                this.#game.addAnswer(cid, timestamp, this.#chat);
+            }
         } else {
             this.#chat.addMessage(cid, message, timestamp);
+            return true;
         }
-
+        return false;
     }
 
     /**
@@ -155,6 +158,6 @@ module.exports = class Lobby {
      * @param {string} cid client unique ID
      */
     setWord(word, cid){
-        this.#game.setWord(word);
+        this.#game.setWord(word, cid);
     }
 }
