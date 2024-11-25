@@ -498,3 +498,52 @@ body {
 .username-modal-content button:hover {
   background-color: #0056b3;
 }
+/* Game Info Bar */
+.game-info-bar {
+  padding-left: 1vw;
+  margin: 20px 30px 10px;
+  border-radius: 8px; 
+  background-color: #262fb7db; 
+  color: #fff;
+  opacity: 90%; 
+  display: flex;
+  justify-content: center; 
+  align-items: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  height: 60px; 
+  position: relative; 
+}
+
+/* Timer Styling (links) */
+#timer {
+  position: absolute; 
+  left: 20px; 
+  font-size: 1.5rem;
+}
+
+/* Responsiveness */
+@media (max-width: 850px) {
+  .game-info-bar {
+    font-size: 1.2rem; 
+  }
+
+  #timer {
+    left: 10px;
+  }
+}
+#startTimerButton {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-left: 10px;
+}
+
+#startTimerButton:hover {
+  background-color: #0056b3;
+}
+
