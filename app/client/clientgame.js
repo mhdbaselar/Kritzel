@@ -8,6 +8,7 @@ const {
   createStartGameButton,
   displayChatMessage,
   displayChatMessageList,
+  renderTimer,
 } = require("./components/userInterface");
 const HexColorConverter = require("./class/hexColorConverter");
 const requestTypes = require("./class/requestTypes");
@@ -60,7 +61,7 @@ module.exports = class ClientGame {
       this.sendGetChatAction();
       this.sendGetCanvasAction();
       this.sendGetUserListAction();
-      //createStartGameButton(this);        // keywords: TESTING DELETE GAMESEQUENCE
+      createStartGameButton(this);        // keywords: TESTING DELETE GAMESEQUENCE
       loadingOverlay.style.display = "none"; // Spinner verstecken
     };
 
@@ -110,8 +111,7 @@ module.exports = class ClientGame {
         console.log(data.data);   // name from the drawer
         // TODO: Frontend anzeigen der Notification ("<Bob> is choosing a word") ausblenden
       } else if (data.type === responseTypes.clock){
-        console.log(data.data);   // time left
-        // TODO: Frontend anzeigen der Uhrzeit
+        renderTimer(data.data);
       }
     };
   }
