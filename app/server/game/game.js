@@ -130,11 +130,25 @@ module.exports = class Game {
         // -> send client "you have the right answer" -> other clients dont get the answer message in chat
     #startDrawAndGuess(){
         console.log("Start Draw and Guess");
-        this.#timeleft = this.#roundTimeout / 1000;
 
+        // Set Hang Man Word Drawer
+        let jsonMessage = JSON.stringify({type: responseTypes.word, data: this.#word});
+        this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessage, false, broadcastTypes.onlyOneClient, this.#playerList);
+
+        // Create Hang Man Word Guesser
+        let hangManWord = "";
+        for(let i = 0; i < this.#word.length; i++){
+            hangManWord += "_";
+        }
+
+        // Set Hang Man Word Guesser
+        jsonMessage = JSON.stringify({type: responseTypes.word, data: hangManWord});
+        this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessage, false, broadcastTypes.allInLobbyWithoutOneClient, this.#playerList);
+
+        this.#timeleft = this.#roundTimeout / 1000;
         // Set a timer for the drawer phase
         const drawTimer = setInterval(() => {
-            let jsonMessage = JSON.stringify({type: responseTypes.clock, data: {time: this.#timeleft, timetype: "Draw Timer: "}});
+            jsonMessage = JSON.stringify({type: responseTypes.clock, data: {time: this.#timeleft, timetype: "Draw Timer: "}});
             this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
             if(this.#timeleft == 0){
                 clearInterval(drawTimer);
