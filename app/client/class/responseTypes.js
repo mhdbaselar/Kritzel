@@ -8,6 +8,7 @@ module.exports = responseTypes = {
     initWhiteCanvas : "initWhiteCanvas",
     cookie : "cookie",
     userList : "userList",
+    word : "word",
     wordChoiceList : "wordChoicesList",
     choosingWordNotification : "choosingWordNotification",
     endChoosingWordNotification : "endChoosingWordNotification",

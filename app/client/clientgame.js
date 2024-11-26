@@ -112,6 +112,9 @@ module.exports = class ClientGame {
         // TODO: Frontend anzeigen der Notification ("<Bob> is choosing a word") ausblenden
       } else if (data.type === responseTypes.clock){
         renderTimer(data.data);
+      } else if (data.type === responseTypes.word){
+        console.log(data);
+        // TODO: Frontend anzeigen des Wortes
       }
     };
   }
