@@ -171,6 +171,14 @@ module.exports = class Game {
             }
         });
 
+        let sendPlayerList = [];
+        this.#playerList.forEach(player => {
+            sendPlayerList.push({ name: player.getName(), points: player.getPoints() });
+          });
+      
+        let jsonMessage = JSON.stringify({ type: responseTypes.userList, data: sendPlayerList });
+        this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
+
         this.#state = stateTypes.roundEnded;
         this.#nextState();
     }
