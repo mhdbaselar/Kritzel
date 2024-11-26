@@ -38,8 +38,12 @@ function renderUsers(users) {
     });
 }
 
+function renderTimer(timerData){
+    document.getElementById("timer").innerHTML = timerData.timetype + timerData.time;
+}
+
 // keywords: TESTING DELETE GAMESEQUENCE
-/*function createStartGameButton(clientGame) {
+function createStartGameButton(clientGame) {
     const startButtonContainer = document.querySelector(".users-column");
     const startButton = document.createElement("button");
     startButton.textContent = "Start Game";
@@ -47,7 +51,7 @@ function renderUsers(users) {
         clientGame.sendGameStartAction();
     });
     startButtonContainer.appendChild(startButton);
-}*/
+}
 
 
 // -------------------------------
@@ -176,4 +180,4 @@ function _submitUsername(clientGame) {
 }
 
 
-module.exports = { renderUsers, initializeChat, displayChatMessage, displayChatMessageList, _submitUsername, createStartGameButton };
+module.exports = { renderUsers, initializeChat, displayChatMessage, displayChatMessageList, _submitUsername, renderTimer ,createStartGameButton };
