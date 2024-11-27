@@ -226,12 +226,21 @@ module.exports = class Game {
         return this.#drawer && this.#drawer.getCid() === cid && this.#state === stateTypes.wordSelected;   // after wordSelected
     }
 
-    setWord(word, cid){
-        if (this.#state === this.stateTypes.drawerSelected && this.#drawer.getCid() === cid){  // after wordSelected and the drawer is the player
+    setWord(word, cid) {
+        if (this.#state === stateTypes.drawerSelected && this.#drawer.getCid() === cid) {
             this.#word = word;
             clearInterval(this.#wordSelectionTimer);
-            let jsonMessageGuesser = JSON.stringify({type: responseTypes.endChoosingWordNotification, data: this.#drawer.getName()});
-            this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessageGuesser, false, broadcastTypes.allInLobbyWithoutOneClient, this.#playerList);
+            let jsonMessageGuesser = JSON.stringify({
+                type: responseTypes.endChoosingWordNotification, 
+                data: this.#drawer.getName()
+            });
+            this.#server.broadcastWsMessage(
+                this.#drawer.getCid(), 
+                jsonMessageGuesser, 
+                false, 
+                broadcastTypes.allInLobbyWithoutOneClient, 
+                this.#playerList
+            );
             this.#state = stateTypes.wordSelected;
             this.#nextState();
         }

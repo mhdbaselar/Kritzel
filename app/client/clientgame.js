@@ -9,6 +9,7 @@ const {
   displayChatMessage,
   displayChatMessageList,
   renderTimer,
+  renderWordChoice,
 } = require("./components/userInterface");
 const HexColorConverter = require("./class/hexColorConverter");
 const requestTypes = require("./class/requestTypes");
@@ -103,7 +104,11 @@ module.exports = class ClientGame {
         this.setUserList(data.data);
       } else if (data.type === responseTypes.wordChoiceList) {
         console.log(data.data); // wordList
-        // TODO: Frontend anzeigen der Worterauswahl
+        const wordSelectionPopup = document.querySelector(
+          ".word-selection-popup"
+        );
+        wordSelectionPopup.style.display = "flex";
+        renderWordChoice(data.data, this);
       } else if (data.type === responseTypes.choosingWordNotification) {
         console.log(data.data); // name from the drawer
         // TODO: Frontend anzeigen der Notification ("<Bob> is choosing a word")
@@ -403,6 +408,7 @@ module.exports = class ClientGame {
   sendWordAction(word) {
     let message = new Message(requestTypes.setWord, word);
     this.send(JSON.stringify(message));
+    console.log("Word sent: " + JSON.stringify(message));
   }
 
   sendGameStartAction() {

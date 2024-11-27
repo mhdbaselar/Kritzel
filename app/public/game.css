@@ -530,18 +530,23 @@ body {
   top: 50%; /* Vertikale Mitte */
   left: 50%; /* Horizontale Mitte */
   transform: translate(-50%, -50%); /* Zentriert die Box exakt */
-  background-color: rgba(0, 0, 0, 0.7); /* Dunkler Hintergrund für besseren Kontrast */
-  color: white; 
+  background-color: rgba(
+    0,
+    0,
+    0,
+    0.7
+  ); /* Dunkler Hintergrund für besseren Kontrast */
+  color: white;
   border-radius: 10px; /* Abgerundete Ecken */
   padding: 10px 20px; /* Etwas mehr Abstand */
-  display: flex;
+  display: none; /* Standardmäßig versteckt */
   justify-content: center;
   align-items: center;
   z-index: 1001; /* Damit es immer über dem Canvas angezeigt wird */
   max-width: 90%; /* Maximale Breite */
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); 
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
   text-align: center; /* Text zentrieren */
-  pointer-events: auto; 
+  pointer-events: auto;
 }
 
 /* Styling der Wort-Optionen */
