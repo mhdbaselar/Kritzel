@@ -78,7 +78,7 @@ module.exports = class TinyServer {
       websocket.cid = this.getUniqueID();
       websocket.send(JSON.stringify({ type: responseTypes.cookie, data: websocket.cid }));
       let lobbyID = 0;
-      /*lobbyID = Math.floor(Math.random() * 2);                          // Test two lobbies
+      /*lobbyID = Math.floor(Math.random() * 2);                // keywords: TESTING DELETE LOBBYS
       console.log("lobbyID: " + lobbyID);*/
       let client = this.#clients.addClient(websocket.cid, null, lobbyID);
       this.wsCallback(websocket.cid, client);

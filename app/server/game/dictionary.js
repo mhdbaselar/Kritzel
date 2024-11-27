@@ -1,39 +1,32 @@
-module.exports = class Dictionary {
-    static wordList = [
-        "Apfel",
-        "Baum",
-        "Katze",
-        "Sonne",
-        "Mond",
-        "Fisch",
-        "Haus",
-        "Auto",
-        "Blume",
-        "Ballon",
-        "Vogel",
-        "Stern",
-        "Buch",
-        "Herz",
-        "Schmetterling",
-        "Schneemann",
-        "Elefant",
-        "Regenbogen",
-        "Hund",
-        "Tasse",
-        "Wolke",
-        "Gitarre",
-        "Bär",
-        "Brille",
-        "Berg",
-        "Schiff",
-        "Stuhl",
-        "Lampe",
-        "Schlüssel",
-        "Eule"
-      ];
+"use strict";
+const fs = require('fs');
 
-    static getRandomWord(){
-        random = Math.floor(Math.random() * wordList.length());
-        return wordList[random];
+module.exports = class Dictionary {
+    #wordList = null;
+
+    constructor(){
+        const data = fs.readFileSync('./server/data/words_german.json');
+        this.#wordList = JSON.parse(data);
+    }
+
+    getWords(qty){
+        let _wordList = [];
+
+        if(qty > 0){
+            for(let i = 0; i < qty; i++){
+                _wordList.push(this.#wordList[Math.floor(Math.random() * this.#wordList.length)]);
+            }
+        }
+
+        return _wordList;
+    }
+
+    removeWord(word){
+        for(let i = 0; i < this.#wordList.length; i++){
+            if(this.#wordList[i] == word){
+                delete this.#wordList[i];
+                break;
+            }
+        }
     }
 }

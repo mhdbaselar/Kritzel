@@ -51,6 +51,20 @@ function renderWordChoice(words) {
         wordContainer.appendChild(wordDiv);
     })
 }
+function renderTimer(timerData){
+    document.getElementById("timer").innerHTML = timerData.timetype + timerData.time;
+}
+
+// keywords: TESTING DELETE GAMESEQUENCE
+function createStartGameButton(clientGame) {
+    const startButtonContainer = document.querySelector(".users-column");
+    const startButton = document.createElement("button");
+    startButton.textContent = "Start Game";
+    startButton.addEventListener("click", () => {
+        clientGame.sendGameStartAction();
+    });
+    startButtonContainer.appendChild(startButton);
+}
 
 // -------------------------------
 // Chat functionality
@@ -177,5 +191,4 @@ function _submitUsername(clientGame) {
     }
 }
 
-
-module.exports = { renderUsers, renderWordChoice, initializeChat, displayChatMessage, displayChatMessageList, _submitUsername };
+module.exports = { renderUsers, renderWordChoice, initializeChat, displayChatMessage, displayChatMessageList, _submitUsername, renderTimer ,createStartGameButton };

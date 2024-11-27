@@ -34,15 +34,23 @@ module.exports = class Game {
     /** @type {int} */
     #wordTimeout = 10000; // 10s
     /** @type {int} */
+    #roundTimeout = 30000; // 30s
+    /** @type {int} */
     #wordChoicesCount = 3;
     /** @type {string[]} */
     #wordChoicesList;
     /**@type {TinyServer} */
     #server;
     #wordSelectionTimeout;
+    /**@type {{cid: string, timestamp: Date}[]} */
+    #answerTimeList;
+    #dictionary;
+    #timeleft;
+    #wordSelectionTimer;
 
     constructor(server){
         this.#server = server;
+        this.#dictionary = new Dictionary();
     }
 
     /**
@@ -51,6 +59,7 @@ module.exports = class Game {
      * @param {int} totalCycle Number of times a player takes a turn as a drawer (consists of round)
      */
     startGame(playerList, totalCycle){
+        console.log("Start Game");
         this.#playerList = playerList;
         this.#totalCycle = totalCycle;
         this.#currentCycle = 1;
@@ -61,10 +70,12 @@ module.exports = class Game {
     }
 
     #startRound(){
+        console.log("Start Round");
         if (this.#currentRound === this.#playerList.length){
             this.#currentCycle++;
             this.#currentRound = 1;
         } else {this.#currentRound++;}
+        this.#answerTimeList = [];
         this.#word = null;
         this.#wordChoicesList = null;
 
@@ -73,8 +84,8 @@ module.exports = class Game {
     }
 
     #selectDrawer(){
+        console.log("Select Drawer");
         this.#drawer = this.#playerList[this.#currentRound-1];
-
         this.#state = stateTypes.drawerSelected;
         this.#nextState();
     }
@@ -86,9 +97,8 @@ module.exports = class Game {
         // -> server check word is set and clear Timeout?
         // -> server send to client (frontend) remove word choice display
     #selectWord(){
-        for(let i = 0; i < wordCount; i++){
-            this.#wordChoicesList.push(Dictionary.getRandomWord());
-        }
+        console.log("Select Word");
+        this.#wordChoicesList = this.#dictionary.getWords(this.#wordChoicesCount);
 
         let jsonMessageDrawer = JSON.stringify({type: responseTypes.wordChoiceList ,data: this.#wordChoicesList});
         let jsonMessageGuesser = JSON.stringify({type: responseTypes.choosingWordNotification, data: this.#drawer.getName()});
@@ -96,32 +106,85 @@ module.exports = class Game {
         this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessageDrawer, false, broadcastTypes.onlyOneClient);
         this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessageGuesser, false, broadcastTypes.allInLobbyWithoutOneClient, this.#playerList);
 
-        this.#wordSelectionTimeout = setTimeout(() => {      // 10s to select a word;
-            this.#state = stateTypes.wordSelected;
-            this.#nextState();
-        }, this.#wordTimeout);
+        /*this.#word = this.#wordChoicesList[0]; // keywords: TESTING DELETE GAMESEQUENCE
+        console.log(this.#word);*/
+
+        this.#timeleft = this.#wordTimeout / 1000;
+
+        this.#wordSelectionTimer = setInterval(() => {      // 10s to select a word;
+            let jsonMessage = JSON.stringify({type: responseTypes.clock, data: {time: this.#timeleft, timetype: "Word Timer: "}});
+            this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
+            if(this.#timeleft == 0){
+                clearInterval(this.#wordSelectionTimer);
+                this.#state = stateTypes.wordSelected;
+                this.#nextState();
+            }
+            this.#timeleft -= 1;
+        }, 1000);
     }
 
-    #startDrawAndGuess(){
-        // TODO: set DrawTimer, and end DrawTimer
-        // Sequence:
+    // Sequence:
         // client send chat messages to sever
         // -> server: check chat Msg == answer and DrawTimer not expired and player != drawer
         // -> rigth answer save Time for player when the answer was send
         // -> send client "you have the right answer" -> other clients dont get the answer message in chat
+    #startDrawAndGuess(){
+        console.log("Start Draw and Guess");
 
-        this.#state = stateTypes.drawAndGuessStarted;
-        this.#nextState();
+        // Set Hang Man Word Drawer
+        let jsonMessage = JSON.stringify({type: responseTypes.word, data: this.#word});
+        this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessage, false, broadcastTypes.onlyOneClient, this.#playerList);
+
+        // Create Hang Man Word Guesser
+        let hangManWord = "";
+        for(let i = 0; i < this.#word.length; i++){
+            hangManWord += "_";
+        }
+
+        // Set Hang Man Word Guesser
+        jsonMessage = JSON.stringify({type: responseTypes.word, data: hangManWord});
+        this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessage, false, broadcastTypes.allInLobbyWithoutOneClient, this.#playerList);
+
+        this.#timeleft = this.#roundTimeout / 1000;
+        // Set a timer for the drawer phase
+        const drawTimer = setInterval(() => {
+            jsonMessage = JSON.stringify({type: responseTypes.clock, data: {time: this.#timeleft, timetype: "Draw Timer: "}});
+            this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
+            if(this.#timeleft == 0){
+                clearInterval(drawTimer);
+                this.#state = stateTypes.drawAndGuessStarted;
+                this.#nextState();
+            }  
+            this.#timeleft -= 1;
+        }, 1000);
     }
 
     #endRound(){
+        console.log("End Round");
         // TODO: calculate score with the saved Times for the player and for the drawer
+        // simple current only +50 points for the right answer pls change
+        this.#answerTimeList.forEach((answer) => {
+            let player = this.#playerList.find((player) => player.getCid() === answer.cid);
+            if(player){
+                player.setPoints(player.getPoints() + 50);
+                console.log(player.getName() + " has " + player.getPoints() + " points");
+            }
+        });
+
+        let sendPlayerList = [];
+        this.#playerList.forEach(player => {
+            sendPlayerList.push({ name: player.getName(), points: player.getPoints() });
+          });
+      
+        let jsonMessage = JSON.stringify({ type: responseTypes.userList, data: sendPlayerList });
+        this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
 
         this.#state = stateTypes.roundEnded;
         this.#nextState();
     }
 
     #endGame(){
+        console.log("End Game");
         // TODO: delete Game Object or maybe with a Button start a new Game
 
         this.#state = stateTypes.gameEnded;
@@ -160,15 +223,39 @@ module.exports = class Game {
     }
 
     hasPermissionToDraw(cid){
-        return this.#drawer.getCid() === cid && this.#state === this.stateTypes.wordSelected;   // after wordSelected
+        return this.#drawer && this.#drawer.getCid() === cid && this.#state === stateTypes.wordSelected;   // after wordSelected
     }
 
     setWord(word, cid){
         if (this.#state === this.stateTypes.drawerSelected && this.#drawer.getCid() === cid){  // after wordSelected and the drawer is the player
             this.#word = word;
-            clearTimeout(this.#wordSelectionTimeout);
+            clearInterval(this.#wordSelectionTimer);
             let jsonMessageGuesser = JSON.stringify({type: responseTypes.endChoosingWordNotification, data: this.#drawer.getName()});
             this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessageGuesser, false, broadcastTypes.allInLobbyWithoutOneClient, this.#playerList);
+            this.#state = stateTypes.wordSelected;
+            this.#nextState();
+        }
+    }
+
+    checkAnswer(answer){
+        if(this.#state === stateTypes.wordSelected &&
+            answer.toLowerCase().trim() === this.#word.toLowerCase().trim()){
+            return true;
+        }
+        return false;
+    }
+
+    addAnswer(cid, timestamp, chat){
+        let isRightAnswerAdded = this.#answerTimeList.some(answer => answer.cid === cid);
+        if(!isRightAnswerAdded){
+            this.#answerTimeList.push({cid, timestamp});
+            let player = this.#playerList.find((player) => player.getCid() === cid);
+            this.#server.broadcastWsMessage(cid, JSON.stringify({
+                type: responseTypes.chatMsg,
+                data: `Good Job. ${player.getName()} get the right answer!`,
+                cid: null,
+                name: "Server"}), false, broadcastTypes.allInLobby, this.#playerList);
+            chat.addMessage(null, `Good Job. ${player.getName()} get the right answer!`, timestamp);
         }
     }
 }
