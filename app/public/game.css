@@ -15,6 +15,16 @@ body {
   opacity: 90%;
 }
 
+.word-guess {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  font-family: monospace;
+  font-size: 25px;
+  letter-spacing: 3px;
+}
+
 /* Layout Containers */
 .row {
   display: flex;
