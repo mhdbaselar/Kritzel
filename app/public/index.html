@@ -44,6 +44,7 @@
           maxlength="20"
           minlength="1"
           required
+          onkeydown="if(event.key === 'Enter') submitUsername()"
         />
         <button onclick="submitUsername()">Bestätigen</button>
       </div>
