@@ -38,6 +38,19 @@ function renderUsers(users) {
     });
 }
 
+// Renders the list of the words to choose from on the screen
+function renderWordChoice(words) {
+    const wordContainer = document.querySelector(".word-selection-popup")
+    wordContainer.innerHTML = "";
+
+    words.forEach((word) => {
+        const wordDiv = document.createElement("div");
+        wordDiv.classList.add("word-option");
+        wordDiv.textContent = word;
+        
+        wordContainer.appendChild(wordDiv);
+    })
+}
 function renderTimer(timerData){
     document.getElementById("timer").innerHTML = timerData.timetype + timerData.time;
 }
@@ -52,7 +65,6 @@ function createStartGameButton(clientGame) {
     });
     startButtonContainer.appendChild(startButton);
 }
-
 
 // -------------------------------
 // Chat functionality
@@ -179,5 +191,4 @@ function _submitUsername(clientGame) {
     }
 }
 
-
-module.exports = { renderUsers, initializeChat, displayChatMessage, displayChatMessageList, _submitUsername, renderTimer ,createStartGameButton };
+module.exports = { renderUsers, renderWordChoice, initializeChat, displayChatMessage, displayChatMessageList, _submitUsername, renderTimer ,createStartGameButton };
