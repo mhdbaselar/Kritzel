@@ -32,9 +32,9 @@ module.exports = class Game {
     /** @type {Client} */
     #drawer = null;
     /** @type {int} */
-    #wordTimeout = 10000; // 10s
+    #wordTimeout = 20000; // 20s
     /** @type {int} */
-    #roundTimeout = 30000; // 30s
+    #roundTimeout = 90000; // 90s
     /** @type {int} */
     #wordChoicesCount = 3;
     /** @type {string[]} */
