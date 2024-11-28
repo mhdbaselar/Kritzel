@@ -19,6 +19,7 @@ const stateTypes = {
 module.exports = class Game {
     /** @type {Client[]} */
     #playerList = null;
+    #playerQueue = null;
     /** @type {int} */
     #state = null;
     /** @type {string} */
@@ -32,9 +33,9 @@ module.exports = class Game {
     /** @type {Client} */
     #drawer = null;
     /** @type {int} */
-    #wordTimeout = 20000; // 20s
+    #wordTimeout = 10000; // 10s
     /** @type {int} */
-    #roundTimeout = 90000; // 90s
+    #roundTimeout = 20000; // 30s
     /** @type {int} */
     #wordChoicesCount = 3;
     /** @type {string[]} */
@@ -71,6 +72,7 @@ module.exports = class Game {
         this.#totalCycle = totalCycle;
         this.#currentCycle = 1;
         this.#currentRound = 0;
+        this.#playerQueue = [...this.#playerList];      // copy current playerList to queue
 
         this.#state = stateTypes.gameStarted;
         this.#nextState();
@@ -78,7 +80,8 @@ module.exports = class Game {
 
     #startRound(){
         console.log("Start Round");
-        if (this.#currentRound === this.#playerList.length){
+        if (this.#playerQueue.length === 0) {
+            this.#playerQueue = [...this.#playerList];      // copy current playerList to queue
             this.#currentCycle++;
             this.#currentRound = 1;
         } else {this.#currentRound++;}
@@ -92,9 +95,19 @@ module.exports = class Game {
 
     #selectDrawer(){
         console.log("Select Drawer");
-        this.#drawer = this.#playerList[this.#currentRound-1];
-        this.#state = stateTypes.drawerSelected;
-        this.#nextState();
+
+        let isNextPlayerInLobby = this.#playerList.some((player) => player === this.#playerQueue[0]);
+        if(!isNextPlayerInLobby){
+            this.#playerQueue.shift();      // Next player
+            this.#state = stateTypes.roundEnded;
+            this.#nextState();
+        }
+        else {      // Select drawer
+            this.#drawer = this.#playerQueue[0];
+            this.#playerQueue.shift();              // remove first player in queue
+            this.#state = stateTypes.drawerSelected;
+            this.#nextState();
+        }        
     }
 
     //Sequence:
@@ -112,9 +125,6 @@ module.exports = class Game {
 
         this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessageDrawer, false, broadcastTypes.onlyOneClient);
         this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessageGuesser, false, broadcastTypes.allInLobbyWithoutOneClient, this.#playerList);
-
-        /*this.#word = this.#wordChoicesList[0]; // keywords: TESTING DELETE GAMESEQUENCE
-        console.log(this.#word);*/
 
         this.#timeleft = this.#wordTimeout / 1000;
 
@@ -185,6 +195,14 @@ module.exports = class Game {
       
         let jsonMessage = JSON.stringify({ type: responseTypes.userList, data: sendPlayerList });
         this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
+        
+        // Reset Display Timer
+        jsonMessage = JSON.stringify({type: responseTypes.clock, data: {time: "", timetype: ""}});
+        this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
+
+        // Reset Display Word
+        jsonMessage = JSON.stringify({type: responseTypes.word, data: ""});
+        this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
 
         this.#state = stateTypes.roundEnded;
         this.#nextState();
@@ -217,7 +235,7 @@ module.exports = class Game {
         } else if (stateTypes.drawAndGuessStarted === this.#state){
             this.#endRound();
         } else if (stateTypes.roundEnded === this.#state){
-            if(this.#currentRound === this.#playerList.length && this.#totalCycle === this.#currentCycle){
+            if(this.#playerQueue.length === 0 && this.#totalCycle === this.#currentCycle){
                 this.#endGame();
             } else {
                 this.#startRound();

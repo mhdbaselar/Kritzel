@@ -65,7 +65,7 @@ module.exports = class ServerGame {
    * @param {string} cid user unique ID
    * @param {Message} request client request
    */
-  processInput(cid, request) {
+  processInput(cid, request, server) {
     let lobbyID = null;
 
     // set Lobby of request sender
@@ -104,7 +104,34 @@ module.exports = class ServerGame {
     } else if(_request.messageType == requestTypes.startGame){
       this.#lobbies[lobbyID].startGame();
     }
+  }
 
+  processServerRequest(request){
+    if (request.messageType === "deletePlayerInLobby"){
+      let lobbyID = null;
+      this.#server.getClients().getClientList().forEach(client => {
+        if(client.getCid() == request.messageBody.cid) {
+          lobbyID = client.getLobbyID();
+        }
+      });
+
+      if(lobbyID !== null){
+        this.#lobbies[lobbyID].deletePlayer(request.messageBody.cid);
+        this.#processGetUserListAction(request.messageBody.cid, lobbyID);
+      }
+    } else if(request.messageType === "addPlayerInLobby" && request.messageBody.client instanceof Client){
+      let lobbyID = null;
+      this.#server.getClients().getClientList().forEach(client => {
+        if(client.getCid() == request.messageBody.client.getCid()) {
+          lobbyID = client.getLobbyID();
+        }
+      });
+
+      if(lobbyID !== null){
+        this.#lobbies[lobbyID].addPlayer(request.messageBody.client);
+      }
+      
+    }
   }
 
   //-------------------------------------
