@@ -47,9 +47,16 @@ module.exports = class Game {
     #dictionary;
     #timeleft;
     #wordSelectionTimer;
+    /** @type {Board} */
+    #board;
 
-    constructor(server){
+    /**
+     * @param {TinyServer} server 
+     * @param {Board} board
+     */
+    constructor(server, board){
         this.#server = server;
+        this.#board = board;
         this.#dictionary = new Dictionary();
     }
 
@@ -230,6 +237,24 @@ module.exports = class Game {
         if (this.#state === stateTypes.drawerSelected && this.#drawer.getCid() === cid) {
             this.#word = word;
             clearInterval(this.#wordSelectionTimer);
+
+            // Board leeren
+            this.#board.clear();
+
+            let jsonMessageClear = JSON.stringify({
+                type: responseTypes.initWhiteCanvas, 
+                data: [0]
+            });
+
+            // Clear Board Nachricht
+            this.#server.broadcastWsMessage(
+                null,
+                jsonMessageClear, 
+                false, 
+                broadcastTypes.allInLobby,
+                this.#playerList
+            );
+
             let jsonMessageGuesser = JSON.stringify({
                 type: responseTypes.endChoosingWordNotification, 
                 data: this.#drawer.getName()

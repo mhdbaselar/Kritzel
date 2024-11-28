@@ -25,7 +25,7 @@ module.exports = class Lobby {
         this.#playerList = [];
         this.#board = new Board(600, 400, 0);
         this.#chat = new Chat();
-        this.#game = new Game(this.#server);
+        this.#game = new Game(this.#server, this.#board);
     }
 
     startGame(){
