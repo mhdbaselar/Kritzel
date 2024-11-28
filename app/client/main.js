@@ -18,7 +18,7 @@
 
 // Import necessary modules
 const ClientGame = require("./clientgame");
-const { renderUsers, _submitUsername } = require("./components/userInterface");
+const { renderUsers, renderWordChoice, _submitUsername } = require("./components/userInterface");
 const { initializeToolbar } = require("./components/toolbar");
 const { initializeChat } = require("./components/chat");
 const {
@@ -417,19 +417,13 @@ window.addEventListener("load", () => {
   canvas.addEventListener("touchmove", draw);
 
   // -------------------------------
-  // User Rendering (Dummy Data)
+  // Word Choice List Rendering (Dummy Data)
   // -------------------------------
-  // const users = [
-  //   { name: "Player1", points: 0 },
-  //   { name: "Player2", points: 20 },
-  //   { name: "Player3", points: 15 },
-  // ];
-
-  // const users = clientGame.getUserList();
-  // console.log("USERS MAIN", users)
-
-  // Render the list of users
-  // renderUsers(users);
+  
+  // TODO mit Backend verknuepfen
+  // Dummy Data in Form von wordChoiceList
+  const wordChoiceList = ["Apfel", "Banane", "Kiwi"];
+  renderWordChoice(wordChoiceList)
 
   // -------------------------------
   // Chat Functionality

@@ -31,7 +31,7 @@ module.exports = class ServerGame {
     let lobby = new Lobby(this.#server);
     this.#lobbies.push(lobby);
 
-    /*let lobby2 = new Lobby();       // Test for two lobbies
+    /*let lobby2 = new Lobby();       // keywords: TESTING DELETE LOBBYS
     this.#lobbies.push(lobby2);*/
 
     this.intervalReference = setInterval(this.tick.bind(this), 100);
@@ -101,6 +101,8 @@ module.exports = class ServerGame {
     } else if (_request.messageType == requestTypes.setWord){
       this.#processSetWordAction(cid, _request.messageBody, lobbyID);
       
+    } else if(_request.messageType == requestTypes.startGame){
+      this.#lobbies[lobbyID].startGame();
     }
 
   }
@@ -118,7 +120,7 @@ module.exports = class ServerGame {
   #processDrawAction(action, cid, lobbyID) {
 
     if (action.tool == "pen") {
-      this.#lobbies[lobbyID].draw(action.x, action.y, action.color, action.thickness);
+      this.#lobbies[lobbyID].draw(action.x, action.y, action.color, action.thickness, cid);
     }
 
     if (action.tool == "eraser") {
@@ -126,10 +128,12 @@ module.exports = class ServerGame {
     }
 
     if (action.tool == "clear") {
-      this.#lobbies[lobbyID].clear(cid);
-      let playerInLobby = this.#lobbies[lobbyID].getPlayerList();
-      let jsonMessage = JSON.stringify({ type: responseTypes.initWhiteCanvas, data: [0] });
-      this.#server.broadcastWsMessage(cid, jsonMessage, false, broadcastTypes.allInLobby, playerInLobby);
+      let hasChanged = this.#lobbies[lobbyID].clear(cid);
+      if(hasChanged){
+        let playerInLobby = this.#lobbies[lobbyID].getPlayerList();
+        let jsonMessage = JSON.stringify({ type: responseTypes.initWhiteCanvas, data: [0] });
+        this.#server.broadcastWsMessage(cid, jsonMessage, false, broadcastTypes.allInLobby, playerInLobby);
+      }
     }
 
     if (action.tool == "fill") {
@@ -165,24 +169,27 @@ module.exports = class ServerGame {
    * @param {int} lobbyID index of the lobby
    */
   #processChatAction(chatMsg, cid, timestamp, lobbyID) {
-    this.#lobbies[lobbyID].addMessage(chatMsg, cid, timestamp);
+    let hasMessageAdded = this.#lobbies[lobbyID].addMessage(chatMsg, cid, timestamp);
 
-    let name = this.#server.getClients().getNameByCid(cid);
+    if(hasMessageAdded){
+      let name = this.#server.getClients().getNameByCid(cid);
 
-    let playerInLobby = this.#lobbies[lobbyID].getPlayerList();
-    let jsonMessage = JSON.stringify({
-      type: responseTypes.chatMsg,
-      data: chatMsg,
-      cid: cid,
-      name: name
-    });
-    this.#server.broadcastWsMessage(
-      cid,
-      jsonMessage,
-      false,
-      broadcastTypes.allInLobbyWithoutOneClient,
-      playerInLobby
-    );
+      let playerInLobby = this.#lobbies[lobbyID].getPlayerList();
+      let jsonMessage = JSON.stringify({
+        type: responseTypes.chatMsg,
+        data: chatMsg,
+        cid: cid,
+        name: name
+      });
+      this.#server.broadcastWsMessage(
+        cid,
+        jsonMessage,
+        false,
+        broadcastTypes.allInLobbyWithoutOneClient,
+        playerInLobby
+      );
+    }
+    
   }
 
   /**

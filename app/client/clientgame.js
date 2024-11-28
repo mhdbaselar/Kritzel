@@ -5,8 +5,11 @@ const DrawAction = require("./class/drawAction");
 const Message = require("./class/message");
 const ChatAction = require("./class/chatAction");
 const {
+  createStartGameButton,
   displayChatMessage,
   displayChatMessageList,
+  renderTimer,
+  renderWordChoice,
 } = require("./components/userInterface");
 const HexColorConverter = require("./class/hexColorConverter");
 const requestTypes = require("./class/requestTypes");
@@ -20,7 +23,7 @@ const converter = new HexColorConverter();
 
 module.exports = class ClientGame {
   /**@type {string} */
-  #name;  // user name
+  #name; // user name
 
   /**
    * Constructor to instanciate the ClientGame
@@ -44,8 +47,10 @@ module.exports = class ClientGame {
     // Determine WebSocket protocol based on current page protocol
     const protocol = location.protocol === "https:" ? "wss://" : "ws://";
 
-    // Show loadingOverlay
+    // Show loadingOverlay 
     const loadingOverlay = document.getElementById("loadingOverlay");
+
+    const wordSelectionPopup = document.querySelector(".word-selection-popup");
 
     const cookie = document.cookie;
 
@@ -59,6 +64,7 @@ module.exports = class ClientGame {
       this.sendGetChatAction();
       this.sendGetCanvasAction();
       this.sendGetUserListAction();
+      createStartGameButton(this); // keywords: TESTING DELETE GAMESEQUENCE
       loadingOverlay.style.display = "none"; // Spinner verstecken
     };
 
@@ -66,6 +72,7 @@ module.exports = class ClientGame {
     this.socket.onclose = (event) => {
       console.log("Socket closed");
       loadingOverlay.style.display = "flex"; // Spinner zeigen
+      wordSelectionPopup.style.display = "none"; // Word selection popup verstecken
     };
 
     // Event handler for any errors with the connection
@@ -96,22 +103,31 @@ module.exports = class ClientGame {
         this.update(data.data);
       } else if (data.type === responseTypes.cookie) {
         this.setSessionCookie(data.data);
-      } else if (data.type === responseTypes.userList){
+      } else if (data.type === responseTypes.userList) {
         this.setUserList(data.data);
-      } else if (data.type === responseTypes.wordChoiceList){
-        console.log(data.data);   // wordList
-        // TODO: Frontend anzeigen der Worterauswahl
-      } else if (data.type === responseTypes.choosingWordNotification){
-        console.log(data.data);   // name from the drawer
+      } else if (data.type === responseTypes.wordChoiceList) {
+        console.log(data.data); // wordList
+        const wordSelectionPopup = document.querySelector(
+          ".word-selection-popup"
+        );
+        wordSelectionPopup.style.display = "flex";
+        renderWordChoice(data.data, this);
+      } else if (data.type === responseTypes.choosingWordNotification) {
+        console.log(data.data); // name from the drawer
         // TODO: Frontend anzeigen der Notification ("<Bob> is choosing a word")
-      } else if (data.type === responseTypes.endChoosingWordNotification){
-        console.log(data.data);   // name from the drawer
-        // TODO: Frontend anzeigen der Notification ("<Bob> is choosing a word")
+      } else if (data.type === responseTypes.endChoosingWordNotification) {
+        console.log(data.data); // name from the drawer
+        // TODO: Frontend anzeigen der Notification ("<Bob> is choosing a word") ausblenden
+      } else if (data.type === responseTypes.clock) {
+        renderTimer(data.data);
+      } else if (data.type === responseTypes.word) {
+        console.log(data);
+        document.getElementById("hint").innerText = data.data;
       }
     };
   }
 
-  setUserList(data){
+  setUserList(data) {
     this.userList = data;
     renderUsers(this.userList);
   }
@@ -392,8 +408,14 @@ module.exports = class ClientGame {
     this.send(JSON.stringify(message));
   }
 
-  sendWordAction(word){
+  sendWordAction(word) {
     let message = new Message(requestTypes.setWord, word);
+    this.send(JSON.stringify(message));
+    console.log("Word sent: " + JSON.stringify(message));
+  }
+
+  sendGameStartAction() {
+    let message = new Message(requestTypes.startGame, null);
     this.send(JSON.stringify(message));
   }
 

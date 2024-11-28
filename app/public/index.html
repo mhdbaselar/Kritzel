@@ -16,27 +16,39 @@
 
   <body style="background-color: #000350">
     <div class="simple-keyboard"></div>
-    <div class="head">
-      <img src="logo-kritzel.svg" alt="Kritzel Logo" height="60vh" />
+    <div
+      class="head"
+      style="display: flex; align-items: center; justify-content: space-between"
+    >
+      <img
+        class="logo"
+        src="logo-kritzel.svg"
+        alt="Kritzel Logo"
+        height="60vh"
+      />
+      <h2 class="word-guess" id="hint"></h2>
+      <div id="timer">60</div>
     </div>
     <div class="loading-overlay" id="loadingOverlay">
       <div class="spinner"></div>
     </div>
-        <!-- Username Modal -->
-        <div class="username-modal" id="usernameModal">
-          <div class="username-modal-content">
-            <h2>Benutzernamen eingeben</h2>
-            <input
-              type="text"
-              id="usernameInput"
-              placeholder="Prof. Dr. Ralf Peters"
-              maxlength="20"
-              minlength="1"
-              required
-            />
-            <button onclick="submitUsername()">Bestätigen</button>
-          </div>
-        </div>
+
+    <!-- Username Modal -->
+    <div class="username-modal" id="usernameModal">
+      <div class="username-modal-content">
+        <h2>Benutzernamen eingeben</h2>
+        <input
+          type="text"
+          id="usernameInput"
+          placeholder="Prof. Dr. Ralf Peters"
+          maxlength="20"
+          minlength="1"
+          required
+          onkeydown="if(event.key === 'Enter') submitUsername()"
+        />
+        <button onclick="submitUsername()">Bestätigen</button>
+      </div>
+    </div>
     <div class="row">
       <div class="column users-column">
         <div class="users-container">
@@ -44,6 +56,9 @@
         </div>
       </div>
       <div class="column canvas-column">
+        <div class="word-selection-popup">
+          <!-- Words to choose from for drawer will be listed here -->
+        </div>
         <canvas id="drawingCanvas"></canvas>
         <div class="toolbar">
           <!-- Color Buttons -->

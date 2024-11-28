@@ -25,7 +25,7 @@ module.exports = class Lobby {
         this.#playerList = [];
         this.#board = new Board(600, 400, 0);
         this.#chat = new Chat();
-        this.#game = new Game(this.#server);
+        this.#game = new Game(this.#server, this.#board);
     }
 
     startGame(){
@@ -60,7 +60,9 @@ module.exports = class Lobby {
      */
     draw(x, y, color, thickness, cid) {
         //TODO: CHECK PERMISSION OF CID
-        this.#board.draw(x,y,color,thickness);
+        if(this.#game.hasPermissionToDraw(cid)){
+            this.#board.draw(x,y,color,thickness);
+        }
     }
 
     /**
@@ -72,7 +74,9 @@ module.exports = class Lobby {
      */
     erase(x, y, thickness, cid) {
         //TODO: CHECK PERMISSION OF CID
-        this.#board.erase(x, y, thickness);
+        if(this.#game.hasPermissionToDraw(cid)){
+            this.#board.erase(x, y, thickness);
+        }
     }
 
     /**
@@ -84,8 +88,11 @@ module.exports = class Lobby {
      */
     fill(x, y, color, cid){
         //TODO: CHECK PERMISSION OF CID
-        let hasChanged = this.#board.fill(x, y, color);
-        return hasChanged;
+        if(this.#game.hasPermissionToDraw(cid)){
+            let hasChanged = this.#board.fill(x, y, color);
+            return hasChanged;
+        }
+        return false;
     }
 
     /**
@@ -94,7 +101,11 @@ module.exports = class Lobby {
      */
     clear(cid) {
         //TODO: CHECK PERMISSION OF CID
-        this.#board.clear();
+        if(this.#game.hasPermissionToDraw(cid)){
+            this.#board.clear();
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -120,7 +131,15 @@ module.exports = class Lobby {
      */
     addMessage(message, cid, timestamp){
         //TODO: CHECK PERMISSION OF CID
-        this.#chat.addMessage(cid, message, timestamp);
+        if(this.#game.checkAnswer(message)){
+            if(this.#game.getDrawer().getCid() !== cid){
+                this.#game.addAnswer(cid, timestamp, this.#chat);
+            }
+        } else {
+            this.#chat.addMessage(cid, message, timestamp);
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -139,6 +158,6 @@ module.exports = class Lobby {
      * @param {string} cid client unique ID
      */
     setWord(word, cid){
-        this.#game.setWord(word);
+        this.#game.setWord(word, cid);
     }
 }
