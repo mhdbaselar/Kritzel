@@ -47,8 +47,10 @@ module.exports = class ClientGame {
     // Determine WebSocket protocol based on current page protocol
     const protocol = location.protocol === "https:" ? "wss://" : "ws://";
 
-    // Show loadingOverlay
+    // Show loadingOverlay 
     const loadingOverlay = document.getElementById("loadingOverlay");
+
+    const wordSelectionPopup = document.querySelector(".word-selection-popup");
 
     const cookie = document.cookie;
 
@@ -70,6 +72,7 @@ module.exports = class ClientGame {
     this.socket.onclose = (event) => {
       console.log("Socket closed");
       loadingOverlay.style.display = "flex"; // Spinner zeigen
+      wordSelectionPopup.style.display = "none"; // Word selection popup verstecken
     };
 
     // Event handler for any errors with the connection
