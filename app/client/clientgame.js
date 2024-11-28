@@ -112,9 +112,18 @@ module.exports = class ClientGame {
         );
         wordSelectionPopup.style.display = "flex";
         renderWordChoice(data.data, this);
+
+        // Toolbar einblenden
+        const toolbar = document.querySelector(".toolbar");
+        toolbar.style.display = "flex";
+
       } else if (data.type === responseTypes.choosingWordNotification) {
         console.log(data.data); // name from the drawer
         // TODO: Frontend anzeigen der Notification ("<Bob> is choosing a word")
+
+        // Toolbar ausblenden
+        const toolbar = document.querySelector(".toolbar");
+        toolbar.style.display = "none";
       } else if (data.type === responseTypes.endChoosingWordNotification) {
         console.log(data.data); // name from the drawer
         // TODO: Frontend anzeigen der Notification ("<Bob> is choosing a word") ausblenden
