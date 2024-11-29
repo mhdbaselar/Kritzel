@@ -8,6 +8,7 @@ module.exports = requestTypes = {
     addChatMsg : "chatAction",
     getAllChatMsg : "getChatAction",
     getUserList : "getUserListAction",
+    getReconnectData : "getReconnectData",
     setName : "setName",
     setWord : "setWord",
     startGame : "startGame"

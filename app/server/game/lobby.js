@@ -169,4 +169,8 @@ module.exports = class Lobby {
     setWord(word, cid){
         this.#game.setWord(word, cid);
     }
+
+    sendReconnectData(cid){
+        this.#game.sendReconnectData(cid);
+    }
 }

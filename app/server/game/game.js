@@ -120,11 +120,8 @@ module.exports = class Game {
         console.log("Select Word");
         this.#wordChoicesList = this.#dictionary.getWords(this.#wordChoicesCount);
 
-        let jsonMessageDrawer = JSON.stringify({type: responseTypes.wordChoiceList ,data: this.#wordChoicesList});
-        let jsonMessageGuesser = JSON.stringify({type: responseTypes.choosingWordNotification, data: this.#drawer.getName()});
-
-        this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessageDrawer, false, broadcastTypes.onlyOneClient);
-        this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessageGuesser, false, broadcastTypes.allInLobbyWithoutOneClient, this.#playerList);
+        this.#sendWordChoicesList();
+        this.#sendWordChoicesNotification(broadcastTypes.allInLobbyWithoutOneClient);
 
         this.#timeleft = this.#wordTimeout / 1000;
 
@@ -148,24 +145,13 @@ module.exports = class Game {
     #startDrawAndGuess(){
         console.log("Start Draw and Guess");
 
-        // Set Hang Man Word Drawer
-        let jsonMessage = JSON.stringify({type: responseTypes.word, data: this.#word});
-        this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessage, false, broadcastTypes.onlyOneClient, this.#playerList);
-
-        // Create Hang Man Word Guesser
-        let hangManWord = "";
-        for(let i = 0; i < this.#word.length; i++){
-            hangManWord += "_";
-        }
-
-        // Set Hang Man Word Guesser
-        jsonMessage = JSON.stringify({type: responseTypes.word, data: hangManWord});
-        this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessage, false, broadcastTypes.allInLobbyWithoutOneClient, this.#playerList);
+        this.#sendWord();
+        this.#sendHangManWord();
 
         this.#timeleft = this.#roundTimeout / 1000;
         // Set a timer for the drawer phase
         const drawTimer = setInterval(() => {
-            jsonMessage = JSON.stringify({type: responseTypes.clock, data: {time: this.#timeleft, timetype: "Draw Timer: "}});
+            let jsonMessage = JSON.stringify({type: responseTypes.clock, data: {time: this.#timeleft, timetype: "Draw Timer: "}});
             this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
             if(this.#timeleft == 0){
                 clearInterval(drawTimer);
@@ -309,5 +295,53 @@ module.exports = class Game {
                 name: "Server"}), false, broadcastTypes.allInLobby, this.#playerList);
             chat.addMessage(null, `Good Job. ${player.getName()} get the right answer!`, timestamp);
         }
+    }
+
+    sendReconnectData(cid){
+        if(this.#state == stateTypes.drawerSelected){
+            if(this.#drawer && this.#drawer.getCid() === cid){
+                this.#sendWordChoicesList();
+            } else if(this.#drawer && this.#drawer.getCid() !== cid){
+                this.#sendWordChoicesNotification(broadcastTypes.onlyOneClient);
+            }
+        } else if (this.#state == stateTypes.wordSelected){
+            if(this.#drawer && this.#drawer.getCid() === cid){
+                this.#sendWord();
+            } else if (this.#drawer && this.#drawer.getCid() !== cid){
+                this.#sendHangManWord();
+            }
+        }
+    }
+
+    //-------------------------------------
+    //------------HELP FUNCTIONS-----------
+    //-------------------------------------
+
+    #sendWordChoicesList(){
+        let jsonMessageDrawer = JSON.stringify({type: responseTypes.wordChoiceList ,data: this.#wordChoicesList});
+        this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessageDrawer, false, broadcastTypes.onlyOneClient);
+    }
+
+    #sendWordChoicesNotification(broadcastType){
+        let jsonMessageGuesser = JSON.stringify({type: responseTypes.choosingWordNotification, data: this.#drawer.getName()});
+        this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessageGuesser, false, broadcastType, this.#playerList);
+    }
+
+    #sendWord(){
+        // Set Hang Man Word Drawer
+        let jsonMessage = JSON.stringify({type: responseTypes.word, data: this.#word});
+        this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessage, false, broadcastTypes.onlyOneClient, this.#playerList);
+    }
+
+    #sendHangManWord(){
+        // Create Hang Man Word Guesser
+        let hangManWord = "";
+        for(let i = 0; i < this.#word.length; i++){
+            hangManWord += "_";
+        }
+
+        // Set Hang Man Word Guesser
+        let jsonMessage = JSON.stringify({type: responseTypes.word, data: hangManWord});
+        this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessage, false, broadcastTypes.allInLobbyWithoutOneClient, this.#playerList);
     }
 }

@@ -64,6 +64,7 @@ module.exports = class ClientGame {
       this.sendGetChatAction();
       this.sendGetCanvasAction();
       this.sendGetUserListAction();
+      this.sendGetReconnectDataAction();
       createStartGameButton(this); // keywords: TESTING DELETE GAMESEQUENCE
       loadingOverlay.style.display = "none"; // Spinner verstecken
     };
@@ -405,6 +406,11 @@ module.exports = class ClientGame {
    */
   sendGetUserListAction() {
     let message = new Message(requestTypes.getUserList, null);
+    this.send(JSON.stringify(message));
+  }
+
+  sendGetReconnectDataAction(){
+    let message = new Message(requestTypes.getReconnectData, null);
     this.send(JSON.stringify(message));
   }
 

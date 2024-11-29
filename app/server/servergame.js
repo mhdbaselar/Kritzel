@@ -103,6 +103,9 @@ module.exports = class ServerGame {
       
     } else if(_request.messageType == requestTypes.startGame){
       this.#lobbies[lobbyID].startGame();
+
+    } else if(_request.messageType == requestTypes.getReconnectData){
+      this.#lobbies[lobbyID].sendReconnectData(cid);
     }
   }
 
