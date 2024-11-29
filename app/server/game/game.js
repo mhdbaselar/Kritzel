@@ -240,6 +240,7 @@ module.exports = class Game {
     setWord(word, cid) {
         if (this.#state === stateTypes.drawerSelected && this.#drawer.getCid() === cid) {
             this.#word = word;
+            this.#dictionary.removeWord(this.#word);
             clearInterval(this.#wordSelectionTimer);
 
             // Board leeren
