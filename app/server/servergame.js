@@ -208,7 +208,6 @@ module.exports = class ServerGame {
       let jsonMessage = JSON.stringify({
         type: responseTypes.chatMsg,
         data: chatMsg,
-        cid: cid,
         name: name
       });
       this.#server.broadcastWsMessage(
@@ -231,14 +230,18 @@ module.exports = class ServerGame {
     let messages = this.#lobbies[lobbyID].getMessages(cid);
     let data = [];
     messages.forEach(message => {
-      let name = this.#server.getClients().getNameByCid(message.cid);
-      data.push({ cid: message.cid, msg: message.msg, name: name });
+      let name = "";
+      if(message.cid === cid){
+        name = "You";
+      } else {
+        name = this.#server.getClients().getNameByCid(message.cid);
+      }
+      data.push({ msg: message.msg, name: name });
     });
 
     let jsonMessage = JSON.stringify({
       type: responseTypes.chatMsgList,
       data: data,
-      cid: cid,
     });
     this.#server.broadcastWsMessage(cid, jsonMessage, false, broadcastTypes.onlyOneClient);
   }

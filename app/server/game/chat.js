@@ -23,7 +23,7 @@ module.exports = class Chat{
 
     /**
      * Returns all messages
-     * @returns {{uid : uid, msg: string}[]} list of messages
+     * @returns {{cid : cid, msg: string, timestamp: Date}[]} list of messages
      */
     getMessages(){
         return this.#messages;
