@@ -35,18 +35,21 @@ module.exports = class Game {
     /** @type {int} */
     #wordTimeout = 10000; // 10s
     /** @type {int} */
-    #roundTimeout = 20000; // 30s
+    #roundTimeout = 30000; // 30s
+    /** @type {int} */
+    #nextRoundTimeout = 5000; // 5s
+    /** @type {int} */
+    #timeleft;
     /** @type {int} */
     #wordChoicesCount = 3;
     /** @type {string[]} */
     #wordChoicesList;
     /**@type {TinyServer} */
     #server;
-    #wordSelectionTimeout;
     /**@type {{cid: string, timestamp: Date}[]} */
     #answerTimeList;
+    /** @type {Dictionary} */
     #dictionary;
-    #timeleft;
     #wordSelectionTimer;
     /** @type {Board} */
     #board;
@@ -89,8 +92,20 @@ module.exports = class Game {
         this.#word = null;
         this.#wordChoicesList = null;
 
-        this.#state = stateTypes.roundStarted;
-        this.#nextState();
+        // wait before next round start
+        this.#timeleft = this.#nextRoundTimeout / 1000;
+
+        let nextRoundTimer = setInterval(() => {
+            let jsonMessage = JSON.stringify({type: responseTypes.clock, data: {time: this.#timeleft, timetype: "Nächste Runde in "}});
+            this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
+            if(this.#timeleft <= 0){
+                clearInterval(nextRoundTimer);
+                this.#state = stateTypes.roundStarted;
+                this.#nextState();
+            }
+            this.#timeleft -= 1;
+        }   
+        , 1000); 
     }
 
     #selectDrawer(){
@@ -126,9 +141,9 @@ module.exports = class Game {
         this.#timeleft = this.#wordTimeout / 1000;
 
         this.#wordSelectionTimer = setInterval(() => {      // 10s to select a word;
-            let jsonMessage = JSON.stringify({type: responseTypes.clock, data: {time: this.#timeleft, timetype: "Word Timer: "}});
+            let jsonMessage = JSON.stringify({type: responseTypes.clock, data: {time: this.#timeleft, timetype: "Wortauswahl verbleibend: "}});
             this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
-            if(this.#timeleft == 0){
+            if(this.#timeleft <= 0){
                 clearInterval(this.#wordSelectionTimer);
                 this.#state = stateTypes.wordSelected;
                 this.#nextState();
@@ -151,9 +166,12 @@ module.exports = class Game {
         this.#timeleft = this.#roundTimeout / 1000;
         // Set a timer for the drawer phase
         const drawTimer = setInterval(() => {
-            let jsonMessage = JSON.stringify({type: responseTypes.clock, data: {time: this.#timeleft, timetype: "Draw Timer: "}});
+            let jsonMessage = JSON.stringify({type: responseTypes.clock, data: {time: this.#timeleft, timetype: "Zeichnen verbleibend: "}});
             this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
-            if(this.#timeleft == 0){
+
+            let allAnswered = this.#playerList.every((player) => player === this.#drawer || 
+                                                    this.#answerTimeList.some((answer) => answer.cid === player.getCid()));
+            if(this.#timeleft <= 0 || allAnswered){
                 clearInterval(drawTimer);
                 this.#state = stateTypes.drawAndGuessStarted;
                 this.#nextState();
@@ -164,6 +182,7 @@ module.exports = class Game {
 
     #endRound(){
         console.log("End Round");
+
         // TODO: calculate score with the saved Times for the player and for the drawer
         // simple current only +50 points for the right answer pls change
         this.#answerTimeList.forEach((answer) => {
@@ -178,7 +197,8 @@ module.exports = class Game {
         this.#playerList.forEach(player => {
             sendPlayerList.push({ name: player.getName(), points: player.getPoints() });
           });
-      
+        
+        // update playerList
         let jsonMessage = JSON.stringify({ type: responseTypes.userList, data: sendPlayerList });
         this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
         
@@ -190,13 +210,24 @@ module.exports = class Game {
         jsonMessage = JSON.stringify({type: responseTypes.word, data: ""});
         this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
 
+        // show answer word all player
+        jsonMessage = JSON.stringify({type: responseTypes.word, data: this.#word});
+        this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
+
         this.#state = stateTypes.roundEnded;
-        this.#nextState();
+        this.#nextState();   
     }
 
     #endGame(){
         console.log("End Game");
-        // TODO: delete Game Object or maybe with a Button start a new Game
+
+        // Reset Display Word
+        let jsonMessage = JSON.stringify({type: responseTypes.word, data: ""});
+        this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
+
+        // show by timer game end
+        jsonMessage = JSON.stringify({type: responseTypes.clock, data: {time: "", timetype: "beendet"}});
+        this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
 
         this.#state = stateTypes.gameEnded;
     }
@@ -289,12 +320,13 @@ module.exports = class Game {
         if(!isRightAnswerAdded){
             this.#answerTimeList.push({cid, timestamp});
             let player = this.#playerList.find((player) => player.getCid() === cid);
+            let answerMsg = `${player.getName()} hat das gesuchte Wort erraten.`
             this.#server.broadcastWsMessage(cid, JSON.stringify({
                 type: responseTypes.chatMsg,
-                data: `Good Job. ${player.getName()} get the right answer!`,
+                data: answerMsg,
                 cid: null,
                 name: "Server"}), false, broadcastTypes.allInLobby, this.#playerList);
-            chat.addMessage(null, `Good Job. ${player.getName()} get the right answer!`, timestamp);
+            chat.addMessage(null, answerMsg, timestamp);
         }
     }
 

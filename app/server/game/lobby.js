@@ -29,7 +29,7 @@ module.exports = class Lobby {
     }
 
     startGame(){
-        setTimeout(() => {this.#game.startGame(this.#playerList, 2)}, 0);  // async operation (not wait) execute a lobby game parallel
+        setTimeout(() => {this.#game.startGame(this.#playerList, 1)}, 0);  // async operation (not wait) execute a lobby game parallel
     }
 
     /**
