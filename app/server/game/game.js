@@ -127,6 +127,7 @@ module.exports = class Game {
         }
         else {      // Select drawer
             this.#drawer = this.#playerQueue[0];
+            this.sendUserList(this.#playerList);
             this.#playerQueue.shift();              // remove first player in queue
             this.#state = stateTypes.drawerSelected;
             this.#nextState();
@@ -232,6 +233,10 @@ module.exports = class Game {
 
         // show game end in timer overlay
         this.#sendTimer("beendet","");
+
+        // Reset Drawer Icon UserList
+        this.#drawer = null;
+        this.sendUserList(this.#playerList);
 
         this.#state = stateTypes.gameEnded;
     }
@@ -374,7 +379,7 @@ module.exports = class Game {
     sendUserList(playerList) {
         let sendPlayerList = [];
         playerList.forEach((player) => {
-            sendPlayerList.push({ name: player.getName(), points: player.getPoints() });
+            sendPlayerList.push({ name: player.getName(), points: player.getPoints(), isDrawer: player === this.#drawer });
         });
 
         let jsonMessage = JSON.stringify({ type: responseTypes.userList, data: sendPlayerList });

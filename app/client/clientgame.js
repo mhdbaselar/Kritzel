@@ -9,6 +9,7 @@ const {
   displayChatMessage,
   displayChatMessageList,
   renderTimer,
+  renderUsers,
   renderWordChoice,
 } = require("./components/userInterface");
 const HexColorConverter = require("./class/hexColorConverter");

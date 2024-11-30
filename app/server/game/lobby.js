@@ -170,6 +170,9 @@ module.exports = class Lobby {
         return this.#chat.getMessages();
     }
 
+    /**
+     * send user list to all clients in the lobby
+     */
     sendUserList(){
         this.#game.sendUserList(this.#playerList);
     }
