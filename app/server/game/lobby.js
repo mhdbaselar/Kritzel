@@ -170,6 +170,10 @@ module.exports = class Lobby {
         return this.#chat.getMessages();
     }
 
+    sendUserList(){
+        this.#game.sendUserList(this.#playerList);
+    }
+
     /**
      * Set the word for the game
      * @param {string} word word to set

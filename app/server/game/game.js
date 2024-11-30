@@ -11,7 +11,7 @@ const stateTypes = {
     roundStarted : 2,
     drawerSelected : 3,
     wordSelected : 4,
-    drawAndGuessStarted : 5,
+    drawAndGuessEnded : 5,
     roundEnded : 6,
     gameEnded : 7
 }
@@ -102,8 +102,7 @@ module.exports = class Game {
         this.#timeleft = this.#nextRoundTimeout / 1000;
 
         let nextRoundTimer = setInterval(() => {
-            let jsonMessage = JSON.stringify({type: responseTypes.clock, data: {time: this.#timeleft, timetype: "Nächste Runde in "}});
-            this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
+            this.#sendTimer("Nächste Runde in ", this.#timeleft);
             if(this.#timeleft <= 0){
                 clearInterval(nextRoundTimer);
                 this.#state = stateTypes.roundStarted;
@@ -153,8 +152,7 @@ module.exports = class Game {
         this.#timeleft = this.#wordTimeout / 1000;
 
         this.#wordSelectionTimer = setInterval(() => {      // 10s to select a word;
-            let jsonMessage = JSON.stringify({type: responseTypes.clock, data: {time: this.#timeleft, timetype: "Wortauswahl verbleibend: "}});
-            this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
+            this.#sendTimer("Wortauswahl verbleibend: ", this.#timeleft);
             if(this.#timeleft <= 0){
                 clearInterval(this.#wordSelectionTimer);
                 this.#state = stateTypes.wordSelected;
@@ -175,20 +173,19 @@ module.exports = class Game {
     #startDrawAndGuess(){
         console.log("Start Draw and Guess");
 
-        this.#sendWord();
+        this.#sendWord(this.#word, broadcastTypes.onlyOneClient, this.#drawer.getCid());
         this.#sendHangManWord();
 
         this.#timeleft = this.#roundTimeout / 1000;
         // Set a timer for the drawer phase
         const drawTimer = setInterval(() => {
-            let jsonMessage = JSON.stringify({type: responseTypes.clock, data: {time: this.#timeleft, timetype: "Zeichnen verbleibend: "}});
-            this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
+            this.#sendTimer("Zeichnen verbleibend: ", this.#timeleft);
 
             let allAnswered = this.#playerList.every((player) => player === this.#drawer || 
                                                     this.#answerTimeList.some((answer) => answer.cid === player.getCid()));
             if(this.#timeleft <= 0 || allAnswered){
                 clearInterval(drawTimer);
-                this.#state = stateTypes.drawAndGuessStarted;
+                this.#state = stateTypes.drawAndGuessEnded;
                 this.#nextState();
             }  
             this.#timeleft -= 1;
@@ -210,27 +207,15 @@ module.exports = class Game {
                 console.log(player.getName() + " has " + player.getPoints() + " points");
             }
         });
-
-        let sendPlayerList = [];
-        this.#playerList.forEach(player => {
-            sendPlayerList.push({ name: player.getName(), points: player.getPoints() });
-          });
         
         // update playerList
-        let jsonMessage = JSON.stringify({ type: responseTypes.userList, data: sendPlayerList });
-        this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
+        this.sendUserList(this.#playerList);
         
         // Reset Display Timer
-        jsonMessage = JSON.stringify({type: responseTypes.clock, data: {time: "", timetype: ""}});
-        this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
-
-        // Reset Display Word
-        jsonMessage = JSON.stringify({type: responseTypes.word, data: ""});
-        this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
+        this.#sendTimer("","");
 
         // show answer word all player
-        jsonMessage = JSON.stringify({type: responseTypes.word, data: this.#word});
-        this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
+        this.#sendWord(this.#word, broadcastTypes.allInLobby);
 
         this.#state = stateTypes.roundEnded;
         this.#nextState();   
@@ -243,12 +228,10 @@ module.exports = class Game {
         console.log("End Game");
 
         // Reset Display Word
-        let jsonMessage = JSON.stringify({type: responseTypes.word, data: ""});
-        this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
+        this.#sendWord("", broadcastTypes.allInLobby);
 
-        // show by timer game end
-        jsonMessage = JSON.stringify({type: responseTypes.clock, data: {time: "", timetype: "beendet"}});
-        this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
+        // show game end in timer overlay
+        this.#sendTimer("beendet","");
 
         this.#state = stateTypes.gameEnded;
     }
@@ -277,7 +260,7 @@ module.exports = class Game {
             } else {
                 this.#endRound();
             }
-        } else if (stateTypes.drawAndGuessStarted === this.#state){
+        } else if (stateTypes.drawAndGuessEnded === this.#state){
             this.#endRound();
         } else if (stateTypes.roundEnded === this.#state){
             if(this.#playerQueue.length === 0 && this.#totalCycle === this.#currentCycle){
@@ -385,6 +368,20 @@ module.exports = class Game {
     }
 
     /**
+     * Send the UserList to the clients
+     * @param {Client[]} playerList player list
+     */
+    sendUserList(playerList) {
+        let sendPlayerList = [];
+        playerList.forEach((player) => {
+            sendPlayerList.push({ name: player.getName(), points: player.getPoints() });
+        });
+
+        let jsonMessage = JSON.stringify({ type: responseTypes.userList, data: sendPlayerList });
+        this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, playerList);
+    }
+
+    /**
      * Send all necessary data by reconnect the client
      * @param {string} cid client unique ID
      */
@@ -397,10 +394,12 @@ module.exports = class Game {
             }
         } else if (this.#state == stateTypes.wordSelected){
             if(this.#drawer && this.#drawer.getCid() === cid){
-                this.#sendWord();
+                this.#sendWord(this.#word, broadcastTypes.onlyOneClient, cid);
             } else if (this.#drawer && this.#drawer.getCid() !== cid){
                 this.#sendHangManWord();
             }
+        } else if (this.#state == stateTypes.gameEnded){
+            this.#sendTimer("beendet","");
         }
     }
 
@@ -426,12 +425,17 @@ module.exports = class Game {
     }
 
     /**
-     * Send the whole word to the drawer
+     * Send the whole word
+     * @param {string} word word to send
+     * @param {string} broadcastType broadcast type
+     * @param {string?} cid client unique ID (optional)
      */
-    #sendWord(){
-        // Set Hang Man Word Drawer
-        let jsonMessage = JSON.stringify({type: responseTypes.word, data: this.#word});
-        this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessage, false, broadcastTypes.onlyOneClient, this.#playerList);
+    #sendWord(word, broadcastType, cid){
+        if(cid === this.#drawer.getCid()){
+            console.log("Send Word to Drawer: " + word + " " + broadcastType + " " + cid);
+        }
+        let jsonMessage = JSON.stringify({type: responseTypes.word, data: word});
+        this.#server.broadcastWsMessage(cid, jsonMessage, false, broadcastType, this.#playerList);
     }
 
     /**
@@ -447,5 +451,15 @@ module.exports = class Game {
         // Set Hang Man Word Guesser
         let jsonMessage = JSON.stringify({type: responseTypes.word, data: hangManWord});
         this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessage, false, broadcastTypes.allInLobbyWithoutOneClient, this.#playerList);
+    }
+
+    /**
+     * Send the timer to the clients
+     * @param {string} timerType type of timer
+     * @param {string} time time to send
+     */
+    #sendTimer(timerType, time){
+        let jsonMessage = JSON.stringify({type: responseTypes.clock, data: {time: time, timetype: timerType}});
+        this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
     }
 }
