@@ -338,7 +338,7 @@ module.exports = class Game {
         }
     }
 
-    checkGameStarted(){
+    checkGameNotStarted(){
         if(this.#state === null || this.#state == stateTypes.gameEnded){
             return true;
         }
@@ -443,9 +443,6 @@ module.exports = class Game {
      * @param {string?} cid client unique ID (optional)
      */
     #sendWord(word, broadcastType, cid){
-        if(cid === this.#drawer.getCid()){
-            console.log("Send Word to Drawer: " + word + " " + broadcastType + " " + cid);
-        }
         let jsonMessage = JSON.stringify({type: responseTypes.word, data: word});
         this.#server.broadcastWsMessage(cid, jsonMessage, false, broadcastType, this.#playerList);
     }

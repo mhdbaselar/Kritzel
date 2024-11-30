@@ -33,7 +33,7 @@ module.exports = class Lobby {
      * Start the game in the lobby (async operation)
      */
     startGame(){
-        if(this.#game.checkGameStarted()){
+        if(this.#game.checkGameNotStarted()){
             setTimeout(() => {this.#game.startGame(this.#playerList, 1)}, 0);  // async operation (not wait) execute a lobby game parallel
         }   
     }
