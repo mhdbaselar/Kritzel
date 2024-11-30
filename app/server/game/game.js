@@ -338,6 +338,13 @@ module.exports = class Game {
         }
     }
 
+    checkGameStarted(){
+        if(this.#state === null || this.#state == stateTypes.gameEnded){
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Check if the word answer is correct
      * @param {string} answer chat message | word
