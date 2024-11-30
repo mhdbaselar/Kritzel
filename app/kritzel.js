@@ -6,8 +6,8 @@ const responseTypes = require("./client/class/responseTypes");
 
 // Creates a Server (organizes WebSocketServer)
 let server = new TinyServer(8123, 
-  (cid, data) => {
-    receive(cid, data);
+  (cid, request) => {
+    receive(cid, request);
   }, 
   (request) => {
     receiveServerRequest(request);
@@ -38,12 +38,16 @@ game.start();
 /**
  * Receives and processes a message from a client
  * @param {string} cid user unique ID
- * @param {Message} message client request
+ * @param {Message} request client request
  */
-function receive(cid, message) {
-  game.processInput(cid, message);
+function receive(cid, request) {
+  game.processInput(cid, request);
 }
 
+/**
+ * Receives and processes a request from the server
+ * @param {Message} request server request
+ */
 function receiveServerRequest(request){
   game.processServerRequest(request);
 }

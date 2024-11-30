@@ -65,7 +65,7 @@ module.exports = class ServerGame {
    * @param {string} cid user unique ID
    * @param {Message} request client request
    */
-  processInput(cid, request, server) {
+  processInput(cid, request) {
     let lobbyID = null;
 
     // set Lobby of request sender
@@ -74,12 +74,6 @@ module.exports = class ServerGame {
         lobbyID = client.getLobbyID();
       }
     });
-
-    // add Player Object to lobby
-    if(request instanceof Client){
-      this.#lobbies[lobbyID].addPlayer(request);
-      return;
-    }
 
     let _request = JSON.parse(request);
 
@@ -109,6 +103,10 @@ module.exports = class ServerGame {
     }
   }
 
+  /**
+   * Process a server request
+   * @param {Message} request server request
+   */
   processServerRequest(request){
     if (request.messageType === "deletePlayerInLobby"){
       let lobbyID = null;

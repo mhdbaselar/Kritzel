@@ -409,17 +409,27 @@ module.exports = class ClientGame {
     this.send(JSON.stringify(message));
   }
 
+  /**
+   * Requests the server to send reconnect data
+   */
   sendGetReconnectDataAction(){
     let message = new Message(requestTypes.getReconnectData, null);
     this.send(JSON.stringify(message));
   }
 
+  /**
+   * Sends the choosen word to the server
+   * @param {string} word word to send
+   */
   sendWordAction(word) {
     let message = new Message(requestTypes.setWord, word);
     this.send(JSON.stringify(message));
     console.log("Word sent: " + JSON.stringify(message));
   }
 
+  /**
+   * Sends the game start action to the server
+   */
   sendGameStartAction() {
     let message = new Message(requestTypes.startGame, null);
     this.send(JSON.stringify(message));

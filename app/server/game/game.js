@@ -19,6 +19,7 @@ const stateTypes = {
 module.exports = class Game {
     /** @type {Client[]} */
     #playerList = null;
+    /** @type {Client[]} */
     #playerQueue = null;
     /** @type {int} */
     #state = null;
@@ -50,11 +51,13 @@ module.exports = class Game {
     #answerTimeList;
     /** @type {Dictionary} */
     #dictionary;
+    /**@type {Interval} */
     #wordSelectionTimer;
     /** @type {Board} */
     #board;
 
-    /**
+    /**  
+     * Constructor to instanciate the game
      * @param {TinyServer} server 
      * @param {Board} board
      */
@@ -81,6 +84,9 @@ module.exports = class Game {
         this.#nextState();
     }
 
+    /**
+     * Start a round and initialize the round
+     */
     #startRound(){
         console.log("Start Round");
         if (this.#playerQueue.length === 0) {
@@ -108,6 +114,9 @@ module.exports = class Game {
         , 1000); 
     }
 
+    /**
+     * Select the drawer for the round
+     */
     #selectDrawer(){
         console.log("Select Drawer");
 
@@ -131,6 +140,9 @@ module.exports = class Game {
         // -> client send choosen word to server
         // -> server check word is set and clear Timeout?
         // -> server send to client (frontend) remove word choice display
+    /**
+     * Select a word for the drawer
+     */
     #selectWord(){
         console.log("Select Word");
         this.#wordChoicesList = this.#dictionary.getWords(this.#wordChoicesCount);
@@ -157,6 +169,9 @@ module.exports = class Game {
         // -> server: check chat Msg == answer and DrawTimer not expired and player != drawer
         // -> rigth answer save Time for player when the answer was send
         // -> send client "you have the right answer" -> other clients dont get the answer message in chat
+    /**
+     * Start the Draw and Guess phase
+     */
     #startDrawAndGuess(){
         console.log("Start Draw and Guess");
 
@@ -180,6 +195,9 @@ module.exports = class Game {
         }, 1000);
     }
 
+    /**
+     * End the round, calculate the score, disable overlays and show the word
+     */
     #endRound(){
         console.log("End Round");
 
@@ -218,6 +236,9 @@ module.exports = class Game {
         this.#nextState();   
     }
 
+    /**
+     * End the game, reset the game and TODO: show the final score
+     */
     #endGame(){
         console.log("End Game");
 
@@ -232,10 +253,17 @@ module.exports = class Game {
         this.#state = stateTypes.gameEnded;
     }
 
+    /**
+     * Get the current state of the game
+     * @returns {int} current state of the game
+     */
     getState(){
         return this.#state;
     }
 
+    /**
+     * Execute the next state of the game
+     */
     #nextState(){
         if(stateTypes.gameStarted === this.#state){
             this.#startRound();
@@ -260,14 +288,28 @@ module.exports = class Game {
         }
     }
 
+    /**
+     * Get the current drawer
+     * @returns {Client} drawer
+     */
     getDrawer(){
         return this.#drawer;
     }
 
+    /**
+     * Check if the client has the permission to draw
+     * @param {string} cid client unique ID
+     * @returns {boolean} true if the client has the permission to draw
+     */
     hasPermissionToDraw(cid){
         return this.#drawer && this.#drawer.getCid() === cid && this.#state === stateTypes.wordSelected;   // after wordSelected
     }
 
+    /**
+     * Set the word for the drawer
+     * @param {string} word choosen word
+     * @param {string} cid client unique ID
+     */
     setWord(word, cid) {
         if (this.#state === stateTypes.drawerSelected && this.#drawer.getCid() === cid) {
             this.#word = word;
@@ -277,12 +319,12 @@ module.exports = class Game {
             // Board leeren
             this.#board.clear();
 
+            // Clear Board Message
             let jsonMessageClear = JSON.stringify({
                 type: responseTypes.initWhiteCanvas, 
                 data: [0]
             });
 
-            // Clear Board Nachricht
             this.#server.broadcastWsMessage(
                 null,
                 jsonMessageClear, 
@@ -291,6 +333,7 @@ module.exports = class Game {
                 this.#playerList
             );
 
+            // End Choosing Word Notification
             let jsonMessageGuesser = JSON.stringify({
                 type: responseTypes.endChoosingWordNotification, 
                 data: this.#drawer.getName()
@@ -307,6 +350,11 @@ module.exports = class Game {
         }
     }
 
+    /**
+     * Check if the word answer is correct
+     * @param {string} answer chat message | word
+     * @returns {boolean} true if the answer is correct
+     */
     checkAnswer(answer){
         if(this.#state === stateTypes.wordSelected &&
             answer.toLowerCase().trim() === this.#word.toLowerCase().trim()){
@@ -315,6 +363,12 @@ module.exports = class Game {
         return false;
     }
 
+    /**
+     * Add the answer notifiaction to the chat and save the time of the answer
+     * @param {string} cid client unique ID
+     * @param {Date} timestamp timestamp of the answer
+     * @param {Chat} chat chat object
+     */
     addAnswer(cid, timestamp, chat){
         let isRightAnswerAdded = this.#answerTimeList.some(answer => answer.cid === cid);
         if(!isRightAnswerAdded){
@@ -330,6 +384,10 @@ module.exports = class Game {
         }
     }
 
+    /**
+     * Send all necessary data by reconnect the client
+     * @param {string} cid client unique ID
+     */
     sendReconnectData(cid){
         if(this.#state == stateTypes.drawerSelected){
             if(this.#drawer && this.#drawer.getCid() === cid){
@@ -350,22 +408,35 @@ module.exports = class Game {
     //------------HELP FUNCTIONS-----------
     //-------------------------------------
 
+    /**
+     * Send the word choices list to the drawer
+     */
     #sendWordChoicesList(){
         let jsonMessageDrawer = JSON.stringify({type: responseTypes.wordChoiceList ,data: this.#wordChoicesList});
         this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessageDrawer, false, broadcastTypes.onlyOneClient);
     }
 
+    /**
+     * Send the word choices notification to the guesser
+     * @param {string} broadcastType broadcast type
+     */
     #sendWordChoicesNotification(broadcastType){
         let jsonMessageGuesser = JSON.stringify({type: responseTypes.choosingWordNotification, data: this.#drawer.getName()});
         this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessageGuesser, false, broadcastType, this.#playerList);
     }
 
+    /**
+     * Send the whole word to the drawer
+     */
     #sendWord(){
         // Set Hang Man Word Drawer
         let jsonMessage = JSON.stringify({type: responseTypes.word, data: this.#word});
         this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessage, false, broadcastTypes.onlyOneClient, this.#playerList);
     }
 
+    /**
+     * Send the hang man word to the guesser
+     */
     #sendHangManWord(){
         // Create Hang Man Word Guesser
         let hangManWord = "";
