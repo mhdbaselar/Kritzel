@@ -30,6 +30,7 @@ module.exports = class ClientGame {
    */
   constructor() {
     this.#name = null;
+    this.canDraw = false;
   }
 
   /**
@@ -113,17 +114,13 @@ module.exports = class ClientGame {
         wordSelectionPopup.style.display = "flex";
         renderWordChoice(data.data, this);
 
-        // Toolbar einblenden
-        const toolbar = document.querySelector(".toolbar");
-        toolbar.style.display = "flex";
-
       } else if (data.type === responseTypes.choosingWordNotification) {
         console.log(data.data); // name from the drawer
         // TODO: Frontend anzeigen der Notification ("<Bob> is choosing a word")
 
-        // Toolbar ausblenden
-        const toolbar = document.querySelector(".toolbar");
-        toolbar.style.display = "none";
+        // Disallow drawing and hide toolbar
+        this.setDrawingState(false);
+
       } else if (data.type === responseTypes.endChoosingWordNotification) {
         console.log(data.data); // name from the drawer
         // TODO: Frontend anzeigen der Notification ("<Bob> is choosing a word") ausblenden
@@ -445,5 +442,28 @@ module.exports = class ClientGame {
         this.socket.readyState
       );
     }
+  }
+
+
+  //-------------------------------------
+  //---Client-Side Drawing States--------
+  //-------------------------------------
+
+  setDrawingState(canDraw) {
+    this.canDraw = canDraw;
+    this.updateToolbarVisibility();
+  }
+
+  getCanDraw() {
+    return this.canDraw;
+  }
+
+  setCanDraw(value) {
+    this.canDraw = value;
+  }
+
+  updateToolbarVisibility() {
+    const toolbar = document.querySelector(".toolbar");
+    toolbar.style.display = this.canDraw ? "flex" : "none";
   }
 };
