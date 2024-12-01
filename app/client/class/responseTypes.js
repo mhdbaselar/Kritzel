@@ -14,5 +14,6 @@ module.exports = responseTypes = {
     endChoosingWordNotification : "endChoosingWordNotification",
     chatMsg : "chatMsg",
     chatMsgList : "chatMsgList",
-    clock : "clock"
+    clock : "clock",
+    drawPermission : "drawPermission"
 }

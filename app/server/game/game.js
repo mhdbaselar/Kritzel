@@ -209,6 +209,9 @@ module.exports = class Game {
             }
         });
         
+        // disable draw permission of current drawer
+        this.#sendDrawPermission(false);
+
         // update playerList
         this.sendUserList(this.#playerList);
         
@@ -407,6 +410,7 @@ module.exports = class Game {
         } else if (this.#state == stateTypes.wordSelected){
             if(this.#drawer && this.#drawer.getCid() === cid){
                 this.#sendWord(this.#word, broadcastTypes.onlyOneClient, cid);
+                this.#sendDrawPermission(true);
             } else if (this.#drawer && this.#drawer.getCid() !== cid){
                 this.#sendHangManWord();
             }
@@ -470,5 +474,14 @@ module.exports = class Game {
     #sendTimer(timerType, time){
         let jsonMessage = JSON.stringify({type: responseTypes.clock, data: {time: time, timetype: timerType}});
         this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
+    }
+
+    /**
+     * Send the draw permission to the drawer (enabled or disabled)
+     * @param {*} isEnabled true if the drawer has the permission to draw
+     */
+    #sendDrawPermission(isEnabled){
+        let jsonMessage = JSON.stringify({type: responseTypes.drawPermission, data: isEnabled});
+        this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessage, false, broadcastTypes.onlyOneClient);
     }
 }
