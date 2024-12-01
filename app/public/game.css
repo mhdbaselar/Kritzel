@@ -48,6 +48,7 @@ body {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  flex-shrink: 0; /* Verhindert Schrumpfen */
 }
 
 .canvas-column {
@@ -64,6 +65,12 @@ body {
   border-radius: 5px;
   width: 50vw;
   margin: 2vh auto 0;
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px;
+  z-index: 100;
 }
 
 /* Color Picker */
@@ -571,4 +578,12 @@ body {
   font-family: monospace;
   font-size: 25px;
   margin: 0 10px 0 0;
+}
+
+/* Container für Canvas und Toolbar */
+.canvas-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* oder feste Höhe */
+  position: relative;
 }
