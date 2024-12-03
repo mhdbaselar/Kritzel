@@ -55,6 +55,7 @@ module.exports = class Game {
     #wordSelectionTimer;
     /** @type {Board} */
     #board;
+    #wordCheckAccuracyRate = 0.75;  // 75%
 
     /**  
      * Constructor to instanciate the game
@@ -354,10 +355,21 @@ module.exports = class Game {
      * @returns {boolean} true if the answer is correct
      */
     checkAnswer(answer){
-        if(this.#state === stateTypes.wordSelected &&
-            answer.toLowerCase().trim() === this.#word.toLowerCase().trim()){
+        let rightLetterCounter = 0;
+
+        if(answer.length >= 2 && this.#word.length >= 2){
+            for(let i = 0; (i < answer.length || i < this.#word.length); i++){
+                if(this.#word[i] !== null && answer[i] !== null && this.#word[i] === answer[i]){
+                    rightLetterCounter += 1;
+                }
+            }
+        }
+
+        let accuracy = rightLetterCounter / this.#word.length;
+        if(accuracy >= this.#wordCheckAccuracyRate){
             return true;
         }
+
         return false;
     }
 
