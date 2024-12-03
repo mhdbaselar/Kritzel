@@ -356,10 +356,12 @@ module.exports = class Game {
      */
     checkAnswer(answer){
         let rightLetterCounter = 0;
+        let word = this.#word.toLowerCase().trim();
+        let answerWord = answer.toLowerCase().trim(); 
 
-        if(answer.length >= 2 && this.#word.length >= 2){
-            for(let i = 0; (i < answer.length || i < this.#word.length); i++){
-                if(this.#word[i] !== null && answer[i] !== null && this.#word[i] === answer[i]){
+        if(answerWord.length >= 2 && word.length >= 2){
+            for(let i = 0; (i < answerWord.length || i < word.length); i++){
+                if(word[i] !== null && answerWord[i] !== null && word[i] === answerWord[i]){
                     rightLetterCounter += 1;
                 }
             }
