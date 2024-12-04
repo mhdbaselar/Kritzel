@@ -26,7 +26,8 @@ function renderUsers(users) {
 
     const nameDiv = document.createElement("div");
     nameDiv.classList.add("user-name");
-    nameDiv.textContent = user.name;
+    let icon = (user.isDrawer ? " 🖌️" : "");
+    nameDiv.textContent = user.name + icon;
 
     const pointsDiv = document.createElement("div");
     pointsDiv.classList.add("user-points");

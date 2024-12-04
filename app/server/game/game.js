@@ -127,6 +127,7 @@ module.exports = class Game {
         }
         else {      // Select drawer
             this.#drawer = this.#playerQueue[0];
+            this.sendUserList(this.#playerList);
             this.#playerQueue.shift();              // remove first player in queue
             this.#state = stateTypes.drawerSelected;
             this.#nextState();
@@ -208,6 +209,9 @@ module.exports = class Game {
             }
         });
         
+        // disable draw permission of current drawer
+        this.#sendDrawPermission(false);
+
         // update playerList
         this.sendUserList(this.#playerList);
         
@@ -232,6 +236,10 @@ module.exports = class Game {
 
         // show game end in timer overlay
         this.#sendTimer("beendet","");
+
+        // Reset Drawer Icon UserList
+        this.#drawer = null;
+        this.sendUserList(this.#playerList);
 
         this.#state = stateTypes.gameEnded;
     }
@@ -333,6 +341,13 @@ module.exports = class Game {
         }
     }
 
+    checkGameNotStarted(){
+        if(this.#state === null || this.#state == stateTypes.gameEnded){
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Check if the word answer is correct
      * @param {string} answer chat message | word
@@ -374,7 +389,7 @@ module.exports = class Game {
     sendUserList(playerList) {
         let sendPlayerList = [];
         playerList.forEach((player) => {
-            sendPlayerList.push({ name: player.getName(), points: player.getPoints() });
+            sendPlayerList.push({ name: player.getName(), points: player.getPoints(), isDrawer: player === this.#drawer });
         });
 
         let jsonMessage = JSON.stringify({ type: responseTypes.userList, data: sendPlayerList });
@@ -395,6 +410,7 @@ module.exports = class Game {
         } else if (this.#state == stateTypes.wordSelected){
             if(this.#drawer && this.#drawer.getCid() === cid){
                 this.#sendWord(this.#word, broadcastTypes.onlyOneClient, cid);
+                this.#sendDrawPermission(true);
             } else if (this.#drawer && this.#drawer.getCid() !== cid){
                 this.#sendHangManWord();
             }
@@ -431,9 +447,6 @@ module.exports = class Game {
      * @param {string?} cid client unique ID (optional)
      */
     #sendWord(word, broadcastType, cid){
-        if(cid === this.#drawer.getCid()){
-            console.log("Send Word to Drawer: " + word + " " + broadcastType + " " + cid);
-        }
         let jsonMessage = JSON.stringify({type: responseTypes.word, data: word});
         this.#server.broadcastWsMessage(cid, jsonMessage, false, broadcastType, this.#playerList);
     }
@@ -461,5 +474,14 @@ module.exports = class Game {
     #sendTimer(timerType, time){
         let jsonMessage = JSON.stringify({type: responseTypes.clock, data: {time: time, timetype: timerType}});
         this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
+    }
+
+    /**
+     * Send the draw permission to the drawer (enabled or disabled)
+     * @param {*} isEnabled true if the drawer has the permission to draw
+     */
+    #sendDrawPermission(isEnabled){
+        let jsonMessage = JSON.stringify({type: responseTypes.drawPermission, data: isEnabled});
+        this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessage, false, broadcastTypes.onlyOneClient);
     }
 }

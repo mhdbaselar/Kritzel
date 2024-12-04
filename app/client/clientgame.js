@@ -9,6 +9,7 @@ const {
   displayChatMessage,
   displayChatMessageList,
   renderTimer,
+  renderUsers,
   renderWordChoice,
 } = require("./components/userInterface");
 const HexColorConverter = require("./class/hexColorConverter");
@@ -130,6 +131,8 @@ module.exports = class ClientGame {
       } else if (data.type === responseTypes.word) {
         console.log(data);
         document.getElementById("hint").innerText = data.data;
+      } else if (data.type === responseTypes.drawPermission) {
+        this.setDrawingState(data.data);
       }
     };
   }

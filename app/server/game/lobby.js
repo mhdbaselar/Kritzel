@@ -33,7 +33,9 @@ module.exports = class Lobby {
      * Start the game in the lobby (async operation)
      */
     startGame(){
-        setTimeout(() => {this.#game.startGame(this.#playerList, 1)}, 0);  // async operation (not wait) execute a lobby game parallel
+        if(this.#game.checkGameNotStarted()){
+            setTimeout(() => {this.#game.startGame(this.#playerList, 1)}, 0);  // async operation (not wait) execute a lobby game parallel
+        }   
     }
 
     /**
@@ -170,6 +172,9 @@ module.exports = class Lobby {
         return this.#chat.getMessages();
     }
 
+    /**
+     * send user list to all clients in the lobby
+     */
     sendUserList(){
         this.#game.sendUserList(this.#playerList);
     }
