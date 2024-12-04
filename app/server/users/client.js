@@ -5,7 +5,7 @@ module.exports = class Client {
     /**@type {string} */
     #name;
     /**@type {int} */
-    #score;
+    #points;
     /**@type {int} */
     #lobbyID;
     /**@type {boolean} */
@@ -25,7 +25,7 @@ module.exports = class Client {
         } else {
             this.#name = "";
         }
-        this.#score = 0;
+        this.#points = 0;
         this.#lobbyID = lobbyID;
         this.#isConnected = true;
     }
@@ -63,19 +63,19 @@ module.exports = class Client {
     }
 
     /**
-     * Returns the client score
-     * @returns {int} client score
+     * Returns the client points
+     * @returns {int} client points
      */
     getPoints() {
-        return this.#score;
+        return this.#points;
     }
 
     /**
-     * Sets the client score
-     * @param {int} points client score
+     * Sets the client points
+     * @param {int} points client points
      */
     setPoints(points) {
-        this.#score = points;
+        this.#points = points;
     }
 
     /**
