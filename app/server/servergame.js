@@ -65,7 +65,7 @@ module.exports = class ServerGame {
    * @param {string} cid user unique ID
    * @param {Message} request client request
    */
-  processInput(cid, request, server) {
+  processInput(cid, request) {
     let lobbyID = null;
 
     // set Lobby of request sender
@@ -74,12 +74,6 @@ module.exports = class ServerGame {
         lobbyID = client.getLobbyID();
       }
     });
-
-    // add Player Object to lobby
-    if(request instanceof Client){
-      this.#lobbies[lobbyID].addPlayer(request);
-      return;
-    }
 
     let _request = JSON.parse(request);
 
@@ -109,6 +103,10 @@ module.exports = class ServerGame {
     }
   }
 
+  /**
+   * Process a server request
+   * @param {Message} request server request
+   */
   processServerRequest(request){
     if (request.messageType === "deletePlayerInLobby"){
       let lobbyID = null;
@@ -233,7 +231,9 @@ module.exports = class ServerGame {
       let name = "";
       if(message.cid === cid){
         name = "You";
-      } else {
+      } else if (message.cid === null){
+        name = "Server";
+      }  else {
         name = this.#server.getClients().getNameByCid(message.cid);
       }
       data.push({ msg: message.msg, name: name });
@@ -252,17 +252,7 @@ module.exports = class ServerGame {
    * @param {int} lobbyID index of the lobby
    */
   #processGetUserListAction(cid, lobbyID) {
-    let playerInLobby = this.#lobbies[lobbyID].getPlayerList();
-    let sendPlayerList = [];
-
-    playerInLobby.forEach(player => {
-      sendPlayerList.push({ name: player.getName(), points: player.getPoints() });
-    });
-
-
-    let jsonMessage = JSON.stringify({ type: responseTypes.userList, data: sendPlayerList });
-
-    this.#server.broadcastWsMessage(cid, jsonMessage, false, broadcastTypes.allInLobby, playerInLobby);
+    this.#lobbies[lobbyID].sendUserList();
   }
 
   /**
