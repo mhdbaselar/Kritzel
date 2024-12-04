@@ -206,24 +206,26 @@ module.exports = class Game {
     #endRound(){
         console.log("End Round");
 
-        // TODO: calculate points with the saved Times for the player and for the drawer
-        // simple current only +50 points for the right answer pls change
         this.#answerTimeList.sort(function(answer1, answer2){
             return answer1.timestamp - answer2.timestamp;
         });
 
-        this.#answerTimeList.forEach((answer) => {
-            let player = this.#playerList.find((player) => player.getCid() === answer.cid);
-            if(player){
-                player.setPoints(player.getPoints() + this.#maxPointsGuesser);
-                console.log(player.getName() + " has " + player.getPoints() + " points");
-                this.#maxPointsGuesser -= 5;
-            }
-        });
-
         let maxLength = Math.max(this.#answerTimeList.length, this.#playerList.length - 1);
-        this.#drawer.setPoints(this.#drawer.getPoints() + this.#maxPointsDrawer / maxLength * this.#answerTimeList.length);
+        if(maxLength !== 0){
+            let maxPointsGuesser = this.#maxPointsGuesser;
+            let pointGradiation = maxPointsGuesser / maxLength;
 
+            this.#answerTimeList.forEach((answer) => {
+                let player = this.#playerList.find((player) => player.getCid() === answer.cid);
+                if(player){
+                    player.setPoints(player.getPoints() + maxPointsGuesser);
+                    maxPointsGuesser -= pointGradiation;
+                }
+            });
+
+            this.#drawer.setPoints(this.#drawer.getPoints() + this.#maxPointsDrawer / maxLength * this.#answerTimeList.length);
+        }
+        
         // disable draw permission of current drawer
         this.#sendDrawPermission(false);
 
@@ -370,21 +372,23 @@ module.exports = class Game {
      * @returns {boolean} - Returns true if the accuracy of the answer is greater than or equal to the required accuracy rate, otherwise false.
      */
     checkAnswer(answer){
-        let rightLetterCounter = 0;
-        let word = this.#word.toLowerCase().trim();
-        let answerWord = answer.toLowerCase().trim();
+        if(this.#state === stateTypes.wordSelected){
+            let rightLetterCounter = 0;
+            let word = this.#word.toLowerCase().trim();
+            let answerWord = answer.toLowerCase().trim();
 
-        if(answerWord.length >= 2 && word.length >= 2){
-            for(let i = 0; (i < answerWord.length || i < word.length); i++){
-                if(word[i] !== null && answerWord[i] !== null && word[i] === answerWord[i]){
-                    rightLetterCounter += 1;
+            if(answerWord.length >= 2 && word.length >= 2){
+                for(let i = 0; (i < answerWord.length || i < word.length); i++){
+                    if(word[i] !== null && answerWord[i] !== null && word[i] === answerWord[i]){
+                        rightLetterCounter += 1;
+                    }
                 }
             }
-        }
 
-        let accuracy = rightLetterCounter / this.#word.length;
-        if(accuracy >= this.#wordCheckAccuracyRate){
-            return true;
+            let accuracy = rightLetterCounter / this.#word.length;
+            if(accuracy >= this.#wordCheckAccuracyRate){
+                return true;
+            }
         }
 
         return false;
