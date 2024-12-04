@@ -34,9 +34,9 @@ module.exports = class Game {
     /** @type {Client} */
     #drawer = null;
     /** @type {int} */
-    #wordTimeout = 10000; // 10s
+    #wordTimeout = 20000; // 10s
     /** @type {int} */
-    #roundTimeout = 30000; // 30s
+    #roundTimeout = 60000; // 30s
     /** @type {int} */
     #nextRoundTimeout = 5000; // 5s
     /** @type {int} */
