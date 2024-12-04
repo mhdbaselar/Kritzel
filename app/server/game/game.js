@@ -57,9 +57,9 @@ module.exports = class Game {
     #board;
     #wordCheckAccuracyRate = 0.75;  // 75%
 
-    /**  
+    /**
      * Constructor to instanciate the game
-     * @param {TinyServer} server 
+     * @param {TinyServer} server
      * @param {Board} board
      */
     constructor(server, board){
@@ -110,8 +110,8 @@ module.exports = class Game {
                 this.#nextState();
             }
             this.#timeleft -= 1;
-        }   
-        , 1000); 
+        }
+        , 1000);
     }
 
     /**
@@ -132,7 +132,7 @@ module.exports = class Game {
             this.#playerQueue.shift();              // remove first player in queue
             this.#state = stateTypes.drawerSelected;
             this.#nextState();
-        }        
+        }
     }
 
     //Sequence:
@@ -183,13 +183,13 @@ module.exports = class Game {
         const drawTimer = setInterval(() => {
             this.#sendTimer("Zeichnen verbleibend: ", this.#timeleft);
 
-            let allAnswered = this.#playerList.every((player) => player === this.#drawer || 
+            let allAnswered = this.#playerList.every((player) => player === this.#drawer ||
                                                     this.#answerTimeList.some((answer) => answer.cid === player.getCid()));
             if(this.#timeleft <= 0 || allAnswered){
                 clearInterval(drawTimer);
                 this.#state = stateTypes.drawAndGuessEnded;
                 this.#nextState();
-            }  
+            }
             this.#timeleft -= 1;
         }, 1000);
     }
@@ -209,13 +209,13 @@ module.exports = class Game {
                 console.log(player.getName() + " has " + player.getPoints() + " points");
             }
         });
-        
+
         // disable draw permission of current drawer
         this.#sendDrawPermission(false);
 
         // update playerList
         this.sendUserList(this.#playerList);
-        
+
         // Reset Display Timer
         this.#sendTimer("","");
 
@@ -223,7 +223,7 @@ module.exports = class Game {
         this.#sendWord(this.#word, broadcastTypes.allInLobby);
 
         this.#state = stateTypes.roundEnded;
-        this.#nextState();   
+        this.#nextState();
     }
 
     /**
@@ -313,28 +313,28 @@ module.exports = class Game {
 
             // Clear Board Message
             let jsonMessageClear = JSON.stringify({
-                type: responseTypes.initWhiteCanvas, 
+                type: responseTypes.initWhiteCanvas,
                 data: [0]
             });
 
             this.#server.broadcastWsMessage(
                 null,
-                jsonMessageClear, 
-                false, 
+                jsonMessageClear,
+                false,
                 broadcastTypes.allInLobby,
                 this.#playerList
             );
 
             // End Choosing Word Notification
             let jsonMessageGuesser = JSON.stringify({
-                type: responseTypes.endChoosingWordNotification, 
+                type: responseTypes.endChoosingWordNotification,
                 data: this.#drawer.getName()
             });
             this.#server.broadcastWsMessage(
-                this.#drawer.getCid(), 
-                jsonMessageGuesser, 
-                false, 
-                broadcastTypes.allInLobbyWithoutOneClient, 
+                this.#drawer.getCid(),
+                jsonMessageGuesser,
+                false,
+                broadcastTypes.allInLobbyWithoutOneClient,
                 this.#playerList
             );
             this.#state = stateTypes.wordSelected;
@@ -350,14 +350,15 @@ module.exports = class Game {
     }
 
     /**
-     * Check if the word answer is correct
-     * @param {string} answer chat message | word
-     * @returns {boolean} true if the answer is correct
+     * Checks if the provided answer matches the word with a certain accuracy rate.
+     *
+     * @param {string} answer - The answer to be checked against the word.
+     * @returns {boolean} - Returns true if the accuracy of the answer is greater than or equal to the required accuracy rate, otherwise false.
      */
     checkAnswer(answer){
         let rightLetterCounter = 0;
         let word = this.#word.toLowerCase().trim();
-        let answerWord = answer.toLowerCase().trim(); 
+        let answerWord = answer.toLowerCase().trim();
 
         if(answerWord.length >= 2 && word.length >= 2){
             for(let i = 0; (i < answerWord.length || i < word.length); i++){
