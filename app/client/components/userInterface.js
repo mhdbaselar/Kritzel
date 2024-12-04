@@ -84,7 +84,7 @@ function createStartGameButton(clientGame) {
  * @param {string} message - The message to display.
  * @param {string} senderCid - The sender of the message.
  */
-function displayChatMessage(chatMessages, message, senderCid, senderName = "") {
+function displayChatMessage(chatMessages, message, senderName = "") {
   const messageDiv = document.createElement("div");
   messageDiv.textContent = `${senderName}: ${message}`;
   chatMessages.appendChild(messageDiv);
@@ -97,26 +97,11 @@ function displayChatMessage(chatMessages, message, senderCid, senderName = "") {
  * @param {HTMLElement} chatMessages - The container element where chat messages will be displayed.
  * @param {Array} messageList - An array of message objects to be displayed. Each object should have `cid` and `message` properties.
  */
-function displayChatMessageList(chatMessages, messageList, cid) {
-  const parseCookie = (str) =>
-    str
-      .split(";")
-      .map((v) => v.split("="))
-      .reduce((acc, v) => {
-        acc[decodeURIComponent(v[0].trim())] = decodeURIComponent(v[1].trim());
-        return acc;
-      }, {});
-
-  let cookieCid = parseCookie(document.cookie)["cid"];
-
+function displayChatMessageList(chatMessages, messageList) {
+  
   messageList.forEach((message) => {
-    let name = message.name;
-    let msgCid = message.cid;
-    if (cid == cookieCid && cookieCid == msgCid) {
-      name = "You";
-    }
     const messageDiv = document.createElement("div");
-    messageDiv.textContent = `${name}: ${message.msg}`;
+    messageDiv.textContent = `${message.name}: ${message.msg}`;
     chatMessages.appendChild(messageDiv);
   });
   chatMessages.scrollTop = chatMessages.scrollHeight;

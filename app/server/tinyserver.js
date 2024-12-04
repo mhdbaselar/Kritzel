@@ -24,9 +24,10 @@ module.exports = class TinyServer {
    * @param {int} port port number
    * @param {function} wsCallback receive function
    */
-  constructor(port, wsCallback) {
+  constructor(port, wsCallback, wssCallback) {
     this.#clients = new ClientList();
     this.wsCallback = wsCallback;
+    this.wssCallback = wssCallback;
     this.server = http.createServer(this.processHttpRequest.bind(this));
     this.websocketServer = new ws.WebSocketServer({
       server: this.server,
@@ -71,6 +72,8 @@ module.exports = class TinyServer {
       this.#clients.getClientList().forEach((client) => {
         if(client.getCid() === websocket.cid){
           client.setIsConnected(true);
+          let request = {messageType : "addPlayerInLobby", messageBody : {client : client}};
+          this.processWssRequest(request);
         }
       });
     }
@@ -78,10 +81,13 @@ module.exports = class TinyServer {
       websocket.cid = this.getUniqueID();
       websocket.send(JSON.stringify({ type: responseTypes.cookie, data: websocket.cid }));
       let lobbyID = 0;
+
       /*lobbyID = Math.floor(Math.random() * 2);                // keywords: TESTING DELETE LOBBYS
       console.log("lobbyID: " + lobbyID);*/
+
       let client = this.#clients.addClient(websocket.cid, null, lobbyID);
-      this.wsCallback(websocket.cid, client);
+      let request = {messageType : "addPlayerInLobby", messageBody : {client : client}};
+      this.processWssRequest(request);
     }
 
     websocket.on("error", console.error);
@@ -92,6 +98,8 @@ module.exports = class TinyServer {
       this.#clients.getClientList().forEach((client) => {
         if(client.getCid() === websocket.cid){
           client.setIsConnected(false);
+          let request = {messageType : "deletePlayerInLobby", messageBody : {cid : client.getCid()}}
+          this.processWssRequest(request);
         }
       });
       console.log("close");
@@ -132,6 +140,14 @@ module.exports = class TinyServer {
     }
 
     if (this.wsCallback) this.wsCallback(websocket.cid, data);
+  }
+
+  /**
+   * Recieves and processes a message from the server
+   * @param {*} request server request
+   */
+  processWssRequest(request){
+    if (this.wssCallback) this.wssCallback(request);
   }
 
   /**

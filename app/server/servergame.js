@@ -75,12 +75,6 @@ module.exports = class ServerGame {
       }
     });
 
-    // add Player Object to lobby
-    if(request instanceof Client){
-      this.#lobbies[lobbyID].addPlayer(request);
-      return;
-    }
-
     let _request = JSON.parse(request);
 
     if (_request.messageType == requestTypes.draw) {
@@ -103,8 +97,42 @@ module.exports = class ServerGame {
       
     } else if(_request.messageType == requestTypes.startGame){
       this.#lobbies[lobbyID].startGame();
-    }
 
+    } else if(_request.messageType == requestTypes.getReconnectData){
+      this.#lobbies[lobbyID].sendReconnectData(cid);
+    }
+  }
+
+  /**
+   * Process a server request
+   * @param {Message} request server request
+   */
+  processServerRequest(request){
+    if (request.messageType === "deletePlayerInLobby"){
+      let lobbyID = null;
+      this.#server.getClients().getClientList().forEach(client => {
+        if(client.getCid() == request.messageBody.cid) {
+          lobbyID = client.getLobbyID();
+        }
+      });
+
+      if(lobbyID !== null){
+        this.#lobbies[lobbyID].deletePlayer(request.messageBody.cid);
+        this.#processGetUserListAction(request.messageBody.cid, lobbyID);
+      }
+    } else if(request.messageType === "addPlayerInLobby" && request.messageBody.client instanceof Client){
+      let lobbyID = null;
+      this.#server.getClients().getClientList().forEach(client => {
+        if(client.getCid() == request.messageBody.client.getCid()) {
+          lobbyID = client.getLobbyID();
+        }
+      });
+
+      if(lobbyID !== null){
+        this.#lobbies[lobbyID].addPlayer(request.messageBody.client);
+      }
+      
+    }
   }
 
   //-------------------------------------
@@ -178,7 +206,6 @@ module.exports = class ServerGame {
       let jsonMessage = JSON.stringify({
         type: responseTypes.chatMsg,
         data: chatMsg,
-        cid: cid,
         name: name
       });
       this.#server.broadcastWsMessage(
@@ -201,14 +228,20 @@ module.exports = class ServerGame {
     let messages = this.#lobbies[lobbyID].getMessages(cid);
     let data = [];
     messages.forEach(message => {
-      let name = this.#server.getClients().getNameByCid(message.cid);
-      data.push({ cid: message.cid, msg: message.msg, name: name });
+      let name = "";
+      if(message.cid === cid){
+        name = "You";
+      } else if (message.cid === null){
+        name = "Server";
+      }  else {
+        name = this.#server.getClients().getNameByCid(message.cid);
+      }
+      data.push({ msg: message.msg, name: name });
     });
 
     let jsonMessage = JSON.stringify({
       type: responseTypes.chatMsgList,
       data: data,
-      cid: cid,
     });
     this.#server.broadcastWsMessage(cid, jsonMessage, false, broadcastTypes.onlyOneClient);
   }
@@ -219,17 +252,7 @@ module.exports = class ServerGame {
    * @param {int} lobbyID index of the lobby
    */
   #processGetUserListAction(cid, lobbyID) {
-    let playerInLobby = this.#lobbies[lobbyID].getPlayerList();
-    let sendPlayerList = [];
-
-    playerInLobby.forEach(player => {
-      sendPlayerList.push({ name: player.getName(), points: player.getPoints() });
-    });
-
-
-    let jsonMessage = JSON.stringify({ type: responseTypes.userList, data: sendPlayerList });
-
-    this.#server.broadcastWsMessage(cid, jsonMessage, false, broadcastTypes.allInLobby, playerInLobby);
+    this.#lobbies[lobbyID].sendUserList();
   }
 
   /**

@@ -19,6 +19,7 @@ module.exports = class Lobby {
 
     /**
      * Constructor to instanciate the lobby
+     * @param {TinyServer} server websocketserver
      */
     constructor(server){
         this.#server = server;
@@ -28,6 +29,9 @@ module.exports = class Lobby {
         this.#game = new Game(this.#server, this.#board);
     }
 
+    /**
+     * Start the game in the lobby (async operation)
+     */
     startGame(){
         setTimeout(() => {this.#game.startGame(this.#playerList, 1)}, 0);  // async operation (not wait) execute a lobby game parallel
     }
@@ -40,6 +44,19 @@ module.exports = class Lobby {
         if (player instanceof Client){
             this.#playerList.push(player);
         }
+    }
+
+    /**
+     * Delete player from playerList (lobby)
+     * @param {*} cid client unique ID
+     */
+    deletePlayer(cid){
+        for(let i = 0; i < this.#playerList.length; i++){
+            if(this.#playerList[i].getCid() === cid){
+                this.#playerList.splice(i, 1);
+                return;
+            }
+        } 
     }
 
     /**
@@ -128,6 +145,7 @@ module.exports = class Lobby {
      * Add message to lobby chat
      * @param {string} message message to add
      * @param {string} cid client unique ID
+     * @param {Date} timestamp timestamp of message
      */
     addMessage(message, cid, timestamp){
         //TODO: CHECK PERMISSION OF CID
@@ -152,6 +170,10 @@ module.exports = class Lobby {
         return this.#chat.getMessages();
     }
 
+    sendUserList(){
+        this.#game.sendUserList(this.#playerList);
+    }
+
     /**
      * Set the word for the game
      * @param {string} word word to set
@@ -159,5 +181,13 @@ module.exports = class Lobby {
      */
     setWord(word, cid){
         this.#game.setWord(word, cid);
+    }
+
+    /**
+     * Send all necessary data by reconnect the client
+     * @param {string} cid client unique ID
+     */
+    sendReconnectData(cid){
+        this.#game.sendReconnectData(cid);
     }
 }
