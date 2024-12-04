@@ -163,6 +163,7 @@ module.exports = class Game {
             this.#sendTimer("Wortauswahl verbleibend: ", this.#timeleft);
             if(this.#timeleft <= 0){
                 clearInterval(this.#wordSelectionTimer);
+                this.#sendRemoveWordChoicesList();
                 this.#state = stateTypes.wordSelected;
                 this.#nextState();
             }
@@ -461,6 +462,11 @@ module.exports = class Game {
      */
     #sendWordChoicesList(){
         let jsonMessageDrawer = JSON.stringify({type: responseTypes.wordChoiceList ,data: this.#wordChoicesList});
+        this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessageDrawer, false, broadcastTypes.onlyOneClient);
+    }
+
+    #sendRemoveWordChoicesList(){
+        let jsonMessageDrawer = JSON.stringify({type: responseTypes.removeWordChoiceList ,data: null});
         this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessageDrawer, false, broadcastTypes.onlyOneClient);
     }
 

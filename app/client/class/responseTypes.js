@@ -10,6 +10,7 @@ module.exports = responseTypes = {
     userList : "userList",
     word : "word",
     wordChoiceList : "wordChoicesList",
+    removeWordChoiceList : "removeWordChoiceList",
     choosingWordNotification : "choosingWordNotification",
     endChoosingWordNotification : "endChoosingWordNotification",
     chatMsg : "chatMsg",
