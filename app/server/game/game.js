@@ -55,7 +55,13 @@ module.exports = class Game {
     #wordSelectionTimer;
     /** @type {Board} */
     #board;
+    /** @type {float} */
     #wordCheckAccuracyRate = 0.75;  // 75%
+    /** @type {int} */
+    #maxPointsGuesser = 100;
+    /** @type {int} */
+    #maxPointsDrawer = 150;
+
 
     /**
      * Constructor to instanciate the game
@@ -195,20 +201,28 @@ module.exports = class Game {
     }
 
     /**
-     * End the round, calculate the score, disable overlays and show the word
+     * End the round, calculate the points, disable overlays and show the word
      */
     #endRound(){
         console.log("End Round");
 
-        // TODO: calculate score with the saved Times for the player and for the drawer
+        // TODO: calculate points with the saved Times for the player and for the drawer
         // simple current only +50 points for the right answer pls change
+        this.#answerTimeList.sort(function(answer1, answer2){
+            return answer1.timestamp - answer2.timestamp;
+        });
+
         this.#answerTimeList.forEach((answer) => {
             let player = this.#playerList.find((player) => player.getCid() === answer.cid);
             if(player){
-                player.setPoints(player.getPoints() + 50);
+                player.setPoints(player.getPoints() + this.#maxPointsGuesser);
                 console.log(player.getName() + " has " + player.getPoints() + " points");
+                this.#maxPointsGuesser -= 5;
             }
         });
+
+        let maxLength = Math.max(this.#answerTimeList.length, this.#playerList.length - 1);
+        this.#drawer.setPoints(this.#drawer.getPoints() + this.#maxPointsDrawer / maxLength * this.#answerTimeList.length);
 
         // disable draw permission of current drawer
         this.#sendDrawPermission(false);
@@ -227,7 +241,7 @@ module.exports = class Game {
     }
 
     /**
-     * End the game, reset the game and TODO: show the final score
+     * End the game, reset the game and TODO: show the final points
      */
     #endGame(){
         console.log("End Game");
