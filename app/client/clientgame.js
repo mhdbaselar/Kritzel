@@ -9,6 +9,7 @@ const {
   displayChatMessage,
   displayChatMessageList,
   renderTimer,
+  renderUsers,
   renderWordChoice,
 } = require("./components/userInterface");
 const HexColorConverter = require("./class/hexColorConverter");
@@ -30,6 +31,7 @@ module.exports = class ClientGame {
    */
   constructor() {
     this.#name = null;
+    this.canDraw = false;
   }
 
   /**
@@ -64,6 +66,7 @@ module.exports = class ClientGame {
       this.sendGetChatAction();
       this.sendGetCanvasAction();
       this.sendGetUserListAction();
+      this.sendGetReconnectDataAction();
       createStartGameButton(this); // keywords: TESTING DELETE GAMESEQUENCE
       loadingOverlay.style.display = "none"; // Spinner verstecken
     };
@@ -87,11 +90,11 @@ module.exports = class ClientGame {
       if (data.type == responseTypes.chatMsgList) {
         // Update the chat display
         const chatMessages = document.querySelector(".chat-messages");
-        displayChatMessageList(chatMessages, data.data, data.cid);
+        displayChatMessageList(chatMessages, data.data);
       } else if (data.type == responseTypes.chatMsg) {
         // Update the chat display
         const chatMessages = document.querySelector(".chat-messages");
-        displayChatMessage(chatMessages, data.data, data.cid, data.name);
+        displayChatMessage(chatMessages, data.data, data.name);
       } else if (data.type === responseTypes.pointList) {
         // 'pl' = PointList
         this.updateWithPoints(data.data);
@@ -112,9 +115,18 @@ module.exports = class ClientGame {
         );
         wordSelectionPopup.style.display = "flex";
         renderWordChoice(data.data, this);
+
+      } else if(data.type === responseTypes.removeWordChoiceList){
+        const wordContainer = document.querySelector(".word-selection-popup");
+        wordContainer.style.display = "none";
+        
       } else if (data.type === responseTypes.choosingWordNotification) {
         console.log(data.data); // name from the drawer
         // TODO: Frontend anzeigen der Notification ("<Bob> is choosing a word")
+
+        // Disallow drawing and hide toolbar
+        this.setDrawingState(false);
+
       } else if (data.type === responseTypes.endChoosingWordNotification) {
         console.log(data.data); // name from the drawer
         // TODO: Frontend anzeigen der Notification ("<Bob> is choosing a word") ausblenden
@@ -123,6 +135,8 @@ module.exports = class ClientGame {
       } else if (data.type === responseTypes.word) {
         console.log(data);
         document.getElementById("hint").innerText = data.data;
+      } else if (data.type === responseTypes.drawPermission) {
+        this.setDrawingState(data.data);
       }
     };
   }
@@ -408,12 +422,27 @@ module.exports = class ClientGame {
     this.send(JSON.stringify(message));
   }
 
+  /**
+   * Requests the server to send reconnect data
+   */
+  sendGetReconnectDataAction(){
+    let message = new Message(requestTypes.getReconnectData, null);
+    this.send(JSON.stringify(message));
+  }
+
+  /**
+   * Sends the choosen word to the server
+   * @param {string} word word to send
+   */
   sendWordAction(word) {
     let message = new Message(requestTypes.setWord, word);
     this.send(JSON.stringify(message));
     console.log("Word sent: " + JSON.stringify(message));
   }
 
+  /**
+   * Sends the game start action to the server
+   */
   sendGameStartAction() {
     let message = new Message(requestTypes.startGame, null);
     this.send(JSON.stringify(message));
@@ -436,5 +465,28 @@ module.exports = class ClientGame {
         this.socket.readyState
       );
     }
+  }
+
+
+  //-------------------------------------
+  //---Client-Side Drawing States--------
+  //-------------------------------------
+
+  setDrawingState(canDraw) {
+    this.canDraw = canDraw;
+    this.updateToolbarVisibility();
+  }
+
+  getCanDraw() {
+    return this.canDraw;
+  }
+
+  setCanDraw(value) {
+    this.canDraw = value;
+  }
+
+  updateToolbarVisibility() {
+    const toolbar = document.querySelector(".toolbar");
+    toolbar.style.display = this.canDraw ? "flex" : "none";
   }
 };

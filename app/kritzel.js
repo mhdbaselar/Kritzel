@@ -5,9 +5,13 @@ const ServerGame = require("./server/servergame");
 const responseTypes = require("./client/class/responseTypes");
 
 // Creates a Server (organizes WebSocketServer)
-let server = new TinyServer(8123, (uid, data) => {
-  receive(uid, data);
-});
+let server = new TinyServer(8123, 
+  (cid, request) => {
+    receive(cid, request);
+  }, 
+  (request) => {
+    receiveServerRequest(request);
+  });
 
 // Creates a ServerGame (organizes game logic server-side)
 let game = new ServerGame(server, () => {
@@ -33,11 +37,19 @@ game.start();
 
 /**
  * Receives and processes a message from a client
- * @param {string} uid user unique ID
- * @param {Message} message client request
+ * @param {string} cid user unique ID
+ * @param {Message} request client request
  */
-function receive(uid, message) {
-  game.processInput(uid, message);
+function receive(cid, request) {
+  game.processInput(cid, request);
+}
+
+/**
+ * Receives and processes a request from the server
+ * @param {Message} request server request
+ */
+function receiveServerRequest(request){
+  game.processServerRequest(request);
 }
 
 // catch all unhandled exceptions

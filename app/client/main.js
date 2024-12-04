@@ -41,6 +41,8 @@ const clientGame = new ClientGame();
  */
 const converter = new HexColorConverter();
 
+let canDraw = false;
+
 window.addEventListener("load", () => {
   console.log(converter.hexToInt("#FFFFFF"));
   console.log(converter.intToHex(0));
@@ -342,6 +344,7 @@ window.addEventListener("load", () => {
    * @param {Event} event - The event object for mouse or touch events.
    */
   function startDrawing(event) {
+    if (!clientGame.getCanDraw()) return;
     drawing = true;
     draw(event);
   }
@@ -350,6 +353,7 @@ window.addEventListener("load", () => {
    * Stops drawing on the canvas.
    */
   function stopDrawing() {
+    if (!clientGame.getCanDraw()) return;
     drawing = false;
     ctx.beginPath();
     clientGame.sendDrawAction("pen", null, null, penColor, 0);
@@ -361,7 +365,7 @@ window.addEventListener("load", () => {
    */
 
   function draw(event) {
-    if (!drawing) return;
+    if (!clientGame.getCanDraw() || !drawing) return;
 
     // Prevent scrolling on touch devices
     event.preventDefault();
