@@ -52,6 +52,8 @@ function renderWordChoice(words, clientGame) {
       clientGame.sendWordAction(word);
       console.log("Word selected: " + word);
       wordContainer.style.display = "none";
+      // Allow drawing and show toolbar
+      clientGame.setDrawingState(true);
     });
 
     wordContainer.appendChild(wordDiv);
