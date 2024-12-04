@@ -116,6 +116,10 @@ module.exports = class ClientGame {
         wordSelectionPopup.style.display = "flex";
         renderWordChoice(data.data, this);
 
+      } else if(data.type === responseTypes.removeWordChoiceList){
+        const wordContainer = document.querySelector(".word-selection-popup");
+        wordContainer.style.display = "none";
+        
       } else if (data.type === responseTypes.choosingWordNotification) {
         console.log(data.data); // name from the drawer
         // TODO: Frontend anzeigen der Notification ("<Bob> is choosing a word")

@@ -3,17 +3,20 @@ class Kritzel {
     - server: TinyServer
     - game: ServerGame
     + receive(uid: string, message: Message)
+    + receiveServerRequest(request: Message)
 }
 
 class TinyServer {
     - clients: ClientList
     - wsCallback: function
+    - wssCallback: function
     - server: http.Server
     - websocketServer: ws.WebSocketServer
-    + constructor(port: int, wsCallback: function)
+    + constructor(port: int, wsCallback: function, wssCallback: function)
     + connectWs(websocket: WebSocket, request: http.IncomingMessage)
     + getUniqueID(): string
     + processWsRequest(websocket: WebSocket, data: string)
+    + processWssRequest(request: Message)
     + broadcastWsMessage(cid: string, data: string, isBinary: boolean, broadcastType: string, clientsInLobby: Client[])
     + processHttpRequest(req: http.IncomingMessage, res: http.ServerResponse)
     + getClients(): ClientList
@@ -30,11 +33,13 @@ class ServerGame {
     + tick()
     + getLobbies(): Lobby[]
     + processInput(cid: string, request: Message)
+    + processServerRequest(request: Message)
     - processDrawAction(action: Object, cid: string, lobbyID: int)
     - processGetCanvasAction(cid: string, lobbyID: int)
-    - processChatAction(chatMsg: string, cid: string, lobbyID: int)
+    - processChatAction(chatMsg: string, cid: string, timestamp: Date, lobbyID: int)
     - processGetChatAction(cid: string, lobbyID: int)
     - processGetUserListAction(cid: string, lobbyID: int)
+    - processSetWordAction(cid: string, word: string, lobbyID: int)
 }
 
 class Lobby {
@@ -42,8 +47,11 @@ class Lobby {
     - board: Board
     - chat: Chat
     - game: Game
-    + constructor()
+    - server: TinyServer
+    + constructor(server: TinyServer)
+    + startGame()
     + addPlayer(player: Client)
+    + deletePlayer(cid: string)
     + getPlayerList(): Client[]
     + draw(x: int, y: int, color: int, thickness: int, cid: string)
     + erase(x: int, y: int, thickness: int, cid: string)
@@ -51,8 +59,11 @@ class Lobby {
     + clear(cid: string)
     + getBoardCanvas(): int[][]
     + getBoard(): Board
-    + addMessage(message: string, cid: string)
+    + addMessage(message: string, cid: string, timestamp: Date)
     + getMessages(cid: string): {uid: string, msg: string}[]
+    + sendUserList()
+    + setWord(word: string, cid: string)
+    + sendReconnectData(cid: string)
 }
 
 class Board {
@@ -79,10 +90,10 @@ class Board {
 }
 
 class Chat {
-    - messages: {cid: string, msg: string}[]
+    - messages: {cid: string, msg: string, timestamp: Date}[]
     + constructor()
-    + addMessage(cid: string, message: string)
-    + getMessages(): {cid: string, msg: string}[]
+    + addMessage(cid: string, message: string, timestamp: Date)
+    + getMessages(): {cid: string, msg: string, timestamp: Date}[]
 }
 
 class ClientList {
@@ -98,9 +109,9 @@ class ClientList {
 class Client {
     - cid: string
     - name: string
-    - score: int
-    - isActivePlayer: boolean
+    - points: int
     - lobbyID: int
+    - isConnected: boolean
     + constructor(cid: string, name: string, lobbyID: int)
     + getCid(): string
     + setCid(cid: string)
@@ -109,28 +120,99 @@ class Client {
     + getPoints(): int
     + setPoints(points: int)
     + getLobbyID(): int
+    + getIsConnected(): boolean
+    + setIsConnected(isConnected: boolean)
 }
 
 class Game {
     - playerList: Client[]
-    - state: string
-    + constructor()
-    + start(playerList: Client[])
+    - playerQueue: Client[]
+    - state: int
+    - word: string
+    - totalCycle: int
+    - currentCycle: int
+    - currentRound: int
+    - drawer: Client
+    - wordTimeout: int
+    - roundTimeout: int
+    - nextRoundTimeout: int
+    - timeleft: int
+    - wordChoicesCount: int
+    - wordChoicesList: string[]
+    - server: TinyServer
+    - answerTimeList: {cid: string, timestamp: Date}[]
+    - dictionary: Dictionary
+    - wordSelectionTimer: Interval
+    - board: Board
+    - wordCheckAccuracyRate: float
+    - maxPointsGuesser: int
+    - maxPointsDrawer: int
+    + constructor(server: TinyServer, board: Board)
+    + startGame(playerList: Client[], totalCycle: int)
+    - startRound()
+    - selectDrawer()
+    - selectWord()
+    - startDrawAndGuess()
+    - endRound()
+    - endGame()
     + getState(): string
     - nextState()
-    + getActivePlayer(): Client
+    + getDrawer(): Client
+    + hasPermissionToDraw(cid: string): boolean
+    + setWord(word: string, cid: string)
+    + checkGameNotStarted(): boolean
+    + checkAnswer(answer: string): boolean
+    + addAnswer(cid: string, timestamp: Date, chat: Chat)
+    + sendUserList(playerList: Client[])
+    + sendReconnectData(cid: string)
+    - sendWordChoicesList()
+    - sendRemoveWordChoicesList()
+    - sendWordChoicesNotification(broadcastType: string)
+    - sendWord(word: string, broadcastType: string, cid: string?)
+    - sendHangManWord()
+    - sendTimer(timerType: string, time: string)
+    - sendDrawPermission(isEnabled: boolean)
+}
+
+class Dictionary {
+    - wordList: string[]
+    + constructor()
+    + getWords(qty: int): string[]
+    + removeWord(word: string)
+}
+
+package responseTypes {
+    enum responseType
+}
+
+package requestTypes {
+    enum requestType
+}
+
+package broadcastTypes {
+    enum broadcastType
 }
 
 Kritzel --> TinyServer
 Kritzel --> ServerGame
+' Kritzel --> responseTypes
+' TinyServer --> responseTypes
+' TinyServer --> requestTypes
+' TinyServer --> broadcastTypes
 TinyServer --> ClientList
+' ServerGame --> responseTypes
+' ServerGame --> requestTypes
+' ServerGame --> broadcastTypes
 ServerGame --> TinyServer
 ServerGame --> Lobby
+ServerGame --> Client
 Lobby --> Board
 Lobby --> Chat
 Lobby --> Game
 Lobby --> Client
-ClientList --> Client
 Game --> Client
-
+Game --> Dictionary
+' Game --> broadcastTypes
+' Game --> responseTypes
+ClientList --> Client
 @enduml
