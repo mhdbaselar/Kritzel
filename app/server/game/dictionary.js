@@ -24,7 +24,7 @@ module.exports = class Dictionary {
     removeWord(word){
         for(let i = 0; i < this.#wordList.length; i++){
             if(this.#wordList[i] == word){
-                delete this.#wordList[i];
+                this.#wordList.splice(i, 1);
                 break;
             }
         }

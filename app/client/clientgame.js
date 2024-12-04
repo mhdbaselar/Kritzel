@@ -64,6 +64,7 @@ module.exports = class ClientGame {
       this.sendGetChatAction();
       this.sendGetCanvasAction();
       this.sendGetUserListAction();
+      this.sendGetReconnectDataAction();
       createStartGameButton(this); // keywords: TESTING DELETE GAMESEQUENCE
       loadingOverlay.style.display = "none"; // Spinner verstecken
     };
@@ -87,11 +88,11 @@ module.exports = class ClientGame {
       if (data.type == responseTypes.chatMsgList) {
         // Update the chat display
         const chatMessages = document.querySelector(".chat-messages");
-        displayChatMessageList(chatMessages, data.data, data.cid);
+        displayChatMessageList(chatMessages, data.data);
       } else if (data.type == responseTypes.chatMsg) {
         // Update the chat display
         const chatMessages = document.querySelector(".chat-messages");
-        displayChatMessage(chatMessages, data.data, data.cid, data.name);
+        displayChatMessage(chatMessages, data.data, data.name);
       } else if (data.type === responseTypes.pointList) {
         // 'pl' = PointList
         this.updateWithPoints(data.data);
@@ -405,6 +406,11 @@ module.exports = class ClientGame {
    */
   sendGetUserListAction() {
     let message = new Message(requestTypes.getUserList, null);
+    this.send(JSON.stringify(message));
+  }
+
+  sendGetReconnectDataAction(){
+    let message = new Message(requestTypes.getReconnectData, null);
     this.send(JSON.stringify(message));
   }
 

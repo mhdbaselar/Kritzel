@@ -29,7 +29,7 @@ module.exports = class Lobby {
     }
 
     startGame(){
-        setTimeout(() => {this.#game.startGame(this.#playerList, 1)}, 0);  // async operation (not wait) execute a lobby game parallel
+        setTimeout(() => {this.#game.startGame(this.#playerList, 2)}, 0);  // async operation (not wait) execute a lobby game parallel
     }
 
     /**
@@ -40,6 +40,15 @@ module.exports = class Lobby {
         if (player instanceof Client){
             this.#playerList.push(player);
         }
+    }
+
+    deletePlayer(cid){
+        for(let i = 0; i < this.#playerList.length; i++){
+            if(this.#playerList[i].getCid() === cid){
+                this.#playerList.splice(i, 1);
+                return;
+            }
+        } 
     }
 
     /**
@@ -159,5 +168,9 @@ module.exports = class Lobby {
      */
     setWord(word, cid){
         this.#game.setWord(word, cid);
+    }
+
+    sendReconnectData(cid){
+        this.#game.sendReconnectData(cid);
     }
 }
