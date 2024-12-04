@@ -465,6 +465,9 @@ module.exports = class Game {
         this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessageDrawer, false, broadcastTypes.onlyOneClient);
     }
 
+    /**
+     * Send remove word choices list to the drawer
+     */
     #sendRemoveWordChoicesList(){
         let jsonMessageDrawer = JSON.stringify({type: responseTypes.removeWordChoiceList ,data: null});
         this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessageDrawer, false, broadcastTypes.onlyOneClient);
