@@ -56,11 +56,17 @@ module.exports = class Game {
     /** @type {Board} */
     #board;
     /** @type {float} */
-    #wordCheckAccuracyRate = 0.75;  // 75%
+    #wordCheckAccuracyRate = 0.8;  // accept 80% accuracy of word
     /** @type {int} */
     #maxPointsGuesser = 100;
     /** @type {int} */
     #maxPointsDrawer = 150;
+    /**@type {float} */
+    #revealeLetterRate = 0.5; // reveal 50% of the word
+    /**@type {{pos : int, random : float}[]}  */
+    #revealeWordOrder;
+    /**@type {string} */
+    #hangManWord;
 
 
     /**
@@ -104,6 +110,7 @@ module.exports = class Game {
         this.#answerTimeList = [];
         this.#word = null;
         this.#wordChoicesList = null;
+        this.#revealeWordOrder = [];
 
         // wait before next round start
         this.#timeleft = this.#nextRoundTimeout / 1000;
@@ -183,15 +190,25 @@ module.exports = class Game {
         console.log("Start Draw and Guess");
 
         this.#sendWord(this.#word, broadcastTypes.onlyOneClient, this.#drawer.getCid());
-        this.#sendHangManWord();
+        this.#sendWord(this.#hangManWord, broadcastTypes.allInLobbyWithoutOneClient, this.#drawer.getCid());
 
         this.#timeleft = this.#roundTimeout / 1000;
+        let revealLetterCount = Math.floor(this.#word.length * this.#revealeLetterRate);
+        let revealLetterIntervalTime = Math.ceil(this.#timeleft / (revealLetterCount + 1));
         // Set a timer for the drawer phase
         const drawTimer = setInterval(() => {
             this.#sendTimer("Zeichnen verbleibend: ", this.#timeleft);
 
             let allAnswered = this.#playerList.every((player) => player === this.#drawer ||
                                                     this.#answerTimeList.some((answer) => answer.cid === player.getCid()));
+
+            // Reveal new letter in hangManWord
+            if(this.#timeleft !== (this.#roundTimeout / 1000) && this.#timeleft > 0 && this.#timeleft % revealLetterIntervalTime === 0){
+                //console.log(this.#timeleft);
+                this.#revealNewLetterInHangManWord();
+                this.#sendWord(this.#hangManWord, broadcastTypes.allInLobbyWithoutOneClient, this.#drawer.getCid());
+            }
+
             if(this.#timeleft <= 0 || allAnswered){
                 clearInterval(drawTimer);
                 this.#state = stateTypes.drawAndGuessEnded;
@@ -321,9 +338,23 @@ module.exports = class Game {
      */
     setWord(word, cid) {
         if (this.#state === stateTypes.drawerSelected && this.#drawer.getCid() === cid) {
-            this.#word = word;
-            this.#dictionary.removeWord(this.#word);
+            
             clearInterval(this.#wordSelectionTimer);
+            this.#word = word;
+
+            // get RevealOrder of HangManWord Letter and initilize hangManWord
+            this.#revealeWordOrder = [];
+            this.#hangManWord = "";
+            for(let i = 0; i < this.#word.length; i++){
+                this.#revealeWordOrder.push({pos: i, random: Math.random()});
+                this.#hangManWord += "_";
+            }
+            this.#revealeWordOrder.sort(function(letter1, letter2) {
+                return letter1.random - letter2.random;
+            });
+
+            // Remove Word from Dict
+            this.#dictionary.removeWord(this.#word);
 
             // Board leeren
             this.#board.clear();
@@ -359,6 +390,10 @@ module.exports = class Game {
         }
     }
 
+    /**
+     *  Check if the game is not started
+     * @returns {boolean} true if the game is not started
+     */
     checkGameNotStarted(){
         if(this.#state === null || this.#state == stateTypes.gameEnded){
             return true;
@@ -446,7 +481,7 @@ module.exports = class Game {
                 this.#sendWord(this.#word, broadcastTypes.onlyOneClient, cid);
                 this.#sendDrawPermission(true);
             } else if (this.#drawer && this.#drawer.getCid() !== cid){
-                this.#sendHangManWord();
+                this.#sendWord(this.#hangManWord, broadcastTypes.allInLobbyWithoutOneClient, this.#drawer.getCid());
             }
         } else if (this.#state == stateTypes.gameEnded){
             this.#sendTimer("beendet","");
@@ -456,6 +491,18 @@ module.exports = class Game {
     //-------------------------------------
     //------------HELP FUNCTIONS-----------
     //-------------------------------------
+
+    /**
+     * Reveal a new letter in the hangManWord
+     */
+    #revealNewLetterInHangManWord(){
+        if(this.#revealeWordOrder[0] !== null){
+            let index = parseInt(this.#revealeWordOrder[0].pos);
+            // Replace Letter
+            this.#hangManWord = this.#hangManWord.substring(0, index) + this.#word[index] + this.#hangManWord.substring(index + 1);
+            this.#revealeWordOrder.shift();
+        }
+    }
 
     /**
      * Send the word choices list to the drawer
@@ -491,21 +538,6 @@ module.exports = class Game {
     #sendWord(word, broadcastType, cid){
         let jsonMessage = JSON.stringify({type: responseTypes.word, data: word});
         this.#server.broadcastWsMessage(cid, jsonMessage, false, broadcastType, this.#playerList);
-    }
-
-    /**
-     * Send the hang man word to the guesser
-     */
-    #sendHangManWord(){
-        // Create Hang Man Word Guesser
-        let hangManWord = "";
-        for(let i = 0; i < this.#word.length; i++){
-            hangManWord += "_";
-        }
-
-        // Set Hang Man Word Guesser
-        let jsonMessage = JSON.stringify({type: responseTypes.word, data: hangManWord});
-        this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessage, false, broadcastTypes.allInLobbyWithoutOneClient, this.#playerList);
     }
 
     /**

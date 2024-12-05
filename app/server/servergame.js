@@ -180,14 +180,13 @@ module.exports = class ServerGame {
   }
 
   /**
-   * Sends the current canvas to all clients in the lobby
+   * Sends the current lobby canvas to the client
    * @param {string} cid user unique ID
    * @param {int} lobbyID index of the lobby
   */
   #processGetCanvasAction(cid, lobbyID) {
-    let playerInLobby = this.#lobbies[lobbyID].getPlayerList();
     let jsonMessage = JSON.stringify({ type: responseTypes.canvas2D, data: this.#lobbies[lobbyID].getBoardCanvas() });
-    this.#server.broadcastWsMessage(cid, jsonMessage, false, broadcastTypes.allInLobby, playerInLobby);
+    this.#server.broadcastWsMessage(cid, jsonMessage, false, broadcastTypes.onlyOneClient);
   }
 
   /**
