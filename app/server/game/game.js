@@ -390,6 +390,10 @@ module.exports = class Game {
         }
     }
 
+    /**
+     *  Check if the game is not started
+     * @returns {boolean} true if the game is not started
+     */
     checkGameNotStarted(){
         if(this.#state === null || this.#state == stateTypes.gameEnded){
             return true;
@@ -488,11 +492,13 @@ module.exports = class Game {
     //------------HELP FUNCTIONS-----------
     //-------------------------------------
 
+    /**
+     * Reveal a new letter in the hangManWord
+     */
     #revealNewLetterInHangManWord(){
         if(this.#revealeWordOrder[0] !== null){
             let index = parseInt(this.#revealeWordOrder[0].pos);
             // Replace Letter
-            //console.log(index, this.#word[index]);
             this.#hangManWord = this.#hangManWord.substring(0, index) + this.#word[index] + this.#hangManWord.substring(index + 1);
             this.#revealeWordOrder.shift();
         }
