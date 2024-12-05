@@ -94,7 +94,7 @@ module.exports = class ServerGame {
 
     } else if (_request.messageType == requestTypes.setWord){
       this.#processSetWordAction(cid, _request.messageBody, lobbyID);
-      
+
     } else if(_request.messageType == requestTypes.startGame){
       this.#lobbies[lobbyID].startGame();
 
@@ -131,7 +131,7 @@ module.exports = class ServerGame {
       if(lobbyID !== null){
         this.#lobbies[lobbyID].addPlayer(request.messageBody.client);
       }
-      
+
     }
   }
 
@@ -193,10 +193,12 @@ module.exports = class ServerGame {
    * Processes the chat action (send a message to all clients in the lobby)
    * @param {string} chatMsg chat message
    * @param {string} cid user unique ID
+   * @param {Date} timestamp timestamp
    * @param {int} lobbyID index of the lobby
    */
   #processChatAction(chatMsg, cid, timestamp, lobbyID) {
-    let hasMessageAdded = this.#lobbies[lobbyID].addMessage(chatMsg, cid, timestamp);
+    let timestampUTC = new Date(timestamp.toUTCString);
+    let hasMessageAdded = this.#lobbies[lobbyID].addMessage(chatMsg, cid, timestampUTC);
 
     if(hasMessageAdded){
       let name = this.#server.getClients().getNameByCid(cid);
@@ -215,7 +217,7 @@ module.exports = class ServerGame {
         playerInLobby
       );
     }
-    
+
   }
 
   /**
