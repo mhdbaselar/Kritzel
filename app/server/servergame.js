@@ -197,8 +197,8 @@ module.exports = class ServerGame {
    * @param {int} lobbyID index of the lobby
    */
   #processChatAction(chatMsg, cid, timestamp, lobbyID) {
-    let timestampUTC = new Date(timestamp.toUTCString);
-    let hasMessageAdded = this.#lobbies[lobbyID].addMessage(chatMsg, cid, timestampUTC);
+    timestamp = new Date();   // override with server timestamp
+    let hasMessageAdded = this.#lobbies[lobbyID].addMessage(chatMsg, cid, timestamp);
 
     if(hasMessageAdded){
       let name = this.#server.getClients().getNameByCid(cid);
