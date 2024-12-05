@@ -219,12 +219,12 @@ module.exports = class Game {
             this.#answerTimeList.forEach((answer) => {
                 let player = this.#playerList.find((player) => player.getCid() === answer.cid);
                 if(player){
-                    player.setPoints(player.getPoints() + maxPointsGuesser);
+                    player.setPoints(player.getPoints() + Math.ceil(maxPointsGuesser));
                     maxPointsGuesser -= pointGradiation;
                 }
             });
 
-            this.#drawer.setPoints(this.#drawer.getPoints() + this.#maxPointsDrawer / maxLength * this.#answerTimeList.length);
+            this.#drawer.setPoints(this.#drawer.getPoints() + Math.ceil(this.#maxPointsDrawer / maxLength * this.#answerTimeList.length));
         }
         
         // disable draw permission of current drawer
