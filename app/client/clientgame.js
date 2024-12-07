@@ -138,7 +138,11 @@ module.exports = class ClientGame {
       } else if (data.type === responseTypes.drawPermission) {
         this.setDrawingState(data.data);
       } else if (data.type === responseTypes.menu) {
+        console.log(data.data);
         // TODO : Frontend anzeige des Menüs
+      } else if (data.type === responseTypes.lobbyList) {
+        console.log(data.data);
+        // TODO: Frontend anzeige der LobbyList im Menü
       }
     };
   }
@@ -447,6 +451,26 @@ module.exports = class ClientGame {
    */
   sendGameStartAction() {
     let message = new Message(requestTypes.startGame, null);
+    this.send(JSON.stringify(message));
+  }
+
+  sendJoinLobbyAction(lobbyID, code){
+    let message = new Message(requestTypes.createLobby, {lobbyID: lobbyID, code: code});
+    this.send(JSON.stringify(message));
+  }
+
+  sendCreateLobbyAction(isPublic, code){
+    let message = new Message(requestTypes.createLobby, {isPublic: isPublic, code: code});
+    this.send(JSON.stringify(message));
+  }
+
+  sendGetLobbyListAction(){
+    let message = new Message(requestTypes.getLobbyList, null);
+    this.send(JSON.stringify(message));
+  }
+
+  sendDeleteLobbyAction(){
+    let message = new Message(requestTypes.deleteLobby, null);
     this.send(JSON.stringify(message));
   }
 

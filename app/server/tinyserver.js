@@ -90,6 +90,7 @@ module.exports = class TinyServer {
       console.log("lobbyID: " + lobbyID);*/
 
       let client = this.#clients.addClient(websocket.cid, null, lobbyID);
+      websocket.send(JSON.stringify({ type: responseTypes.menu, data: null }));
       //let request = {messageType : "addPlayerInLobby", messageBody : {client : client}};
       //this.processWssRequest(request);
     }

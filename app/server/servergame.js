@@ -107,8 +107,14 @@ module.exports = class ServerGame {
     } else if (_request.messageType == requestTypes.joinLobby){
       this.#processJoinLobbyAction(cid, _request.messageBody.lobbyID, _request.messageBody.code);
 
+    } else if (_request.messageType == requestTypes.leaveLobby){
+      this.#processLeaveLobbyAction(cid);
+
     } else if (_request.messageType == requestTypes.getLobbyList){
       this.#processGetLobbyListAction(cid);
+
+    } else if (_request.messageType == requestTypes.deleteLobby){
+      this.#processDeleteLobbyAction(cid, lobbyID);
     }
   }
 
@@ -301,8 +307,10 @@ module.exports = class ServerGame {
   #processJoinLobbyAction(cid, lobbyID, code){
     this.#server.getClients().getClientList().forEach(client => {
       if(client.getCid() == cid && (this.#lobbies[lobbyID].getIsPublic() || code == this.#lobbies[lobbyID].getCode())) {
-        this.processServerRequest({messageType : "deletePlayerInLobby", messageBody : {cid : client.getCid()}});
-        client.setLobbyID(lobbyID);
+        if(client.getLobbyID() !== lobbyID){
+          this.processServerRequest({messageType : "deletePlayerInLobby", messageBody : {cid : client.getCid()}});
+          client.setLobbyID(lobbyID);
+        }
         this.processServerRequest({messageType : "addPlayerInLobby", messageBody : {client : client}});
         this.#processGetChatAction(cid, lobbyID);
         this.#processGetCanvasAction(cid, lobbyID);
@@ -323,6 +331,12 @@ module.exports = class ServerGame {
     this.#server.broadcastWsMessage(cid, jsonMessage, false, broadcastTypes.onlyOneClient);
   }
 
+  #processLeaveLobbyAction(cid){
+    this.processServerRequest({messageType : "deletePlayerInLobby", messageBody : {cid : cid}});
+    client.setLobbyID(null);
+    this.#processGetMenuAction(cid, broadcastTypes.onlyOneClient);
+  }
+
   #processDeleteLobbyAction(cid, lobbyID){
     if(this.#lobbies[lobbyID].checkGameEnd()){
       let playerList = this.#lobbies[lobbyID].getPlayerList();
@@ -331,11 +345,15 @@ module.exports = class ServerGame {
         player.setLobbyID(null);
       });
 
-      let jsonMessage = JSON.stringify({ type: responseTypes.menu, data: null});
-      this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, playerList);
+      this.#processGetMenuAction(null, broadcastTypes.allInLobby);
 
       this.#lobbies[lobbyID] = null;
     }
+  }
+
+  #processGetMenuAction(cid, broadcastType){
+    let jsonMessage = JSON.stringify({ type: responseTypes.menu, data: null });
+      this.#server.broadcastWsMessage(cid, jsonMessage, false, broadcastType);  
   }
 };
 

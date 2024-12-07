@@ -15,5 +15,6 @@ module.exports = requestTypes = {
     createLobby : "createLobby",
     joinLobby : "joinLobby",
     getLobbyList : "getLobbyList",
-    deleteLobby : "deleteLobby"
+    deleteLobby : "deleteLobby",
+    leaveLobby : "leaveLobby"
 }
