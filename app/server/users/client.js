@@ -86,6 +86,10 @@ module.exports = class Client {
         return this.#lobbyID;
     }
 
+    setLobbyID(lobbyID){
+        this.#lobbyID = lobbyID;
+    }
+
     /**
      * Returns the client connection state (boolean)
      * @returns {boolean} is client connected

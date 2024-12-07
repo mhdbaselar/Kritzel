@@ -18,7 +18,7 @@ const broadcastTypes = require("./broadcastTypes");
 module.exports = class TinyServer {
   /**@type {ClientList} */
   #clients;
-  
+
   /**
    * Constructor to instanciate the WebsocketServer
    * @param {int} port port number
@@ -46,7 +46,7 @@ module.exports = class TinyServer {
    */
   connectWs(websocket, request) {
     const cookies = request.headers.cookie;
-    
+
     const parseCookie = str =>
       str
         .split(';')
@@ -55,7 +55,7 @@ module.exports = class TinyServer {
           acc[decodeURIComponent(v[0].trim())] = decodeURIComponent(v[1].trim());
           return acc;
         }, {});
-    
+
     let cid;
 
     // Check if cookie is set
@@ -72,22 +72,26 @@ module.exports = class TinyServer {
       this.#clients.getClientList().forEach((client) => {
         if(client.getCid() === websocket.cid){
           client.setIsConnected(true);
-          let request = {messageType : "addPlayerInLobby", messageBody : {client : client}};
-          this.processWssRequest(request);
+          if(client.getLobbyID() === null){
+            websocket.send(JSON.stringify({ type: responseTypes.menu, data: null }));
+          } else {
+            let request = {messageType : "addPlayerInLobby", messageBody : {client : client}};
+            this.processWssRequest(request);
+          }
         }
       });
     }
     else {    // create new client
       websocket.cid = this.getUniqueID();
       websocket.send(JSON.stringify({ type: responseTypes.cookie, data: websocket.cid }));
-      let lobbyID = 0;
+      let lobbyID = null;
 
       /*lobbyID = Math.floor(Math.random() * 2);                // keywords: TESTING DELETE LOBBYS
       console.log("lobbyID: " + lobbyID);*/
 
       let client = this.#clients.addClient(websocket.cid, null, lobbyID);
-      let request = {messageType : "addPlayerInLobby", messageBody : {client : client}};
-      this.processWssRequest(request);
+      //let request = {messageType : "addPlayerInLobby", messageBody : {client : client}};
+      //this.processWssRequest(request);
     }
 
     websocket.on("error", console.error);
@@ -98,7 +102,7 @@ module.exports = class TinyServer {
       this.#clients.getClientList().forEach((client) => {
         if(client.getCid() === websocket.cid){
           client.setIsConnected(false);
-          let request = {messageType : "deletePlayerInLobby", messageBody : {cid : client.getCid()}}
+          let request = {messageType : "deletePlayerInLobby", messageBody : {cid : client.getCid()}};
           this.processWssRequest(request);
         }
       });
@@ -126,7 +130,7 @@ module.exports = class TinyServer {
    */
   processWsRequest(websocket, data) {
     let requestData = JSON.parse(data);
-    
+
     if (requestData.messageType == requestTypes.setName) {
       if(requestData.messageBody.name){
         this.#clients.registerName(websocket.cid, requestData.messageBody.name);

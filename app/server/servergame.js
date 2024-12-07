@@ -28,7 +28,7 @@ module.exports = class ServerGame {
    * Creates a lobby, sets and starts the interval for the send function
    */
   start() {
-    let lobby = new Lobby(this.#server);
+    let lobby = new Lobby(this.#server, true, null);
     this.#lobbies.push(lobby);
 
     /*let lobby2 = new Lobby();       // keywords: TESTING DELETE LOBBYS
@@ -99,7 +99,16 @@ module.exports = class ServerGame {
       this.#lobbies[lobbyID].startGame();
 
     } else if(_request.messageType == requestTypes.getReconnectData){
-      this.#lobbies[lobbyID].sendReconnectData(cid);
+      this.#processGetReconnectData(cid, lobbyID);
+
+    } else if (_request.messageType == requestTypes.createLobby){
+      this.#processCreateLobbyAction(cid, _request.messageBody.isPublic, _request.messageBody.code);
+
+    } else if (_request.messageType == requestTypes.joinLobby){
+      this.#processJoinLobbyAction(cid, _request.messageBody.lobbyID, _request.messageBody.code);
+
+    } else if (_request.messageType == requestTypes.getLobbyList){
+      this.#processGetLobbyListAction(cid);
     }
   }
 
@@ -264,6 +273,69 @@ module.exports = class ServerGame {
    */
   #processSetWordAction(cid, word, lobbyID){
     this.#lobbies[lobbyID].setWord(word, cid);
+  }
+
+  #processGetReconnectData(cid, lobbyID){
+    this.#lobbies[lobbyID].sendReconnectData(cid);
+  }
+
+  #processCreateLobbyAction(cid, isPublic, code){
+    let isNullFound = false;
+    let lobbyID = null;
+    for(let i = 0; i < this.#lobbies.length; i++){
+      if(this.#lobbies[i] === null){
+        this.#lobbies[i] = new Lobby(this.#server, isPublic, code);
+        isNullFound = true;
+        lobbyID = i;
+        break;
+      }
+    }
+    if(!isNullFound){
+      this.#lobbies.push(new Lobby(this.#server, isPublic, code));
+      lobbyID = this.#lobbies.length - 1;
+    }
+
+    this.#processJoinLobbyAction(cid, lobbyID, code);
+  }
+
+  #processJoinLobbyAction(cid, lobbyID, code){
+    this.#server.getClients().getClientList().forEach(client => {
+      if(client.getCid() == cid && (this.#lobbies[lobbyID].getIsPublic() || code == this.#lobbies[lobbyID].getCode())) {
+        this.processServerRequest({messageType : "deletePlayerInLobby", messageBody : {cid : client.getCid()}});
+        client.setLobbyID(lobbyID);
+        this.processServerRequest({messageType : "addPlayerInLobby", messageBody : {client : client}});
+        this.#processGetChatAction(cid, lobbyID);
+        this.#processGetCanvasAction(cid, lobbyID);
+        this.#processGetUserListAction(cid, lobbyID);
+        this.#processGetReconnectData(cid, lobbyID);
+      }
+    });
+  }
+
+  #processGetLobbyListAction(cid){
+    let lobbyList = [];
+
+    for(let i = 0; i < this.#lobbies.length; i++){
+      lobbyList.push({lobbyID: i, isPublic: this.#lobbies[i].getIsPublic()});
+    }
+
+    let jsonMessage = JSON.stringify({ type: responseTypes.lobbyList, data: lobbyList});
+    this.#server.broadcastWsMessage(cid, jsonMessage, false, broadcastTypes.onlyOneClient);
+  }
+
+  #processDeleteLobbyAction(cid, lobbyID){
+    if(this.#lobbies[lobbyID].checkGameEnd()){
+      let playerList = this.#lobbies[lobbyID].getPlayerList();
+
+      playerList.forEach((player) => {
+        player.setLobbyID(null);
+      });
+
+      let jsonMessage = JSON.stringify({ type: responseTypes.menu, data: null});
+      this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, playerList);
+
+      this.#lobbies[lobbyID] = null;
+    }
   }
 };
 

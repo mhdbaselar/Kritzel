@@ -243,7 +243,7 @@ module.exports = class Game {
 
             this.#drawer.setPoints(this.#drawer.getPoints() + Math.ceil(this.#maxPointsDrawer / maxLength * this.#answerTimeList.length));
         }
-        
+
         // disable draw permission of current drawer
         this.#sendDrawPermission(false);
 
@@ -338,7 +338,7 @@ module.exports = class Game {
      */
     setWord(word, cid) {
         if (this.#state === stateTypes.drawerSelected && this.#drawer.getCid() === cid) {
-            
+
             clearInterval(this.#wordSelectionTimer);
             this.#word = word;
 
@@ -428,6 +428,10 @@ module.exports = class Game {
         }
 
         return false;
+    }
+
+    checkGameEnd(){
+        return this.#state === stateTypes.gameEnded;
     }
 
     /**
