@@ -28,7 +28,7 @@ module.exports = class ServerGame {
    * Creates a lobby, sets and starts the interval for the send function
    */
   start() {
-    let lobby = new Lobby(this.#server, true, null);
+    let lobby = new Lobby(this.#server, false, "1234");
     this.#lobbies.push(lobby);
 
     /*let lobby2 = new Lobby();       // keywords: TESTING DELETE LOBBYS
@@ -104,10 +104,7 @@ module.exports = class ServerGame {
       } else if(_request.messageType == requestTypes.getReconnectData){
         this.#processGetReconnectData(cid, lobbyID);
   
-      } else if (_request.messageType == requestTypes.createLobby){
-        this.#processCreateLobbyAction(cid, _request.messageBody.isPublic, _request.messageBody.code);
-  
-      } else if (_request.messageType == requestTypes.deleteLobby){
+      }  else if (_request.messageType == requestTypes.deleteLobby){
         this.#processDeleteLobbyAction(cid, lobbyID);
       }
     } 
@@ -115,6 +112,9 @@ module.exports = class ServerGame {
     if(client !== null){
       if (_request.messageType == requestTypes.joinLobby){
         this.#processJoinLobbyAction(client, _request.messageBody.lobbyID, _request.messageBody.code);
+  
+      } else if (_request.messageType == requestTypes.createLobby){
+        this.#processCreateLobbyAction(client, _request.messageBody.isPublic, _request.messageBody.code);
   
       } else if (_request.messageType == requestTypes.leaveLobby){
         this.#processLeaveLobbyAction(client);
@@ -288,11 +288,11 @@ module.exports = class ServerGame {
 
   /**
    * Create a lobby and join the client to the lobby
-   * @param {string} cid client unique ID
+   * @param {Client} client client object
    * @param {boolean} isPublic true if lobby is public else false private
    * @param {string?} code lobby code
    */
-  #processCreateLobbyAction(cid, isPublic, code){
+  #processCreateLobbyAction(client, isPublic, code){
     let isNullFound = false;
     let lobbyID = null;
     for(let i = 0; i < this.#lobbies.length; i++){
@@ -308,7 +308,7 @@ module.exports = class ServerGame {
       lobbyID = this.#lobbies.length - 1;
     }
 
-    this.#processJoinLobbyAction(cid, lobbyID, code);
+    this.#processJoinLobbyAction(client, lobbyID, code);
   }
 
   /**

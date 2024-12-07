@@ -178,7 +178,7 @@ function _submitUsername(clientGame) {
   if (username.length >= 1) {
     document.getElementById("usernameModal").style.display = "none";
     clientGame.sendNameAction(username);
-    clientGame.sendJoinLobbyAction(0, null);   // join Lobby 0
+    clientGame.sendJoinLobbyAction(0, "1234");   // join Lobby 0 with password 1234
   } else {
     alert("Der Benutzername muss mindestens 1 Zeichen lang sein.");
     usernameInput.focus();
