@@ -161,7 +161,7 @@ module.exports = class TinyServer {
    * @param {string} data server response
    * @param {boolean} isBinary is data binary
    * @param {string} broadcastType send - all | allWithoutSender | onlySender | allInLobby | allInLobbyWithoutSender - client
-   * @param {Client[]} clientsInLobby list of clients in lobby
+   * @param {Client[]?} clientsInLobby list of clients in lobby
    */
   broadcastWsMessage(cid, data, isBinary, broadcastType, clientsInLobby) {
     let broadcastFunction = function each(client) {}; // empty function

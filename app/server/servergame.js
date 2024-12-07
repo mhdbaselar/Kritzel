@@ -111,7 +111,7 @@ module.exports = class ServerGame {
         this.#processDeleteLobbyAction(cid, lobbyID);
       }
     } 
-    
+
     if(client !== null){
       if (_request.messageType == requestTypes.joinLobby){
         this.#processJoinLobbyAction(client, _request.messageBody.lobbyID, _request.messageBody.code);
@@ -277,10 +277,21 @@ module.exports = class ServerGame {
     this.#lobbies[lobbyID].setWord(word, cid);
   }
 
+  /**
+   * Sends the reconnect data (game) to the client
+   * @param {string} cid client unique ID
+   * @param {int} lobbyID id of the lobby
+   */
   #processGetReconnectData(cid, lobbyID){
     this.#lobbies[lobbyID].sendReconnectData(cid);
   }
 
+  /**
+   * Create a lobby and join the client to the lobby
+   * @param {string} cid client unique ID
+   * @param {boolean} isPublic true if lobby is public else false private
+   * @param {string?} code lobby code
+   */
   #processCreateLobbyAction(cid, isPublic, code){
     let isNullFound = false;
     let lobbyID = null;
@@ -300,6 +311,12 @@ module.exports = class ServerGame {
     this.#processJoinLobbyAction(cid, lobbyID, code);
   }
 
+  /**
+   * Join the client to the lobby
+   * @param {Client} client client object	
+   * @param {int} lobbyID id of the lobby
+   * @param {string?} code lobby code
+   */
   #processJoinLobbyAction(client, lobbyID, code){
     if(this.#lobbies[lobbyID].getIsPublic() || code == this.#lobbies[lobbyID].getCode()) {
       if(client.getLobbyID() !== lobbyID){
@@ -312,12 +329,20 @@ module.exports = class ServerGame {
     }
   }
 
+  /**
+   * Leave the lobby (client) and show the menu
+   * @param {Client} client client object
+   */
   #processLeaveLobbyAction(client){
     this.processServerRequest({messageType : "deletePlayerInLobby", messageBody : {client : client}});
     client.setLobbyID(null);
     this.#processGetMenuAction(client.getCid(), broadcastTypes.onlyOneClient);
   }
 
+  /**
+   * Send the lobby list to the client
+   * @param {string} cid client unique ID
+   */
   #processGetLobbyListAction(cid){
     let lobbyList = [];
 
@@ -329,6 +354,11 @@ module.exports = class ServerGame {
     this.#server.broadcastWsMessage(cid, jsonMessage, false, broadcastTypes.onlyOneClient);
   }
 
+  /**
+   * Delete the lobby and send the menu to all clients in the lobby
+   * @param {string} cid client unique ID
+   * @param {int} lobbyID id of the lobby
+   */
   #processDeleteLobbyAction(cid, lobbyID){
     if(this.#lobbies[lobbyID].checkGameEnd()){
       let playerList = this.#lobbies[lobbyID].getPlayerList();
@@ -343,11 +373,21 @@ module.exports = class ServerGame {
     }
   }
 
+  /**
+   * Sends the menu notification to the client
+   * @param {string} cid client unique ID
+   * @param {string} broadcastType broadcast type
+   */
   #processGetMenuAction(cid, broadcastType){
     let jsonMessage = JSON.stringify({ type: responseTypes.menu, data: null });
       this.#server.broadcastWsMessage(cid, jsonMessage, false, broadcastType);  
   }
 
+  /**
+   * Sends the chat, canvas, userlist and reconnect data to the join client
+   * @param {string} cid client unique ID
+   * @param {int} lobbyID  id of the lobby
+   */
   #processSendJoinLobbyData(cid, lobbyID){
     this.#processGetChatAction(cid, lobbyID);
     this.#processGetCanvasAction(cid, lobbyID);

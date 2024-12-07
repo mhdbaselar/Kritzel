@@ -441,28 +441,47 @@ module.exports = class ClientGame {
     this.send(JSON.stringify(message));
   }
 
+  /**
+   *  Sends the game end action to the server
+   * @param {int} lobbyID id of the lobby
+   * @param {string?} code lobby code
+   */
   sendJoinLobbyAction(lobbyID, code){
     let message = new Message(requestTypes.joinLobby, {lobbyID: lobbyID, code: code});
     this.send(JSON.stringify(message));
     createStartGameButton(this);  // keywords: TESTING DELETE GAMESEQUENCE
   }
 
+  /**
+   * Sends the leave lobby action to the server
+   */
   sendLeaveLobbyAction(){
     let message = new Message(requestTypes.leaveLobby, null);
     this.send(JSON.stringify(message));
   }
 
+  /**
+   * Sends the create lobby action to the server
+   * @param {boolean} isPublic true public or false private lobby
+   * @param {string} code lobby code
+   */
   sendCreateLobbyAction(isPublic, code){
     let message = new Message(requestTypes.createLobby, {isPublic: isPublic, code: code});
     this.send(JSON.stringify(message));
     createStartGameButton(this);  // keywords: TESTING DELETE GAMESEQUENCE
   }
 
+  /**
+   * Sends the get lobby list action to the server
+   */
   sendGetLobbyListAction(){
     let message = new Message(requestTypes.getLobbyList, null);
     this.send(JSON.stringify(message));
   }
 
+  /**
+   * Sends the delete lobby action to the server
+   */
   sendDeleteLobbyAction(){
     let message = new Message(requestTypes.deleteLobby, null);
     this.send(JSON.stringify(message));

@@ -430,6 +430,10 @@ module.exports = class Game {
         return false;
     }
 
+    /**
+     * Check if the game is ended
+     * @returns {boolean} true if the game is ended
+     */
     checkGameEnd(){
         return this.#state === stateTypes.gameEnded;
     }

@@ -149,10 +149,18 @@ module.exports = class Lobby {
         return this.#board;
     }
 
+    /**
+     * Get lobby code
+     * @returns {string} lobby code
+     */
     getCode(){
         return this.#code;
     }
 
+    /**
+     * Get lobby isPublic (true/false) 
+     * @returns {boolean} isPublic then true else false
+     */
     getIsPublic(){
         return this.#isPublic;
     }
@@ -186,6 +194,10 @@ module.exports = class Lobby {
         return this.#chat.getMessages();
     }
 
+    /**
+     * Check if game ended
+     * @returns {boolean} true if game ended else false
+     */
     checkGameEnd(){
         return this.#game.checkGameEnd();
     }
