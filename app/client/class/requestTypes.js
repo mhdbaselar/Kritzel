@@ -11,5 +11,9 @@ module.exports = requestTypes = {
     getReconnectData : "getReconnectData",
     setName : "setName",
     setWord : "setWord",
-    startGame : "startGame"
+    startGame : "startGame",
+    createLobby : "createLobby",
+    joinLobby : "joinLobby",
+    getLobbyList : "getLobbyList",
+    deleteLobby : "deleteLobby"
 }
