@@ -67,11 +67,13 @@ module.exports = class ServerGame {
    */
   processInput(cid, request) {
     let lobbyID = null;
+    let client = null;
 
     // set Lobby of request sender
     this.#server.getClients().getClientList().forEach(client => {
       if(client.getCid() == cid) {
         lobbyID = client.getLobbyID();
+        client = client;
       }
     });
 
@@ -105,10 +107,10 @@ module.exports = class ServerGame {
       this.#processCreateLobbyAction(cid, _request.messageBody.isPublic, _request.messageBody.code);
 
     } else if (_request.messageType == requestTypes.joinLobby){
-      this.#processJoinLobbyAction(cid, _request.messageBody.lobbyID, _request.messageBody.code);
+      this.#processJoinLobbyAction(client, _request.messageBody.lobbyID, _request.messageBody.code);
 
     } else if (_request.messageType == requestTypes.leaveLobby){
-      this.#processLeaveLobbyAction(cid);
+      this.#processLeaveLobbyAction(client);
 
     } else if (_request.messageType == requestTypes.getLobbyList){
       this.#processGetLobbyListAction(cid);
@@ -124,29 +126,18 @@ module.exports = class ServerGame {
    */
   processServerRequest(request){
     if (request.messageType === "deletePlayerInLobby"){
-      let lobbyID = null;
-      this.#server.getClients().getClientList().forEach(client => {
-        if(client.getCid() == request.messageBody.cid) {
-          lobbyID = client.getLobbyID();
-        }
-      });
+      let lobbyID = request.messageBody.client.getLobby();
 
       if(lobbyID !== null){
-        this.#lobbies[lobbyID].deletePlayer(request.messageBody.cid);
-        this.#processGetUserListAction(request.messageBody.cid, lobbyID);
+        this.#lobbies[lobbyID].deletePlayer(request.messageBody.client.getCid());
+        this.#processGetUserListAction(request.messageBody.client.getCid(), lobbyID);
       }
     } else if(request.messageType === "addPlayerInLobby" && request.messageBody.client instanceof Client){
-      let lobbyID = null;
-      this.#server.getClients().getClientList().forEach(client => {
-        if(client.getCid() == request.messageBody.client.getCid()) {
-          lobbyID = client.getLobbyID();
-        }
-      });
+      let lobbyID = request.messageBody.client.getLobby();
 
       if(lobbyID !== null){
         this.#lobbies[lobbyID].addPlayer(request.messageBody.client);
       }
-
     }
   }
 
@@ -304,20 +295,19 @@ module.exports = class ServerGame {
     this.#processJoinLobbyAction(cid, lobbyID, code);
   }
 
-  #processJoinLobbyAction(cid, lobbyID, code){
-    this.#server.getClients().getClientList().forEach(client => {
-      if(client.getCid() == cid && (this.#lobbies[lobbyID].getIsPublic() || code == this.#lobbies[lobbyID].getCode())) {
-        if(client.getLobbyID() !== lobbyID){
-          this.processServerRequest({messageType : "deletePlayerInLobby", messageBody : {cid : client.getCid()}});
-          client.setLobbyID(lobbyID);
-        }
-        this.processServerRequest({messageType : "addPlayerInLobby", messageBody : {client : client}});
-        this.#processGetChatAction(cid, lobbyID);
-        this.#processGetCanvasAction(cid, lobbyID);
-        this.#processGetUserListAction(cid, lobbyID);
-        this.#processGetReconnectData(cid, lobbyID);
+  #processJoinLobbyAction(client, lobbyID, code){
+    if(this.#lobbies[lobbyID].getIsPublic() || code == this.#lobbies[lobbyID].getCode()) {
+      if(client.getLobbyID() !== lobbyID){
+        this.processServerRequest({messageType : "deletePlayerInLobby", messageBody : {client : client}});
+        client.setLobbyID(lobbyID);
       }
-    });
+      this.processServerRequest({messageType : "addPlayerInLobby", messageBody : {client : client}});
+      let cid = client.getCid();
+      this.#processGetChatAction(cid, lobbyID);
+      this.#processGetCanvasAction(cid, lobbyID);
+      this.#processGetUserListAction(cid, lobbyID);
+      this.#processGetReconnectData(cid, lobbyID);
+    }
   }
 
   #processGetLobbyListAction(cid){
@@ -331,10 +321,10 @@ module.exports = class ServerGame {
     this.#server.broadcastWsMessage(cid, jsonMessage, false, broadcastTypes.onlyOneClient);
   }
 
-  #processLeaveLobbyAction(cid){
-    this.processServerRequest({messageType : "deletePlayerInLobby", messageBody : {cid : cid}});
+  #processLeaveLobbyAction(client){
+    this.processServerRequest({messageType : "deletePlayerInLobby", messageBody : {client : client}});
     client.setLobbyID(null);
-    this.#processGetMenuAction(cid, broadcastTypes.onlyOneClient);
+    this.#processGetMenuAction(client.getCid(), broadcastTypes.onlyOneClient);
   }
 
   #processDeleteLobbyAction(cid, lobbyID){

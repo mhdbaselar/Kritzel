@@ -73,7 +73,7 @@ module.exports = class TinyServer {
         if(client.getCid() === websocket.cid){
           client.setIsConnected(true);
           if(client.getLobbyID() === null){
-            websocket.send(JSON.stringify({ type: responseTypes.menu, data: null }));
+            websocket.send(JSON.stringify({ type: responseTypes.menu, data: null }));   // send Menu
           } else {
             let request = {messageType : "addPlayerInLobby", messageBody : {client : client}};
             this.processWssRequest(request);
@@ -84,13 +84,13 @@ module.exports = class TinyServer {
     else {    // create new client
       websocket.cid = this.getUniqueID();
       websocket.send(JSON.stringify({ type: responseTypes.cookie, data: websocket.cid }));
-      let lobbyID = null;
+      let lobbyID = 0;
 
       /*lobbyID = Math.floor(Math.random() * 2);                // keywords: TESTING DELETE LOBBYS
       console.log("lobbyID: " + lobbyID);*/
 
       let client = this.#clients.addClient(websocket.cid, null, lobbyID);
-      websocket.send(JSON.stringify({ type: responseTypes.menu, data: null }));
+      websocket.send(JSON.stringify({ type: responseTypes.menu, data: null }));   // sendMenu
       //let request = {messageType : "addPlayerInLobby", messageBody : {client : client}};
       //this.processWssRequest(request);
     }
@@ -103,7 +103,7 @@ module.exports = class TinyServer {
       this.#clients.getClientList().forEach((client) => {
         if(client.getCid() === websocket.cid){
           client.setIsConnected(false);
-          let request = {messageType : "deletePlayerInLobby", messageBody : {cid : client.getCid()}};
+          let request = {messageType : "deletePlayerInLobby", messageBody : {client : client}};
           this.processWssRequest(request);
         }
       });
