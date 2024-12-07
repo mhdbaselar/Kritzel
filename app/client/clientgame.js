@@ -30,16 +30,7 @@ module.exports = class ClientGame {
    * Constructor to instanciate the ClientGame
    */
   constructor() {
-    this.#name = null;
     this.canDraw = false;
-  }
-
-  /**
-   * Sets the user name
-   * @param {string} name user name
-   */
-  setUserNameByClientGame(name) {
-    this.#name = name;
   }
 
   /**
@@ -62,12 +53,6 @@ module.exports = class ClientGame {
     // Event handler for when the connection is opened
     this.socket.onopen = (event) => {
       console.log("Socket opened");
-      /*this.sendNameAction(this.#name);
-      this.sendGetChatAction();
-      this.sendGetCanvasAction();
-      this.sendGetUserListAction();
-      this.sendGetReconnectDataAction();
-      createStartGameButton(this);*/ // keywords: TESTING DELETE GAMESEQUENCE
       loadingOverlay.style.display = "none"; // Spinner verstecken
     };
 
@@ -140,9 +125,11 @@ module.exports = class ClientGame {
       } else if (data.type === responseTypes.menu) {
         console.log(data.data);
         // TODO : Frontend anzeige des Menüs
+        document.getElementById("usernameModal").style.visibility = "visible";
       } else if (data.type === responseTypes.lobbyList) {
         console.log(data.data);
         // TODO: Frontend anzeige der LobbyList im Menü
+        
       }
     };
   }
@@ -455,13 +442,20 @@ module.exports = class ClientGame {
   }
 
   sendJoinLobbyAction(lobbyID, code){
-    let message = new Message(requestTypes.createLobby, {lobbyID: lobbyID, code: code});
+    let message = new Message(requestTypes.joinLobby, {lobbyID: lobbyID, code: code});
+    this.send(JSON.stringify(message));
+    createStartGameButton(this);  // keywords: TESTING DELETE GAMESEQUENCE
+  }
+
+  sendLeaveLobbyAction(){
+    let message = new Message(requestTypes.leaveLobby, null);
     this.send(JSON.stringify(message));
   }
 
   sendCreateLobbyAction(isPublic, code){
     let message = new Message(requestTypes.createLobby, {isPublic: isPublic, code: code});
     this.send(JSON.stringify(message));
+    createStartGameButton(this);  // keywords: TESTING DELETE GAMESEQUENCE
   }
 
   sendGetLobbyListAction(){

@@ -34,6 +34,7 @@ const HexColorConverter = require("./class/hexColorConverter");
  * @type {ClientGame}
  */
 const clientGame = new ClientGame();
+clientGame.openWebSocket();
 
 /**
  * Instance of the HexColorConverter class.
@@ -44,6 +45,8 @@ const converter = new HexColorConverter();
 let canDraw = false;
 
 window.addEventListener("load", () => {
+  document.getElementById("usernameModal").style.visibility = "hidden";
+
   console.log(converter.hexToInt("#FFFFFF"));
   console.log(converter.intToHex(0));
 
