@@ -137,6 +137,12 @@ module.exports = class ClientGame {
         document.getElementById("hint").innerText = data.data;
       } else if (data.type === responseTypes.drawPermission) {
         this.setDrawingState(data.data);
+      } else if (data.type === responseTypes.resultList){
+        console.log(data.data);
+        // TODO: Show round ResultList
+      } else if (data.type === responseTypes.endResultList){
+        console.log("Remove ResultOverlay");
+        // TODO: Remove round ResultList
       }
     };
   }

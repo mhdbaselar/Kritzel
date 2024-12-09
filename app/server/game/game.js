@@ -120,6 +120,9 @@ module.exports = class Game {
             if(this.#timeleft <= 0){
                 clearInterval(nextRoundTimer);
                 this.#state = stateTypes.roundStarted;
+                // Send remove ResultList
+                let jsonMessage = JSON.stringify({type: responseTypes.endResultList, data: null});
+                this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
                 this.#nextState();
             }
             this.#timeleft -= 1;
@@ -232,16 +235,34 @@ module.exports = class Game {
         if(maxLength !== 0){
             let maxPointsGuesser = this.#maxPointsGuesser;
             let pointGradiation = maxPointsGuesser / maxLength;
-
+            let resultList = [];
             this.#answerTimeList.forEach((answer) => {
                 let player = this.#playerList.find((player) => player.getCid() === answer.cid);
                 if(player){
-                    player.setPoints(player.getPoints() + Math.ceil(maxPointsGuesser));
+                    let points = Math.ceil(maxPointsGuesser);
+                    resultList.push({name: player.getName(), points : points});
+                    player.setPoints(player.getPoints() + points);
                     maxPointsGuesser -= pointGradiation;
                 }
             });
 
-            this.#drawer.setPoints(this.#drawer.getPoints() + Math.ceil(this.#maxPointsDrawer / maxLength * this.#answerTimeList.length));
+            // 0 Point add resultList
+            this.#playerList.forEach((player) => {
+                let playerAnswered = this.#answerTimeList.some((answer) => player.getCid() === answer.cid);
+                if(!playerAnswered && player !== this.#drawer){
+                    resultList.push({name: player.getName(), points : 0});
+                }
+            });
+
+            let drawerPoints = Math.ceil(this.#maxPointsDrawer / maxLength * this.#answerTimeList.length);
+            this.#drawer.setPoints(this.#drawer.getPoints() + drawerPoints);
+            resultList.push({name: this.#drawer.getName(), points : drawerPoints});
+
+            resultList.sort((result1, result2) => result2.points - result1.points);
+
+            // Send ResultList to Clients
+            let jsonMessage = JSON.stringify({type: responseTypes.resultList, data: resultList});
+            this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
         }
         
         // disable draw permission of current drawer
