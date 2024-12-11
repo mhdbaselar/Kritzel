@@ -486,6 +486,20 @@ function submitUsername() {
   _submitUsername(clientGame);
 }
 
+function showLobbyMenu() {
+  console.log("test");
+  document.getElementById("usernameModal").style.display = "none";
+  document.getElementById("lobbyJoin").style.display = "flex";
+  _submitUsername(clientGame);
+  
+}
+
+function hideLobbyMenu() {
+  document.getElementById("lobbyJoin").style.display = "none";
+}
+
 // Funktion für globale Erreichbarkeit im HTML
 window.submitUsername = submitUsername;
 window.renderUsers = renderUsers;
+window.showLobbyMenu = showLobbyMenu;
+window.hideLobbyMenu = hideLobbyMenu;
