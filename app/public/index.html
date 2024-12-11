@@ -46,9 +46,22 @@
           required
           onkeydown="if(event.key === 'Enter') submitUsername()"
         />
-        <button onclick="submitUsername()">Bestätigen</button>
+        <button onclick="showLobbyMenu()">Beitreten</button>
+        <button onclick="submitUsername()">Erstellen</button>
       </div>
     </div>
+
+    <!-- List for joining Lobbys -->
+    <div class="lobby-join" id="lobbyJoin">
+      <div class="lobby-join-content">
+        <h2>Lobby1</h2>
+        <h2>Lobby2</h2>
+        <h2>Lobby3</h2>
+        <h2>Lobby4</h2>
+        <button onclick="hideLobbyMenu()">Fertig</button>
+      </div>
+    </div>
+    
     <div class="row">
       <div class="column users-column">
         <div class="users-container">
