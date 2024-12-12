@@ -33,6 +33,10 @@ module.exports = class Translator {
     };
   }
 
+  getTokenPattern() {
+    return this.#tokenPattern;
+  }
+
   translate(text, language) {
     if (!this.#translations[language]) {
       return text; // Fallback auf Original wenn Sprache nicht unterstützt

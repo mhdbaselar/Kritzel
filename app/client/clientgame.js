@@ -36,8 +36,10 @@ module.exports = class ClientGame {
     this.#name = null;
     this.canDraw = false;
     this.#translator = new Translator();
-    this.#currentLanguage = 'en'; // Default Sprache
-    this.translateUI(); // Initial übersetzen
+    this.#currentLanguage = localStorage.getItem('preferredLanguage') || 'de';
+    document.getElementById('languageSelect').value = this.#currentLanguage;
+    
+    this.translateUI();
   }
 
   /**
@@ -497,8 +499,20 @@ module.exports = class ClientGame {
   }
 
   setLanguage(language) {
+    // Sprache setzen
     this.#currentLanguage = language;
-    this.updateUI(); // UI neu rendern mit neuer Sprache
+
+    // Im localStorage speichern
+    localStorage.setItem('preferredLanguage', language);
+
+    // UI aktualisieren
+    this.translateUI();
+
+    // Dropdown aktualisieren
+    const languageSelect = document.getElementById('languageSelect');
+    if (languageSelect) {
+      languageSelect.value = language;
+    }
   }
 
   // Beispiel für Verwendung in renderUI Methoden
@@ -518,10 +532,35 @@ module.exports = class ClientGame {
   }
 
   translateUI() {
-    const elements = document.querySelectorAll('[data-translate]');
-    elements.forEach(el => {
-      const key = el.getAttribute('data-translate');
-      el.textContent = this.#translator.translate(`{{${key}}}`, this.#currentLanguage);
+    // Beim ersten Durchlauf: Token in data-attributes speichern
+    const textElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, button, label, div');
+    
+    textElements.forEach(el => {
+      // Prüfe nur direkte Textknoten
+      for (const node of el.childNodes) {
+        if (node.nodeType === Node.TEXT_NODE) {
+          const originalText = node.textContent.trim();
+          const tokenMatch = originalText.match(this.#translator.getTokenPattern());
+          
+          if (tokenMatch) {
+            // Speichere originalText mit Token
+            if (!el.hasAttribute('data-original-text')) {
+              el.setAttribute('data-original-text', originalText);
+            }
+            
+            // Übersetze Text
+            const translatedText = this.#translator.translate(originalText, this.#currentLanguage);
+            node.textContent = translatedText;
+          }
+        }
+      }
+    });
+
+    // Für alle bereits übersetzten Elemente
+    const translatedElements = document.querySelectorAll('[data-original-text]');
+    translatedElements.forEach(el => {
+      const originalText = el.getAttribute('data-original-text');
+      el.textContent = this.#translator.translate(originalText, this.#currentLanguage);
     });
   }
 };

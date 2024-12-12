@@ -483,6 +483,21 @@ window.addEventListener("load", () => {
       }
     }, 200)
   );
+
+  // Language selector event listener
+  document.getElementById('languageSelect').addEventListener('change', (event) => {
+    clientGame.setLanguage(event.target.value);
+  });
+
+  document.getElementById('languageSelect').addEventListener('change', (event) => {
+    clientGame.setLanguage(event.target.value);
+  });
+
+  const languageSelect = document.getElementById('languageSelect');
+  languageSelect.addEventListener('change', function(event) {
+    clientGame.setLanguage(event.target.value);
+  });
+
 });
 
 window.submitUsername = function() {
@@ -497,4 +512,8 @@ window.showLobbyMenu = function() {
 
 window.hideLobbyMenu = function() {
   document.getElementById("lobbyJoin").style.display = "none";
+};
+
+window.changeLanguage = function(language) {
+  clientGame.setLanguage(language);
 };

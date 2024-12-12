@@ -689,3 +689,40 @@ body {
 .lobby-join-content button:hover {
   background-color: #0056b3;
 }
+
+/* Language Selector Styles */
+.language-selector {
+  margin: 10px 0;
+  width: 80%;
+  display: block;
+  margin: 10px auto;
+}
+
+.language-selector select {
+  width: 100%;
+  padding: 8px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+  color: #1d2194;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.language-selector select:hover {
+  border-color: #007bff;
+}
+
+.language-selector select:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+.language-selector select option {
+  padding: 8px;
+  background-color: #fff;
+  color: #1d2194;
+}
+

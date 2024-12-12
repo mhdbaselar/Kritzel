@@ -36,7 +36,7 @@
     <!-- Username Modal -->
     <div class="username-modal" id="usernameModal">
       <div class="username-modal-content">
-        <h2 data-translate="USERNAME_PROMPT">Benutzernamen eingeben</h2>
+        <h2>{{USERNAME_PROMPT}}</h2>
         <input
           type="text"
           id="usernameInput"
@@ -46,12 +46,14 @@
           required
           onkeydown="if(event.key === 'Enter') window.submitUsername()"
         />
-        <button onclick="window.showLobbyMenu()" data-translate="JOIN">
-          Beitreten
-        </button>
-        <button onclick="window.submitUsername()" data-translate="CREATE">
-          Erstellen
-        </button>
+        <div class="language-selector">
+          <select id="languageSelect">
+            <option value="de">Deutsch</option>
+            <option value="en">English</option> 
+          </select>
+        </div>
+        <button onclick="window.showLobbyMenu()">{{JOIN}}</button>
+        <button onclick="window.submitUsername()">{{CREATE}}</button>
       </div>
     </div>
 
