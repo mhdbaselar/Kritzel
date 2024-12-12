@@ -49,45 +49,79 @@
         <div class="language-selector">
           <select id="languageSelect">
             <option value="de">Deutsch</option>
-            <option value="en">English</option> 
+            <option value="en">English</option>
           </select>
         </div>
-        <button onclick="window.showLobbyMenu()">{{JOIN}}</button>
-        <button onclick="window.submitUsername()">{{CREATE}}</button>
-      </div>
-    </div>
-    
-    <div class="lobby-create" id="lobbyCreate">
-      <div class="lobby-create-content">
-        <h2>Lobby Einstellungen</h2>
-        <div class="button-container">
-          <label class="switch">
-            <input type="checkbox">
-            <span class="slider round"></span>
-          </label>
-        </div>  
-        <br>
-        <input 
-          type="text" 
-          id="codeInput"
-          placeholder="PASSWORD"
-          size="10"
-          />
-        <br><br>
-        <button onclick="hideCreateLobby()">Fertig</button>
+        <!-- Buttons angepasst -->
+        <button onclick="submitUsernameAndShowLobbyMenu()">{{JOIN}}</button>
+        <button onclick="submitUsernameAndShowCreateLobby()">{{CREATE}}</button>
       </div>
     </div>
 
-    <!-- List for joining Lobbys -->
-    <div class="lobby-join" id="lobbyJoin">
-      <div class="lobby-join-content">
-        <h2>Lobby1</h2>
-        <h2>Lobby2</h2>
-        <h2>Lobby3</h2>
-        <h2>Lobby4</h2>
-        <button onclick="hideLobbyMenu()">Fertig</button>
+    <!-- Create Lobby Overlay -->
+    <div class="lobby-create" id="lobbyCreate">
+      <div class="lobby-create-content">
+        <h2>Lobby Einstellungen</h2>
+
+        <!-- Neue Eingabefelder für Lobby-Einstellungen -->
+        <div class="lobby-settings">
+          <label for="roundCount">Rundenzahl:</label>
+          <input type="number" id="roundCount" min="1" max="20" value="5" />
+
+          <label for="roundTimer">Timer pro Runde (Sek.):</label>
+          <input type="number" id="roundTimer" min="10" max="300" value="60" />
+
+          <label for="playerCount">Maximale Spieleranzahl:</label>
+          <input type="number" id="playerCount" min="2" max="20" value="8" />
+
+          <div class="button-container">
+            <label class="switch">
+              <input type="checkbox" />
+              <span class="slider round"></span>
+            </label>
+            <p>Öffentliche Lobby</p>
+          </div>
+
+          <input
+            type="text"
+            id="codeInput"
+            placeholder="PASSWORD (optional)"
+            size="15"
+          />
+        </div>
+
+        <br />
+
+        <!-- Neue Buttons -->
+        <div class="lobby-create-buttons">
+          <button onclick="window.createLobby()">Erstellen</button>
+          <button onclick="hideCreateLobby(); showLobbyMenu();">
+            Zu den Lobbys
+          </button>
+        </div>
       </div>
     </div>
+
+    <!-- Lobby Join Overlay -->
+    <div class="lobby-join" id="lobbyJoin">
+      <div class="lobby-join-content">
+        <h2>Verfügbare Lobbys</h2>
+        <!-- Zufällige Lobby beitreten Button -->
+        <button class="random-lobby-button" onclick="onRandomLobby()">
+          Zufällige Lobby beitreten
+        </button>
+        <div id="lobbyListContainer">
+          <!-- Beispiel für leere Anzeige:
+      <p>Keine Lobbys vorhanden. Erstelle eine neue Lobby.</p>
+      <button onclick="hideLobbyMenu(); showCreateLobby();">Lobby erstellen</button>
+      -->
+        </div>
+        <button onclick="hideLobbyMenu(); showCreateLobby();">
+          Lobby erstellen
+        </button>
+      </div>
+    </div>
+
     <div class="row">
       <div class="column users-column">
         <div class="users-container">
