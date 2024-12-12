@@ -35,10 +35,12 @@ module.exports = class ClientGame {
   constructor() {
     this.canDraw = false;
     this.#translator = new Translator();
-    this.#currentLanguage = localStorage.getItem('preferredLanguage') || 'de';
-    document.getElementById('languageSelect').value = this.#currentLanguage;
-    
+    this.#currentLanguage = localStorage.getItem("preferredLanguage") || "de";
+    document.getElementById("languageSelect").value = this.#currentLanguage;
+
     this.translateUI();
+
+    this.lobbyList = []; // Neue Property zum Speichern der Lobby-Daten
   }
 
   /**
@@ -108,18 +110,15 @@ module.exports = class ClientGame {
         );
         wordSelectionPopup.style.display = "flex";
         renderWordChoice(data.data, this);
-
-      } else if(data.type === responseTypes.removeWordChoiceList){
+      } else if (data.type === responseTypes.removeWordChoiceList) {
         const wordContainer = document.querySelector(".word-selection-popup");
         wordContainer.style.display = "none";
-
       } else if (data.type === responseTypes.choosingWordNotification) {
         console.log(data.data); // name from the drawer
         // TODO: Frontend anzeigen der Notification ("<Bob> is choosing a word")
 
         // Disallow drawing and hide toolbar
         this.setDrawingState(false);
-
       } else if (data.type === responseTypes.endChoosingWordNotification) {
         console.log(data.data); // name from the drawer
         // TODO: Frontend anzeigen der Notification ("<Bob> is choosing a word") ausblenden
@@ -136,8 +135,9 @@ module.exports = class ClientGame {
         document.getElementById("usernameModal").style.visibility = "visible";
       } else if (data.type === responseTypes.lobbyList) {
         console.log(data.data);
+        this.lobbyList = data.data;
+        displayLobbyList(this.lobbyList);
         // TODO: Frontend anzeige der LobbyList im Menü
-        
       }
     };
   }
@@ -426,7 +426,7 @@ module.exports = class ClientGame {
   /**
    * Requests the server to send reconnect data
    */
-  sendGetReconnectDataAction(){
+  sendGetReconnectDataAction() {
     let message = new Message(requestTypes.getReconnectData, null);
     this.send(JSON.stringify(message));
   }
@@ -454,16 +454,19 @@ module.exports = class ClientGame {
    * @param {int} lobbyID id of the lobby
    * @param {string?} code lobby code
    */
-  sendJoinLobbyAction(lobbyID, code){
-    let message = new Message(requestTypes.joinLobby, {lobbyID: lobbyID, code: code});
+  sendJoinLobbyAction(lobbyID, code) {
+    let message = new Message(requestTypes.joinLobby, {
+      lobbyID: lobbyID,
+      code: code,
+    });
     this.send(JSON.stringify(message));
-    createStartGameButton(this);  // keywords: TESTING DELETE GAMESEQUENCE
+    createStartGameButton(this); // keywords: TESTING DELETE GAMESEQUENCE
   }
 
   /**
    * Sends the leave lobby action to the server
    */
-  sendLeaveLobbyAction(){
+  sendLeaveLobbyAction() {
     let message = new Message(requestTypes.leaveLobby, null);
     this.send(JSON.stringify(message));
   }
@@ -473,16 +476,19 @@ module.exports = class ClientGame {
    * @param {boolean} isPublic true public or false private lobby
    * @param {string} code lobby code
    */
-  sendCreateLobbyAction(isPublic, code){
-    let message = new Message(requestTypes.createLobby, {isPublic: isPublic, code: code});
+  sendCreateLobbyAction(isPublic, code) {
+    let message = new Message(requestTypes.createLobby, {
+      isPublic: isPublic,
+      code: code,
+    });
     this.send(JSON.stringify(message));
-    createStartGameButton(this);  // keywords: TESTING DELETE GAMESEQUENCE
+    createStartGameButton(this); // keywords: TESTING DELETE GAMESEQUENCE
   }
 
   /**
    * Sends the get lobby list action to the server
    */
-  sendGetLobbyListAction(){
+  sendGetLobbyListAction() {
     let message = new Message(requestTypes.getLobbyList, null);
     this.send(JSON.stringify(message));
   }
@@ -490,7 +496,7 @@ module.exports = class ClientGame {
   /**
    * Sends the delete lobby action to the server
    */
-  sendDeleteLobbyAction(){
+  sendDeleteLobbyAction() {
     let message = new Message(requestTypes.deleteLobby, null);
     this.send(JSON.stringify(message));
   }
@@ -513,7 +519,6 @@ module.exports = class ClientGame {
       );
     }
   }
-
 
   //-------------------------------------
   //---Client-Side Drawing States--------
@@ -542,13 +547,13 @@ module.exports = class ClientGame {
     this.#currentLanguage = language;
 
     // Im localStorage speichern
-    localStorage.setItem('preferredLanguage', language);
+    localStorage.setItem("preferredLanguage", language);
 
     // UI aktualisieren
     this.translateUI();
 
     // Dropdown aktualisieren
-    const languageSelect = document.getElementById('languageSelect');
+    const languageSelect = document.getElementById("languageSelect");
     if (languageSelect) {
       languageSelect.value = language;
     }
@@ -557,58 +562,78 @@ module.exports = class ClientGame {
   // Beispiel für Verwendung in renderUI Methoden
   renderWordChoice(words) {
     const translatedTitle = this.#translator.translate(
-      '{{CHOOSE_WORD}}',
+      "{{CHOOSE_WORD}}",
       this.#currentLanguage
     );
-    
-    const wordContainer = document.querySelector('.word-selection-popup');
+
+    const wordContainer = document.querySelector(".word-selection-popup");
     wordContainer.innerHTML = `
       <h2>${translatedTitle}</h2>
       <div class="word-options">
-        ${words.map(word => `<div class="word-option">${word}</div>`).join('')}
+        ${words
+          .map((word) => `<div class="word-option">${word}</div>`)
+          .join("")}
       </div>
     `;
   }
 
   translateUI() {
-    const textElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, button, label, div');
-    
-    textElements.forEach(el => {
+    const textElements = document.querySelectorAll(
+      "h1, h2, h3, h4, h5, h6, p, span, button, label, div"
+    );
+
+    textElements.forEach((el) => {
       for (const node of el.childNodes) {
         if (node.nodeType === Node.TEXT_NODE) {
           const originalText = node.textContent.trim();
-          const tokenMatch = originalText.match(this.#translator.getTokenPattern());
-          
+          const tokenMatch = originalText.match(
+            this.#translator.getTokenPattern()
+          );
+
           if (tokenMatch) {
-            if (!el.hasAttribute('data-original-text')) {
-              el.setAttribute('data-original-text', originalText);
+            if (!el.hasAttribute("data-original-text")) {
+              el.setAttribute("data-original-text", originalText);
             }
-            const translatedText = this.#translator.translate(originalText, this.#currentLanguage);
+            const translatedText = this.#translator.translate(
+              originalText,
+              this.#currentLanguage
+            );
             node.textContent = translatedText;
           }
         }
       }
     });
 
-    const elementsWithPlaceholder = document.querySelectorAll('[placeholder]');
-    elementsWithPlaceholder.forEach(el => {
-      const placeholder = el.getAttribute('placeholder');
-      const originalPlaceholder = el.getAttribute('data-original-placeholder') || placeholder;
-      const tokenMatch = originalPlaceholder.match(this.#translator.getTokenPattern());
-      
+    const elementsWithPlaceholder = document.querySelectorAll("[placeholder]");
+    elementsWithPlaceholder.forEach((el) => {
+      const placeholder = el.getAttribute("placeholder");
+      const originalPlaceholder =
+        el.getAttribute("data-original-placeholder") || placeholder;
+      const tokenMatch = originalPlaceholder.match(
+        this.#translator.getTokenPattern()
+      );
+
       if (tokenMatch) {
-        if (!el.hasAttribute('data-original-placeholder')) {
-          el.setAttribute('data-original-placeholder', originalPlaceholder);
+        if (!el.hasAttribute("data-original-placeholder")) {
+          el.setAttribute("data-original-placeholder", originalPlaceholder);
         }
-        const translatedPlaceholder = this.#translator.translate(originalPlaceholder, this.#currentLanguage);
-        el.setAttribute('placeholder', translatedPlaceholder);
+        const translatedPlaceholder = this.#translator.translate(
+          originalPlaceholder,
+          this.#currentLanguage
+        );
+        el.setAttribute("placeholder", translatedPlaceholder);
       }
     });
 
-    const translatedElements = document.querySelectorAll('[data-original-text]');
-    translatedElements.forEach(el => {
-      const originalText = el.getAttribute('data-original-text');
-      el.textContent = this.#translator.translate(originalText, this.#currentLanguage);
+    const translatedElements = document.querySelectorAll(
+      "[data-original-text]"
+    );
+    translatedElements.forEach((el) => {
+      const originalText = el.getAttribute("data-original-text");
+      el.textContent = this.#translator.translate(
+        originalText,
+        this.#currentLanguage
+      );
     });
   }
 };
