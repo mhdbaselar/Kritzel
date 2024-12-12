@@ -15,6 +15,7 @@ const {
 const HexColorConverter = require("./class/hexColorConverter");
 const requestTypes = require("./class/requestTypes");
 const responseTypes = require("./class/responseTypes");
+const Translator = require("./class/translator");
 
 /**
  * Instance of the HexColorConverter class.
@@ -25,6 +26,8 @@ const converter = new HexColorConverter();
 module.exports = class ClientGame {
   /**@type {string} */
   #name; // user name
+  #translator;
+  #currentLanguage;
 
   /**
    * Constructor to instanciate the ClientGame
@@ -32,6 +35,11 @@ module.exports = class ClientGame {
   constructor() {
     this.#name = null;
     this.canDraw = false;
+    this.#translator = new Translator();
+    this.#currentLanguage = localStorage.getItem('preferredLanguage') || 'de';
+    document.getElementById('languageSelect').value = this.#currentLanguage;
+    
+    this.translateUI();
   }
 
   /**
@@ -488,5 +496,80 @@ module.exports = class ClientGame {
   updateToolbarVisibility() {
     const toolbar = document.querySelector(".toolbar");
     toolbar.style.display = this.canDraw ? "flex" : "none";
+  }
+
+  setLanguage(language) {
+    // Sprache setzen
+    this.#currentLanguage = language;
+
+    // Im localStorage speichern
+    localStorage.setItem('preferredLanguage', language);
+
+    // UI aktualisieren
+    this.translateUI();
+
+    // Dropdown aktualisieren
+    const languageSelect = document.getElementById('languageSelect');
+    if (languageSelect) {
+      languageSelect.value = language;
+    }
+  }
+
+  // Beispiel für Verwendung in renderUI Methoden
+  renderWordChoice(words) {
+    const translatedTitle = this.#translator.translate(
+      '{{CHOOSE_WORD}}',
+      this.#currentLanguage
+    );
+    
+    const wordContainer = document.querySelector('.word-selection-popup');
+    wordContainer.innerHTML = `
+      <h2>${translatedTitle}</h2>
+      <div class="word-options">
+        ${words.map(word => `<div class="word-option">${word}</div>`).join('')}
+      </div>
+    `;
+  }
+
+  translateUI() {
+    const textElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, button, label, div');
+    
+    textElements.forEach(el => {
+      for (const node of el.childNodes) {
+        if (node.nodeType === Node.TEXT_NODE) {
+          const originalText = node.textContent.trim();
+          const tokenMatch = originalText.match(this.#translator.getTokenPattern());
+          
+          if (tokenMatch) {
+            if (!el.hasAttribute('data-original-text')) {
+              el.setAttribute('data-original-text', originalText);
+            }
+            const translatedText = this.#translator.translate(originalText, this.#currentLanguage);
+            node.textContent = translatedText;
+          }
+        }
+      }
+    });
+
+    const elementsWithPlaceholder = document.querySelectorAll('[placeholder]');
+    elementsWithPlaceholder.forEach(el => {
+      const placeholder = el.getAttribute('placeholder');
+      const originalPlaceholder = el.getAttribute('data-original-placeholder') || placeholder;
+      const tokenMatch = originalPlaceholder.match(this.#translator.getTokenPattern());
+      
+      if (tokenMatch) {
+        if (!el.hasAttribute('data-original-placeholder')) {
+          el.setAttribute('data-original-placeholder', originalPlaceholder);
+        }
+        const translatedPlaceholder = this.#translator.translate(originalPlaceholder, this.#currentLanguage);
+        el.setAttribute('placeholder', translatedPlaceholder);
+      }
+    });
+
+    const translatedElements = document.querySelectorAll('[data-original-text]');
+    translatedElements.forEach(el => {
+      const originalText = el.getAttribute('data-original-text');
+      el.textContent = this.#translator.translate(originalText, this.#currentLanguage);
+    });
   }
 };

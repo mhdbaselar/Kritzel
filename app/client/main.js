@@ -44,6 +44,9 @@ const converter = new HexColorConverter();
 let canDraw = false;
 
 window.addEventListener("load", () => {
+  // Übersetze UI beim Start
+  clientGame.translateUI();
+  
   console.log(converter.hexToInt("#FFFFFF"));
   console.log(converter.intToHex(0));
 
@@ -480,26 +483,37 @@ window.addEventListener("load", () => {
       }
     }, 200)
   );
+
+  // Language selector event listener
+  document.getElementById('languageSelect').addEventListener('change', (event) => {
+    clientGame.setLanguage(event.target.value);
+  });
+
+  document.getElementById('languageSelect').addEventListener('change', (event) => {
+    clientGame.setLanguage(event.target.value);
+  });
+
+  const languageSelect = document.getElementById('languageSelect');
+  languageSelect.addEventListener('change', function(event) {
+    clientGame.setLanguage(event.target.value);
+  });
+
 });
 
-function submitUsername() {
+window.submitUsername = function() {
   _submitUsername(clientGame);
-}
+};
 
-function showLobbyMenu() {
-  console.log("test");
+window.showLobbyMenu = function() {
   document.getElementById("usernameModal").style.display = "none";
   document.getElementById("lobbyJoin").style.display = "flex";
-  _submitUsername(clientGame);
-  
-}
+  _submitUsername(clientGame); 
+};
 
-function hideLobbyMenu() {
+window.hideLobbyMenu = function() {
   document.getElementById("lobbyJoin").style.display = "none";
-}
+};
 
-// Funktion für globale Erreichbarkeit im HTML
-window.submitUsername = submitUsername;
-window.renderUsers = renderUsers;
-window.showLobbyMenu = showLobbyMenu;
-window.hideLobbyMenu = hideLobbyMenu;
+window.changeLanguage = function(language) {
+  clientGame.setLanguage(language);
+};
