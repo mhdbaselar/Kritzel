@@ -46,8 +46,14 @@
           required
           onkeydown="if(event.key === 'Enter') window.submitUsername()"
         />
-        <button onclick="showLobbyMenu()">Beitreten</button>
-        <button onclick="showCreateLobby()">Erstellen</button>
+        <div class="language-selector">
+          <select id="languageSelect">
+            <option value="de">Deutsch</option>
+            <option value="en">English</option> 
+          </select>
+        </div>
+        <button onclick="window.showLobbyMenu()">{{JOIN}}</button>
+        <button onclick="window.submitUsername()">{{CREATE}}</button>
       </div>
     </div>
     
@@ -69,14 +75,6 @@
           />
         <br><br>
         <button onclick="hideCreateLobby()">Fertig</button>
-        <div class="language-selector">
-          <select id="languageSelect">
-            <option value="de">Deutsch</option>
-            <option value="en">English</option> 
-          </select>
-        </div>
-        <button onclick="window.showLobbyMenu()">{{JOIN}}</button>
-        <button onclick="window.submitUsername()">{{CREATE}}</button>
       </div>
     </div>
 
