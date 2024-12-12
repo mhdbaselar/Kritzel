@@ -177,9 +177,8 @@ function _submitUsername(clientGame) {
   const username = usernameInput.value.trim();
   if (username.length >= 1) {
     document.getElementById("usernameModal").style.display = "none";
-    clientGame.setUserNameByClientGame(username);
-    // Open WebSocket connection
-    clientGame.openWebSocket();
+    clientGame.sendNameAction(username);
+    clientGame.sendJoinLobbyAction(0, "1234");   // join Lobby 0 with password 1234
   } else {
     alert("Der Benutzername muss mindestens 1 Zeichen lang sein.");
     usernameInput.focus();

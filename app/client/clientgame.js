@@ -33,7 +33,6 @@ module.exports = class ClientGame {
    * Constructor to instanciate the ClientGame
    */
   constructor() {
-    this.#name = null;
     this.canDraw = false;
     this.#translator = new Translator();
     this.#currentLanguage = localStorage.getItem('preferredLanguage') || 'de';
@@ -43,21 +42,13 @@ module.exports = class ClientGame {
   }
 
   /**
-   * Sets the user name
-   * @param {string} name user name
-   */
-  setUserNameByClientGame(name) {
-    this.#name = name;
-  }
-
-  /**
    * Opens a WebSocket connection to the server.
    */
   openWebSocket() {
     // Determine WebSocket protocol based on current page protocol
     const protocol = location.protocol === "https:" ? "wss://" : "ws://";
 
-    // Show loadingOverlay 
+    // Show loadingOverlay
     const loadingOverlay = document.getElementById("loadingOverlay");
 
     const wordSelectionPopup = document.querySelector(".word-selection-popup");
@@ -70,12 +61,6 @@ module.exports = class ClientGame {
     // Event handler for when the connection is opened
     this.socket.onopen = (event) => {
       console.log("Socket opened");
-      this.sendNameAction(this.#name);
-      this.sendGetChatAction();
-      this.sendGetCanvasAction();
-      this.sendGetUserListAction();
-      this.sendGetReconnectDataAction();
-      createStartGameButton(this); // keywords: TESTING DELETE GAMESEQUENCE
       loadingOverlay.style.display = "none"; // Spinner verstecken
     };
 
@@ -127,7 +112,7 @@ module.exports = class ClientGame {
       } else if(data.type === responseTypes.removeWordChoiceList){
         const wordContainer = document.querySelector(".word-selection-popup");
         wordContainer.style.display = "none";
-        
+
       } else if (data.type === responseTypes.choosingWordNotification) {
         console.log(data.data); // name from the drawer
         // TODO: Frontend anzeigen der Notification ("<Bob> is choosing a word")
@@ -145,6 +130,14 @@ module.exports = class ClientGame {
         document.getElementById("hint").innerText = data.data;
       } else if (data.type === responseTypes.drawPermission) {
         this.setDrawingState(data.data);
+      } else if (data.type === responseTypes.menu) {
+        console.log(data.data);
+        // TODO : Frontend anzeige des Menüs
+        document.getElementById("usernameModal").style.visibility = "visible";
+      } else if (data.type === responseTypes.lobbyList) {
+        console.log(data.data);
+        // TODO: Frontend anzeige der LobbyList im Menü
+        
       }
     };
   }
@@ -453,6 +446,52 @@ module.exports = class ClientGame {
    */
   sendGameStartAction() {
     let message = new Message(requestTypes.startGame, null);
+    this.send(JSON.stringify(message));
+  }
+
+  /**
+   *  Sends the game end action to the server
+   * @param {int} lobbyID id of the lobby
+   * @param {string?} code lobby code
+   */
+  sendJoinLobbyAction(lobbyID, code){
+    let message = new Message(requestTypes.joinLobby, {lobbyID: lobbyID, code: code});
+    this.send(JSON.stringify(message));
+    createStartGameButton(this);  // keywords: TESTING DELETE GAMESEQUENCE
+  }
+
+  /**
+   * Sends the leave lobby action to the server
+   */
+  sendLeaveLobbyAction(){
+    let message = new Message(requestTypes.leaveLobby, null);
+    this.send(JSON.stringify(message));
+  }
+
+  /**
+   * Sends the create lobby action to the server
+   * @param {boolean} isPublic true public or false private lobby
+   * @param {string} code lobby code
+   */
+  sendCreateLobbyAction(isPublic, code){
+    let message = new Message(requestTypes.createLobby, {isPublic: isPublic, code: code});
+    this.send(JSON.stringify(message));
+    createStartGameButton(this);  // keywords: TESTING DELETE GAMESEQUENCE
+  }
+
+  /**
+   * Sends the get lobby list action to the server
+   */
+  sendGetLobbyListAction(){
+    let message = new Message(requestTypes.getLobbyList, null);
+    this.send(JSON.stringify(message));
+  }
+
+  /**
+   * Sends the delete lobby action to the server
+   */
+  sendDeleteLobbyAction(){
+    let message = new Message(requestTypes.deleteLobby, null);
     this.send(JSON.stringify(message));
   }
 

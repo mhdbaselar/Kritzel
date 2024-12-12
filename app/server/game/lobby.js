@@ -16,13 +16,19 @@ module.exports = class Lobby {
     #game = null;
     /**@type {TinyServer} */
     #server;
+    /**@type {boolean} */
+    #isPublic;
+    /**@type {string} */
+    #code;
 
     /**
      * Constructor to instanciate the lobby
      * @param {TinyServer} server websocketserver
      */
-    constructor(server){
+    constructor(server, isPublic, code){
         this.#server = server;
+        this.#isPublic = isPublic;
+        this.#code = code;
         this.#playerList = [];
         this.#board = new Board(600, 400, 0);
         this.#chat = new Chat();
@@ -35,7 +41,7 @@ module.exports = class Lobby {
     startGame(){
         if(this.#game.checkGameNotStarted()){
             setTimeout(() => {this.#game.startGame(this.#playerList, 1)}, 0);  // async operation (not wait) execute a lobby game parallel
-        }   
+        }
     }
 
     /**
@@ -58,7 +64,7 @@ module.exports = class Lobby {
                 this.#playerList.splice(i, 1);
                 return;
             }
-        } 
+        }
     }
 
     /**
@@ -144,6 +150,22 @@ module.exports = class Lobby {
     }
 
     /**
+     * Get lobby code
+     * @returns {string} lobby code
+     */
+    getCode(){
+        return this.#code;
+    }
+
+    /**
+     * Get lobby isPublic (true/false) 
+     * @returns {boolean} isPublic then true else false
+     */
+    getIsPublic(){
+        return this.#isPublic;
+    }
+
+    /**
      * Add message to lobby chat
      * @param {string} message message to add
      * @param {string} cid client unique ID
@@ -170,6 +192,14 @@ module.exports = class Lobby {
     getMessages(cid){
         //TODO: CHECK PERMISSION OF CID
         return this.#chat.getMessages();
+    }
+
+    /**
+     * Check if game ended
+     * @returns {boolean} true if game ended else false
+     */
+    checkGameEnd(){
+        return this.#game.checkGameEnd();
     }
 
     /**

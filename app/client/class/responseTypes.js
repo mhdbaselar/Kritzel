@@ -16,5 +16,7 @@ module.exports = responseTypes = {
     chatMsg : "chatMsg",
     chatMsgList : "chatMsgList",
     clock : "clock",
-    drawPermission : "drawPermission"
+    drawPermission : "drawPermission",
+    lobbyList : "lobbyList",
+    menu : "menu"
 }
