@@ -36,7 +36,7 @@
     <!-- Username Modal -->
     <div class="username-modal" id="usernameModal">
       <div class="username-modal-content">
-        <h2>Benutzernamen eingeben</h2>
+        <h2 data-translate="USERNAME_PROMPT">Benutzernamen eingeben</h2>
         <input
           type="text"
           id="usernameInput"
@@ -44,10 +44,14 @@
           maxlength="20"
           minlength="1"
           required
-          onkeydown="if(event.key === 'Enter') submitUsername()"
+          onkeydown="if(event.key === 'Enter') window.submitUsername()"
         />
-        <button onclick="showLobbyMenu()">Beitreten</button>
-        <button onclick="submitUsername()">Erstellen</button>
+        <button onclick="window.showLobbyMenu()" data-translate="JOIN">
+          Beitreten
+        </button>
+        <button onclick="window.submitUsername()" data-translate="CREATE">
+          Erstellen
+        </button>
       </div>
     </div>
 

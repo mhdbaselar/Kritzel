@@ -15,6 +15,7 @@ const {
 const HexColorConverter = require("./class/hexColorConverter");
 const requestTypes = require("./class/requestTypes");
 const responseTypes = require("./class/responseTypes");
+const Translator = require("./class/translator");
 
 /**
  * Instance of the HexColorConverter class.
@@ -25,6 +26,8 @@ const converter = new HexColorConverter();
 module.exports = class ClientGame {
   /**@type {string} */
   #name; // user name
+  #translator;
+  #currentLanguage;
 
   /**
    * Constructor to instanciate the ClientGame
@@ -32,6 +35,9 @@ module.exports = class ClientGame {
   constructor() {
     this.#name = null;
     this.canDraw = false;
+    this.#translator = new Translator();
+    this.#currentLanguage = 'en'; // Default Sprache
+    this.translateUI(); // Initial übersetzen
   }
 
   /**
@@ -488,5 +494,34 @@ module.exports = class ClientGame {
   updateToolbarVisibility() {
     const toolbar = document.querySelector(".toolbar");
     toolbar.style.display = this.canDraw ? "flex" : "none";
+  }
+
+  setLanguage(language) {
+    this.#currentLanguage = language;
+    this.updateUI(); // UI neu rendern mit neuer Sprache
+  }
+
+  // Beispiel für Verwendung in renderUI Methoden
+  renderWordChoice(words) {
+    const translatedTitle = this.#translator.translate(
+      '{{CHOOSE_WORD}}',
+      this.#currentLanguage
+    );
+    
+    const wordContainer = document.querySelector('.word-selection-popup');
+    wordContainer.innerHTML = `
+      <h2>${translatedTitle}</h2>
+      <div class="word-options">
+        ${words.map(word => `<div class="word-option">${word}</div>`).join('')}
+      </div>
+    `;
+  }
+
+  translateUI() {
+    const elements = document.querySelectorAll('[data-translate]');
+    elements.forEach(el => {
+      const key = el.getAttribute('data-translate');
+      el.textContent = this.#translator.translate(`{{${key}}}`, this.#currentLanguage);
+    });
   }
 };

@@ -44,6 +44,9 @@ const converter = new HexColorConverter();
 let canDraw = false;
 
 window.addEventListener("load", () => {
+  // Übersetze UI beim Start
+  clientGame.translateUI();
+  
   console.log(converter.hexToInt("#FFFFFF"));
   console.log(converter.intToHex(0));
 
@@ -482,24 +485,16 @@ window.addEventListener("load", () => {
   );
 });
 
-function submitUsername() {
+window.submitUsername = function() {
   _submitUsername(clientGame);
-}
+};
 
-function showLobbyMenu() {
-  console.log("test");
+window.showLobbyMenu = function() {
   document.getElementById("usernameModal").style.display = "none";
   document.getElementById("lobbyJoin").style.display = "flex";
-  _submitUsername(clientGame);
-  
-}
+  _submitUsername(clientGame); 
+};
 
-function hideLobbyMenu() {
+window.hideLobbyMenu = function() {
   document.getElementById("lobbyJoin").style.display = "none";
-}
-
-// Funktion für globale Erreichbarkeit im HTML
-window.submitUsername = submitUsername;
-window.renderUsers = renderUsers;
-window.showLobbyMenu = showLobbyMenu;
-window.hideLobbyMenu = hideLobbyMenu;
+};
