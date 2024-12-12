@@ -502,18 +502,35 @@ window.addEventListener("load", () => {
 
 window.submitUsername = function() {
   _submitUsername(clientGame);
-};
+}
 
-window.showLobbyMenu = function() {
-  document.getElementById("usernameModal").style.display = "none";
+function showLobbyMenu() {
+  console.log("test");
   document.getElementById("lobbyJoin").style.display = "flex";
-  _submitUsername(clientGame); 
-};
+  _submitUsername(clientGame);
+  
+}
 
-window.hideLobbyMenu = function() {
+function hideLobbyMenu() {
   document.getElementById("lobbyJoin").style.display = "none";
-};
+}
+
+function showCreateLobby() {
+  document.getElementById("lobbyCreate").style.display = "flex";
+  _submitUsername(clientGame);
+}
+
+function hideCreateLobby() {
+  document.getElementById("lobbyCreate").style.display = "none";
+}
 
 window.changeLanguage = function(language) {
   clientGame.setLanguage(language);
 };
+// Funktion für globale Erreichbarkeit im HTML
+window.submitUsername = submitUsername;
+window.renderUsers = renderUsers;
+window.showLobbyMenu = showLobbyMenu;
+window.hideLobbyMenu = hideLobbyMenu;
+window.showCreateLobby = showCreateLobby;
+window.hideCreateLobby = hideCreateLobby;

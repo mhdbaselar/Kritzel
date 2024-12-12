@@ -46,6 +46,29 @@
           required
           onkeydown="if(event.key === 'Enter') window.submitUsername()"
         />
+        <button onclick="showLobbyMenu()">Beitreten</button>
+        <button onclick="showCreateLobby()">Erstellen</button>
+      </div>
+    </div>
+    
+    <div class="lobby-create" id="lobbyCreate">
+      <div class="lobby-create-content">
+        <h2>Lobby Einstellungen</h2>
+        <div class="button-container">
+          <label class="switch">
+            <input type="checkbox">
+            <span class="slider round"></span>
+          </label>
+        </div>  
+        <br>
+        <input 
+          type="text" 
+          id="codeInput"
+          placeholder="PASSWORD"
+          size="10"
+          />
+        <br><br>
+        <button onclick="hideCreateLobby()">Fertig</button>
         <div class="language-selector">
           <select id="languageSelect">
             <option value="de">Deutsch</option>
@@ -67,7 +90,6 @@
         <button onclick="hideLobbyMenu()">Fertig</button>
       </div>
     </div>
-    
     <div class="row">
       <div class="column users-column">
         <div class="users-container">
