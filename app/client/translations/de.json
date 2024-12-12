@@ -1,0 +1,11 @@
+{
+    "START_GAME": "Spiel starten",
+    "CHOOSE_WORD": "Wähle ein Wort",
+    "YOUR_TURN": "Du bist dran", 
+    "TIMER": "Zeit verbleibend",
+    "USERNAME_PROMPT": "Benutzernamen eingeben",
+    "JOIN": "Beitreten",
+    "CREATE": "Erstellen",
+    "DONE": "Fertig",
+    "USERNAME": "Benutzername"
+  }

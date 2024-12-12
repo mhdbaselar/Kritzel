@@ -532,23 +532,18 @@ module.exports = class ClientGame {
   }
 
   translateUI() {
-    // Beim ersten Durchlauf: Token in data-attributes speichern
     const textElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, button, label, div');
     
     textElements.forEach(el => {
-      // Prüfe nur direkte Textknoten
       for (const node of el.childNodes) {
         if (node.nodeType === Node.TEXT_NODE) {
           const originalText = node.textContent.trim();
           const tokenMatch = originalText.match(this.#translator.getTokenPattern());
           
           if (tokenMatch) {
-            // Speichere originalText mit Token
             if (!el.hasAttribute('data-original-text')) {
               el.setAttribute('data-original-text', originalText);
             }
-            
-            // Übersetze Text
             const translatedText = this.#translator.translate(originalText, this.#currentLanguage);
             node.textContent = translatedText;
           }
@@ -556,7 +551,21 @@ module.exports = class ClientGame {
       }
     });
 
-    // Für alle bereits übersetzten Elemente
+    const elementsWithPlaceholder = document.querySelectorAll('[placeholder]');
+    elementsWithPlaceholder.forEach(el => {
+      const placeholder = el.getAttribute('placeholder');
+      const originalPlaceholder = el.getAttribute('data-original-placeholder') || placeholder;
+      const tokenMatch = originalPlaceholder.match(this.#translator.getTokenPattern());
+      
+      if (tokenMatch) {
+        if (!el.hasAttribute('data-original-placeholder')) {
+          el.setAttribute('data-original-placeholder', originalPlaceholder);
+        }
+        const translatedPlaceholder = this.#translator.translate(originalPlaceholder, this.#currentLanguage);
+        el.setAttribute('placeholder', translatedPlaceholder);
+      }
+    });
+
     const translatedElements = document.querySelectorAll('[data-original-text]');
     translatedElements.forEach(el => {
       const originalText = el.getAttribute('data-original-text');
