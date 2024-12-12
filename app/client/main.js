@@ -593,7 +593,8 @@ window.createLobby = function () {
 
   hideCreateLobby();
 };
-window.joinRandomLobby = function () {
+//Funktioniert nicht, da wir keine Lobbies haben. Dummy Lobbies sind ein anderes Array
+window.onRandomLobby = function () {
   if (!clientGame.lobbyList || clientGame.lobbyList.length === 0) {
     const lobbyListContainer = document.getElementById("lobbyListContainer");
     lobbyListContainer.innerHTML = `
@@ -605,12 +606,12 @@ window.joinRandomLobby = function () {
 
   const randomIndex = Math.floor(Math.random() * clientGame.lobbyList.length);
   const chosenLobby = clientGame.lobbyList[randomIndex];
-
   const lobbyID = chosenLobby.id;
   const lobbyCode = chosenLobby.code || "";
 
   clientGame.sendJoinLobbyAction(lobbyID, lobbyCode);
   hideLobbyMenu();
+  createStartGameButton(clientGame);
 };
 
 window.joinThisLobby = function (lobbyID, code) {
@@ -690,37 +691,3 @@ if (randomLobbyButton) {
 if (createLobbyButton) {
   createLobbyButton.style.display = "inline-block";
 }
-
-//Funktioniert nicht, da wir keine Lobbies haben. Dummy Lobbies sind ein anderes Array
-window.onRandomLobby = function () {
-  if (!clientGame.lobbyList || clientGame.lobbyList.length === 0) {
-    const lobbyListContainer = document.getElementById("lobbyListContainer");
-    lobbyListContainer.innerHTML = `
-      <p>Keine Lobbys vorhanden. Erstelle eine neue Lobby.</p>
-      <button onclick="hideLobbyMenu(); showCreateLobby();">Lobby erstellen</button>
-    `;
-    return;
-  }
-
-  const randomIndex = Math.floor(Math.random() * clientGame.lobbyList.length);
-  const chosenLobby = clientGame.lobbyList[randomIndex];
-
-  const lobbyID = chosenLobby.id;
-  const lobbyCode = chosenLobby.code || "";
-
-  clientGame.sendJoinLobbyAction(lobbyID, lobbyCode);
-  hideLobbyMenu();
-};
-
-window.joinThisLobby = function (lobbyID, code) {
-  clientGame.sendJoinLobbyAction(lobbyID, code);
-  hideLobbyMenu();
-};
-
-// Funktion für globale Erreichbarkeit im HTML
-window.submitUsername = submitUsername;
-window.renderUsers = renderUsers;
-window.showLobbyMenu = showLobbyMenu;
-window.hideLobbyMenu = hideLobbyMenu;
-window.showCreateLobby = showCreateLobby;
-window.hideCreateLobby = hideCreateLobby;

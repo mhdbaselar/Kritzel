@@ -26,7 +26,7 @@ function renderUsers(users) {
 
     const nameDiv = document.createElement("div");
     nameDiv.classList.add("user-name");
-    let icon = (user.isDrawer ? " 🖌️" : "");
+    let icon = user.isDrawer ? " 🖌️" : "";
     nameDiv.textContent = user.name + icon;
 
     const pointsDiv = document.createElement("div");
@@ -99,7 +99,6 @@ function displayChatMessage(chatMessages, message, senderName = "") {
  * @param {Array} messageList - An array of message objects to be displayed. Each object should have `cid` and `message` properties.
  */
 function displayChatMessageList(chatMessages, messageList) {
-  
   messageList.forEach((message) => {
     const messageDiv = document.createElement("div");
     messageDiv.textContent = `${message.name}: ${message.msg}`;
@@ -178,12 +177,39 @@ function _submitUsername(clientGame) {
   if (username.length >= 1) {
     document.getElementById("usernameModal").style.display = "none";
     clientGame.sendNameAction(username);
-    clientGame.sendJoinLobbyAction(0, "1234");   // join Lobby 0 with password 1234
+    clientGame.sendJoinLobbyAction(0, "1234"); // join Lobby 0 with password 1234
   } else {
     alert("Der Benutzername muss mindestens 1 Zeichen lang sein.");
     usernameInput.focus();
   }
 }
+/** 
+ * Würde doppelte startGameButton verhindern!
+
+function createStartGameButton(clientGame) {
+  console.log("createStartGameButton aufgerufen");
+  const existingButton = document.querySelector(".start-game-button");
+  if (existingButton) return;
+
+  const startButtonContainer = document.querySelector(".users-column");
+  if (!startButtonContainer) {
+    console.error("startButtonContainer not found");
+    return;
+  }
+
+  const startButton = document.createElement("button");
+  startButton.textContent = "Start Game";
+  startButton.classList.add("start-game-button");
+
+  startButton.addEventListener("click", () => {
+    console.log("Start Game Button geklickt");
+    clientGame.sendGameStartAction();
+  });
+
+  startButtonContainer.appendChild(startButton);
+  console.log("Start Game Button wurde hinzugefügt");
+}
+  */
 
 module.exports = {
   renderUsers,

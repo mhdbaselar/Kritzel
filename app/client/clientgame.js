@@ -81,6 +81,7 @@ module.exports = class ClientGame {
 
     // Event handler for receiving messages from the server
     this.socket.onmessage = (event) => {
+      console.log("Nachricht vom Server empfangen:", event.data);
       let data = JSON.parse(event.data);
       if (data.type == responseTypes.chatMsgList) {
         // Update the chat display
@@ -445,7 +446,9 @@ module.exports = class ClientGame {
    * Sends the game start action to the server
    */
   sendGameStartAction() {
+    console.log("sendGameStartAction aufgerufen");
     let message = new Message(requestTypes.startGame, null);
+    console.log("Sende Nachricht:", message);
     this.send(JSON.stringify(message));
   }
 
@@ -511,6 +514,7 @@ module.exports = class ClientGame {
    */
   send(message) {
     if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+      console.log("WebSocket sendet Nachricht:", message);
       this.socket.send(message);
     } else {
       console.error(
