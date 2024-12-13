@@ -18,7 +18,11 @@
 
 // Import necessary modules
 const ClientGame = require("./clientgame");
-const { renderUsers, renderWordChoice, _submitUsername } = require("./components/userInterface");
+const {
+  renderUsers,
+  renderWordChoice,
+  _submitUsername,
+} = require("./components/userInterface");
 const { initializeToolbar } = require("./components/toolbar");
 const { initializeChat } = require("./components/chat");
 const {
@@ -34,6 +38,7 @@ const HexColorConverter = require("./class/hexColorConverter");
  * @type {ClientGame}
  */
 const clientGame = new ClientGame();
+clientGame.openWebSocket();
 
 /**
  * Instance of the HexColorConverter class.
@@ -44,9 +49,10 @@ const converter = new HexColorConverter();
 let canDraw = false;
 
 window.addEventListener("load", () => {
+
   // Übersetze UI beim Start
   clientGame.translateUI();
-  
+
   console.log(converter.hexToInt("#FFFFFF"));
   console.log(converter.intToHex(0));
 
@@ -426,11 +432,11 @@ window.addEventListener("load", () => {
   // -------------------------------
   // Word Choice List Rendering (Dummy Data)
   // -------------------------------
-  
+
   // TODO mit Backend verknuepfen
   // Dummy Data in Form von wordChoiceList
   const wordChoiceList = ["Apfel", "Banane", "Kiwi"];
-  renderWordChoice(wordChoiceList)
+  renderWordChoice(wordChoiceList);
 
   // -------------------------------
   // Chat Functionality
@@ -485,35 +491,161 @@ window.addEventListener("load", () => {
   );
 
   // Language selector event listener
-  document.getElementById('languageSelect').addEventListener('change', (event) => {
+  document
+    .getElementById("languageSelect")
+    .addEventListener("change", (event) => {
+      clientGame.setLanguage(event.target.value);
+    });
+
+  document
+    .getElementById("languageSelect")
+    .addEventListener("change", (event) => {
+      clientGame.setLanguage(event.target.value);
+    });
+
+  const languageSelect = document.getElementById("languageSelect");
+  languageSelect.addEventListener("change", function (event) {
     clientGame.setLanguage(event.target.value);
   });
-
-  document.getElementById('languageSelect').addEventListener('change', (event) => {
-    clientGame.setLanguage(event.target.value);
-  });
-
-  const languageSelect = document.getElementById('languageSelect');
-  languageSelect.addEventListener('change', function(event) {
-    clientGame.setLanguage(event.target.value);
-  });
-
 });
 
-window.submitUsername = function() {
-  _submitUsername(clientGame);
+window.submitUsername = function () {
+  return _submitUsername(clientGame);
 };
 
-window.showLobbyMenu = function() {
-  document.getElementById("usernameModal").style.display = "none";
+window.submitUsernameAndShowLobbyMenu = function () {
+  // Username validieren und senden
+  let isNameSet = submitUsername();
+
+  if(isNameSet){
+    // Danach Modal schließen und Lobby-Liste anzeigen
+    document.getElementById("usernameModal").style.display = "none";
+    showLobbyMenu();
+  }
+};
+
+window.submitUsernameAndShowCreateLobby = function () {
+  // Username validieren und senden
+  let isNameSet = submitUsername();
+  
+  if(isNameSet){
+    // Danach Modal schließen und Lobby-Einstellungen anzeigen
+    document.getElementById("usernameModal").style.display = "none";
+    showCreateLobby();
+  }
+};
+
+function showLobbyMenu() {
+  clientGame.sendGetLobbyListAction();
+  // Zeigt nur das Lobby-Overlay an
   document.getElementById("lobbyJoin").style.display = "flex";
-  _submitUsername(clientGame); 
-};
+}
 
-window.hideLobbyMenu = function() {
+function hideLobbyMenu() {
+  // Versteckt das Lobby-Overlay
   document.getElementById("lobbyJoin").style.display = "none";
+}
+
+function showCreateLobby() {
+  // Zeigt nur das Lobby-Einstellungs-Overlay an
+  document.getElementById("lobbyCreate").style.display = "flex";
+}
+
+function hideCreateLobby() {
+  // Versteckt das Lobby-Einstellungs-Overlay
+  document.getElementById("lobbyCreate").style.display = "none";
+}
+
+window.changeLanguage = function (language) {
+  clientGame.setLanguage(language);
+};
+window.submitUsername = submitUsername;
+window.renderUsers = renderUsers;
+window.showLobbyMenu = showLobbyMenu;
+window.hideLobbyMenu = hideLobbyMenu;
+window.showCreateLobby = showCreateLobby;
+window.hideCreateLobby = hideCreateLobby;
+
+// Lobby erstellen Funktion
+window.createLobby = function () {
+  const lobbyName = document.getElementById("lobbyName").value;
+  const roundCount = document.getElementById("roundCount").value;
+  const roundTimer = document.getElementById("roundTimer").value;
+  const playerCount = document.getElementById("playerCount").value;
+  const codeInput = document.getElementById("codeInput").value;
+  const isPublic = document.querySelector(
+    ".lobby-create-content .switch input"
+  ).checked;
+
+  console.log(isPublic, codeInput, lobbyName, roundCount, roundTimer, playerCount);
+  clientGame.sendCreateLobbyAction(isPublic, codeInput, lobbyName, roundCount, roundTimer, playerCount);
+
+  hideCreateLobby();
+};
+//Funktioniert nicht, da wir keine Lobbies haben. Dummy Lobbies sind ein anderes Array
+window.onRandomLobby = function () {
+  clientGame.sendJoinRandomLobbyAction();
+  hideLobbyMenu();
 };
 
-window.changeLanguage = function(language) {
-  clientGame.setLanguage(language);
+window.joinThisLobby = function (lobbyID, isPublic) {
+  if(isPublic){
+    clientGame.sendJoinLobbyAction(lobbyID, null);
+  } else {
+    console.log(document.getElementById(`codeInputField${lobbyID}`).value);
+    clientGame.sendJoinLobbyAction(lobbyID, document.getElementById(`codeInputField${lobbyID}`).value);
+  }
+  
+  hideLobbyMenu();
+};
+
+window.displayLobbyList = function (lobbyArray) {
+  const lobbyListContainer = document.getElementById("lobbyListContainer");
+  const randomLobbyButton = document.querySelector(".random-lobby-button");
+  const createLobbyButton = document.querySelector(
+    ".lobby-join-content button[onclick*='showCreateLobby']"
+  );
+
+  if (!lobbyListContainer) {
+    console.error("lobbyListContainer not found");
+    return;
+  }
+
+  // Wenn keine Lobbys vorhanden sind:
+  if (!lobbyArray || lobbyArray.length === 0) {
+    lobbyListContainer.innerHTML = `
+      <p>Keine Lobbys vorhanden. Erstelle eine neue Lobby.</p>
+      <button onclick="hideLobbyMenu(); showCreateLobby();">Lobby erstellen</button>
+    `;
+
+    // Die Buttons für "Zufällige Lobby beitreten" und "Lobby erstellen" ausblenden
+    if (randomLobbyButton) {
+      randomLobbyButton.style.display = "none";
+    }
+    if (createLobbyButton) {
+      createLobbyButton.style.display = "none";
+    }
+    return;
+  }
+
+  // Die Buttons wieder einblenden, falls sie zuvor ausgeblendet waren
+  if (randomLobbyButton) {
+    randomLobbyButton.style.display = "inline-block";
+  }
+  if (createLobbyButton) {
+    createLobbyButton.style.display = "inline-block";
+  }
+  let html = "";
+  lobbyArray.forEach((lobby) => {
+    html += `
+      <div class="lobby-item" style="border: 1px solid #ccc; margin-bottom:10px; padding:10px;">
+        <h3>Lobby: ${lobby.lobbyName} ${lobby.isPublic ? "🌐" : "🔒"}</h3>
+        <p>Spieler: ${lobby.currentPlayers}/${lobby.maxPlayers}</p>
+        ${lobby.isPublic ? ""
+        : `<input id="codeInputField${lobby.lobbyID}" type="text">`}
+        <button onclick="joinThisLobby(${lobby.lobbyID},${lobby.isPublic})">Beitreten</button>
+      </div>
+    `;
+  });
+  lobbyListContainer.innerHTML = html;
 };
