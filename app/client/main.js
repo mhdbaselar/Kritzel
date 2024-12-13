@@ -49,7 +49,6 @@ const converter = new HexColorConverter();
 let canDraw = false;
 
 window.addEventListener("load", () => {
-  document.getElementById("usernameModal").style.visibility = "hidden";
 
   // Übersetze UI beim Start
   clientGame.translateUI();

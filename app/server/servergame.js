@@ -28,11 +28,8 @@ module.exports = class ServerGame {
    * Creates a lobby, sets and starts the interval for the send function
    */
   start() {
-    let lobby = new Lobby(this.#server, true);
+    let lobby = new Lobby(this.#server, true, null, "Test-Lobby", 1, 60, 20);
     this.#lobbies.push(lobby);
-
-    /*let lobby2 = new Lobby();       // keywords: TESTING DELETE LOBBYS
-    this.#lobbies.push(lobby2);*/
 
     this.intervalReference = setInterval(this.tick.bind(this), 100);
   }

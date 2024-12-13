@@ -81,7 +81,7 @@ module.exports = class ClientGame {
 
     // Event handler for receiving messages from the server
     this.socket.onmessage = (event) => {
-      //console.log("Nachricht vom Server empfangen:", event.data);
+      console.log("Nachricht vom Server empfangen:", event.data);
       let data = JSON.parse(event.data);
       if (data.type == responseTypes.chatMsgList) {
         // Update the chat display
@@ -126,19 +126,14 @@ module.exports = class ClientGame {
       } else if (data.type === responseTypes.clock) {
         renderTimer(data.data);
       } else if (data.type === responseTypes.word) {
-        console.log(data);
         document.getElementById("hint").innerText = data.data;
       } else if (data.type === responseTypes.drawPermission) {
         this.setDrawingState(data.data);
       } else if (data.type === responseTypes.menu) {
-        console.log(data.data);
-        // TODO : Frontend anzeige des Menüs
-        document.getElementById("usernameModal").style.visibility = "visible";
+        document.getElementById("usernameModal").style.display = "flex";
       } else if (data.type === responseTypes.lobbyList) {
-        console.log(data.data);
         this.lobbyList = data.data;
         displayLobbyList(this.lobbyList);
-        // TODO: Frontend anzeige der LobbyList im Menü
       }
     };
   }
