@@ -64,6 +64,7 @@ module.exports = class ClientGame {
     // Event handler for when the connection is opened
     this.socket.onopen = (event) => {
       createStartGameButton(this);
+      displayStartGameButton();
       console.log("Socket opened");
       loadingOverlay.style.display = "none"; // Spinner verstecken
     };
@@ -138,6 +139,12 @@ module.exports = class ClientGame {
         displayLobbyList(this.lobbyList);
       } else if (data.type === responseTypes.lobbyJoinMenu){
         showLobbyMenu();
+      } else if (data.type === responseTypes.nameCheck){
+        if(data.data === false){
+          hideLobbyMenu();
+          hideCreateLobby();
+          document.getElementById("usernameModal").style.display = "flex";
+        }
       }
     };
   }
@@ -468,6 +475,7 @@ module.exports = class ClientGame {
   sendJoinRandomLobbyAction(){
     let message = new Message(requestTypes.joinRandomLobby, null);
     this.send(JSON.stringify(message));
+    displayStartGameButton();
   }
 
   /**
