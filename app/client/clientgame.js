@@ -81,7 +81,7 @@ module.exports = class ClientGame {
 
     // Event handler for receiving messages from the server
     this.socket.onmessage = (event) => {
-      console.log("Nachricht vom Server empfangen:", event.data);
+      //console.log("Nachricht vom Server empfangen:", event.data);
       let data = JSON.parse(event.data);
       if (data.type == responseTypes.chatMsgList) {
         // Update the chat display
@@ -479,10 +479,14 @@ module.exports = class ClientGame {
    * @param {boolean} isPublic true public or false private lobby
    * @param {string} code lobby code
    */
-  sendCreateLobbyAction(isPublic, code) {
+  sendCreateLobbyAction(isPublic, code, lobbyName, roundCount, roundTimer, playerCount) {
     let message = new Message(requestTypes.createLobby, {
       isPublic: isPublic,
       code: code,
+      lobbyName: lobbyName,
+      roundCount: roundCount,
+      roundTimer: roundTimer,
+      playerCount: playerCount
     });
     this.send(JSON.stringify(message));
     createStartGameButton(this); // keywords: TESTING DELETE GAMESEQUENCE

@@ -85,10 +85,11 @@ module.exports = class Game {
      * @param {Client[]} playerList list of players to the game
      * @param {int} totalCycle Number of times a player takes a turn as a drawer (consists of round)
      */
-    startGame(playerList, totalCycle){
+    startGame(playerList, totalCycle, roundTimeout){
         console.log("Start Game");
         this.#playerList = playerList;
         this.#totalCycle = totalCycle;
+        this.#roundTimeout = roundTimeout;
         this.#currentCycle = 1;
         this.#currentRound = 0;
         this.#playerQueue = [...this.#playerList];      // copy current playerList to queue

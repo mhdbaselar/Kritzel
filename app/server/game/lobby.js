@@ -20,12 +20,16 @@ module.exports = class Lobby {
     #isPublic;
     /**@type {string} */
     #code;
+    #lobbyName;
+    #roundCount;
+    #roundTimer;
+    #playerCount;
 
     /**
      * Constructor to instanciate the lobby
      * @param {TinyServer} server websocketserver
      */
-    constructor(server, isPublic, code){
+    constructor(server, isPublic, code, lobbyName, roundCount, roundTimer, playerCount){
         this.#server = server;
         this.#isPublic = isPublic;
         this.#code = code;
@@ -33,6 +37,10 @@ module.exports = class Lobby {
         this.#board = new Board(600, 400, 0);
         this.#chat = new Chat();
         this.#game = new Game(this.#server, this.#board);
+        this.#lobbyName = lobbyName;
+        this.#roundCount = Math.ceil(roundCount);
+        this.#roundTimer = Math.ceil(roundTimer * 1000);
+        this.#playerCount = playerCount;
     }
 
     /**
@@ -40,7 +48,7 @@ module.exports = class Lobby {
      */
     startGame(){
         if(this.#game.checkGameNotStarted()){
-            setTimeout(() => {this.#game.startGame(this.#playerList, 1)}, 0);  // async operation (not wait) execute a lobby game parallel
+            setTimeout(() => {this.#game.startGame(this.#playerList, this.#roundCount, this.#roundTimer)}, 0);  // async operation (not wait) execute a lobby game parallel
         }
     }
 
@@ -163,6 +171,18 @@ module.exports = class Lobby {
      */
     getIsPublic(){
         return this.#isPublic;
+    }
+
+    getLobbyName(){
+        return this.#lobbyName;
+    }
+
+    getMaxPlayers(){
+        return this.#playerCount;
+    }
+
+    getCurrentPlayerCount(){
+        return this.#playerList.length;
     }
 
     /**

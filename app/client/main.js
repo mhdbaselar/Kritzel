@@ -527,25 +527,30 @@ const testLobbies = [
   },
 ];*/
 window.submitUsername = function () {
-  _submitUsername(clientGame);
+  return _submitUsername(clientGame);
 };
 
 window.submitUsernameAndShowLobbyMenu = function () {
   clientGame.sendGetLobbyListAction();
   // Username validieren und senden
-  submitUsername();
-  // Danach Modal schließen und Lobby-Liste anzeigen
-  document.getElementById("usernameModal").style.display = "none";
-  showLobbyMenu();
-  //displayLobbyList(testLobbies);
+  let isNameSet = submitUsername();
+
+  if(isNameSet){
+    // Danach Modal schließen und Lobby-Liste anzeigen
+    document.getElementById("usernameModal").style.display = "none";
+    showLobbyMenu();
+  }
 };
 
 window.submitUsernameAndShowCreateLobby = function () {
   // Username validieren und senden
-  submitUsername();
-  // Danach Modal schließen und Lobby-Einstellungen anzeigen
-  document.getElementById("usernameModal").style.display = "none";
-  showCreateLobby();
+  let isNameSet = submitUsername();
+  
+  if(isNameSet){
+    // Danach Modal schließen und Lobby-Einstellungen anzeigen
+    document.getElementById("usernameModal").style.display = "none";
+    showCreateLobby();
+  }
 };
 
 function showLobbyMenu() {
@@ -580,15 +585,17 @@ window.hideCreateLobby = hideCreateLobby;
 
 // Lobby erstellen Funktion
 window.createLobby = function () {
-  //const roundCount = document.getElementById("roundCount").value;
-  //const roundTimer = document.getElementById("roundTimer").value;
-  //const playerCount = document.getElementById("playerCount").value;
+  const lobbyName = document.getElementById("lobbyName").value;
+  const roundCount = document.getElementById("roundCount").value;
+  const roundTimer = document.getElementById("roundTimer").value;
+  const playerCount = document.getElementById("playerCount").value;
   const codeInput = document.getElementById("codeInput").value;
   const isPublic = document.querySelector(
     ".lobby-create-content .switch input"
   ).checked;
 
-  // clientGame.sendCreateLobbyAction(isPublic, codeInput);
+  console.log(isPublic, codeInput, lobbyName, roundCount, roundTimer, playerCount);
+  clientGame.sendCreateLobbyAction(isPublic, codeInput, lobbyName, roundCount, roundTimer, playerCount);
   // Später: Runden, Timer und Spieleranzahl an den Server übergeben, wenn Backend das unterstützt.
 
   hideCreateLobby();
@@ -615,12 +622,10 @@ window.onRandomLobby = function () {
 
 window.joinThisLobby = function (lobbyID, code) {
   clientGame.sendJoinLobbyAction(lobbyID, code);
-  console.log(lobbyID, code);
   hideLobbyMenu();
 };
 
 window.displayLobbyList = function (lobbyArray) {
-  console.log(lobbyArray);
   const lobbyListContainer = document.getElementById("lobbyListContainer");
   const randomLobbyButton = document.querySelector(".random-lobby-button");
   const createLobbyButton = document.querySelector(
@@ -660,7 +665,7 @@ window.displayLobbyList = function (lobbyArray) {
   lobbyArray.forEach((lobby) => {
     html += `
       <div class="lobby-item" style="border: 1px solid #ccc; margin-bottom:10px; padding:10px;">
-        <h3>Lobby: ${lobby.name}</h3>
+        <h3>Lobby: ${lobby.lobbyName}</h3>
         <p>Spieler: ${lobby.currentPlayers}/${lobby.maxPlayers}</p>
         <button onclick="joinThisLobby(${lobby.lobbyID}, '${
       lobby.code || ""

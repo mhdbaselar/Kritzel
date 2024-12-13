@@ -120,7 +120,11 @@ module.exports = class ServerGame {
         this.#processCreateLobbyAction(
           client,
           _request.messageBody.isPublic,
-          _request.messageBody.code
+          _request.messageBody.code,
+          _request.messageBody.lobbyName,
+          _request.messageBody.roundCount,
+          _request.messageBody.roundTimer,
+          _request.messageBody.playerCount
         );
       } else if (_request.messageType == requestTypes.leaveLobby) {
         this.#processLeaveLobbyAction(client);
@@ -353,19 +357,19 @@ module.exports = class ServerGame {
    * @param {boolean} isPublic true if lobby is public else false private
    * @param {string?} code lobby code
    */
-  #processCreateLobbyAction(client, isPublic, code) {
+  #processCreateLobbyAction(client, isPublic, code, lobbyName, roundCount, roundTimer, playerCount) {
     let isNullFound = false;
     let lobbyID = null;
     for (let i = 0; i < this.#lobbies.length; i++) {
       if (this.#lobbies[i] === null) {
-        this.#lobbies[i] = new Lobby(this.#server, isPublic, code);
+        this.#lobbies[i] = new Lobby(this.#server, isPublic, code, lobbyName, roundCount, roundTimer, playerCount);
         isNullFound = true;
         lobbyID = i;
         break;
       }
     }
     if (!isNullFound) {
-      this.#lobbies.push(new Lobby(this.#server, isPublic, code));
+      this.#lobbies.push(new Lobby(this.#server, isPublic, code, lobbyName, roundCount, roundTimer, playerCount));
       lobbyID = this.#lobbies.length - 1;
     }
 
@@ -420,7 +424,9 @@ module.exports = class ServerGame {
     let lobbyList = [];
 
     for (let i = 0; i < this.#lobbies.length; i++) {
-      lobbyList.push({ lobbyID: i, isPublic: this.#lobbies[i].getIsPublic() });
+      lobbyList.push({ lobbyID: i, isPublic: this.#lobbies[i].getIsPublic(), lobbyName: this.#lobbies[i].getLobbyName(), 
+        currentPlayers: this.#lobbies[i].getCurrentPlayerCount(), maxPlayers: this.#lobbies[i].getMaxPlayers()
+      });
     }
 
     let jsonMessage = JSON.stringify({
