@@ -514,7 +514,6 @@ window.submitUsername = function () {
 };
 
 window.submitUsernameAndShowLobbyMenu = function () {
-  clientGame.sendGetLobbyListAction();
   // Username validieren und senden
   let isNameSet = submitUsername();
 
@@ -537,6 +536,7 @@ window.submitUsernameAndShowCreateLobby = function () {
 };
 
 function showLobbyMenu() {
+  clientGame.sendGetLobbyListAction();
   // Zeigt nur das Lobby-Overlay an
   document.getElementById("lobbyJoin").style.display = "flex";
 }
@@ -584,28 +584,18 @@ window.createLobby = function () {
 };
 //Funktioniert nicht, da wir keine Lobbies haben. Dummy Lobbies sind ein anderes Array
 window.onRandomLobby = function () {
-  /*if (!clientGame.lobbyList || clientGame.lobbyList.length === 0) {
-    const lobbyListContainer = document.getElementById("lobbyListContainer");
-    lobbyListContainer.innerHTML = `
-      <p>Keine Lobbys vorhanden. Erstelle eine neue Lobby.</p>
-      <button onclick="hideLobbyMenu(); showCreateLobby();">Lobby erstellen</button>
-    `;
-    return;
-  }
-
-  const randomIndex = Math.floor(Math.random() * clientGame.lobbyList.length);
-  const chosenLobby = clientGame.lobbyList[randomIndex];
-  if (chosenLobby.isPublic){
-    const lobbyID = chosenLobby.lobbyID;
-    const lobbyCode = chosenLobby.code || "";
-  }*/
-  
   clientGame.sendJoinRandomLobbyAction();
   hideLobbyMenu();
 };
 
-window.joinThisLobby = function (lobbyID, code) {
-  clientGame.sendJoinLobbyAction(lobbyID, code);
+window.joinThisLobby = function (lobbyID, isPublic) {
+  if(isPublic){
+    clientGame.sendJoinLobbyAction(lobbyID, null);
+  } else {
+    console.log(document.getElementById(`codeInputField${lobbyID}`).value);
+    clientGame.sendJoinLobbyAction(lobbyID, document.getElementById(`codeInputField${lobbyID}`).value);
+  }
+  
   hideLobbyMenu();
 };
 
@@ -649,11 +639,11 @@ window.displayLobbyList = function (lobbyArray) {
   lobbyArray.forEach((lobby) => {
     html += `
       <div class="lobby-item" style="border: 1px solid #ccc; margin-bottom:10px; padding:10px;">
-        <h3>Lobby: ${lobby.lobbyName}</h3>
+        <h3>Lobby: ${lobby.lobbyName} ${lobby.isPublic ? "🌐" : "🔒"}</h3>
         <p>Spieler: ${lobby.currentPlayers}/${lobby.maxPlayers}</p>
-        <button onclick="joinThisLobby(${lobby.lobbyID}, '${
-      lobby.code || ""
-    }')">Beitreten</button>
+        ${lobby.isPublic ? ""
+        : `<input id="codeInputField${lobby.lobbyID}" type="text">`}
+        <button onclick="joinThisLobby(${lobby.lobbyID},${lobby.isPublic})">Beitreten</button>
       </div>
     `;
   });

@@ -18,5 +18,6 @@ module.exports = responseTypes = {
     clock : "clock",
     drawPermission : "drawPermission",
     lobbyList : "lobbyList",
-    menu : "menu"
+    menu : "menu",
+    lobbyJoinMenu : "lobbyJoinMenu"
 }

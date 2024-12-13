@@ -134,6 +134,8 @@ module.exports = class ClientGame {
       } else if (data.type === responseTypes.lobbyList) {
         this.lobbyList = data.data;
         displayLobbyList(this.lobbyList);
+      } else if (data.type === responseTypes.lobbyJoinMenu){
+        showLobbyMenu();
       }
     };
   }

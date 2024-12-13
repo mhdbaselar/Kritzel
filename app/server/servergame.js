@@ -28,7 +28,7 @@ module.exports = class ServerGame {
    * Creates a lobby, sets and starts the interval for the send function
    */
   start() {
-    let lobby = new Lobby(this.#server, true, null, "Test-Lobby", 1, 60, 20);
+    let lobby = new Lobby(this.#server, false, "1234", "Test-Lobby", 1, 60, 20);
     this.#lobbies.push(lobby);
 
     this.intervalReference = setInterval(this.tick.bind(this), 100);
@@ -399,6 +399,18 @@ module.exports = class ServerGame {
       });
       let cid = client.getCid();
       this.#processSendJoinLobbyData(cid, lobbyID);
+    } 
+    else {      // Code incorrect send Client
+      let jsonMessage = JSON.stringify({
+        type: responseTypes.lobbyJoinMenu,
+        data: null,
+      });
+      this.#server.broadcastWsMessage(
+        client.getCid(),
+        jsonMessage,
+        false,
+        broadcastTypes.onlyOneClient
+      );
     }
   }
 
