@@ -63,7 +63,7 @@ module.exports = class ClientGame {
 
     // Event handler for when the connection is opened
     this.socket.onopen = (event) => {
-      createStartGameButton();
+      createStartGameButton(this);
       console.log("Socket opened");
       loadingOverlay.style.display = "none"; // Spinner verstecken
     };
