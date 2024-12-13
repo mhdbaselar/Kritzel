@@ -125,13 +125,6 @@ module.exports = class TinyServer {
    * @param {string} data client request
    */
   processWsRequest(websocket, data) {
-    let requestData = JSON.parse(data);
-
-    if (requestData.messageType == requestTypes.setName) {
-      if(requestData.messageBody.name){
-        this.#clients.registerName(websocket.cid, requestData.messageBody.name);
-      }
-    }
 
     // If client has no name, set default name
     let hasNotClientName = this.#clients.getClientList().some(client => client.getCid() === websocket.cid && client.getName() === "");

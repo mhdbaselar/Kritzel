@@ -19,5 +19,6 @@ module.exports = responseTypes = {
     drawPermission : "drawPermission",
     lobbyList : "lobbyList",
     menu : "menu",
-    lobbyJoinMenu : "lobbyJoinMenu"
+    lobbyJoinMenu : "lobbyJoinMenu",
+    nameCheck : "nameCheck"
 }

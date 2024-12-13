@@ -129,6 +129,8 @@ module.exports = class ServerGame {
         this.#processGetLobbyListAction(cid);
       } else if (_request.messageType == requestTypes.joinRandomLobby){
         this.#processJoinRandomLobbyAction(client);
+      } else if (_request.messageType == requestTypes.setName){
+        this.#processSetUserName(client, _request.messageBody.name);
       }
     }
   }
@@ -517,5 +519,23 @@ module.exports = class ServerGame {
     this.#processGetCanvasAction(cid, lobbyID);
     this.#processGetUserListAction(cid, lobbyID);
     this.#processGetReconnectData(cid, lobbyID);
+  }
+
+  #processSetUserName(client, name){
+    if(name && name.length <= 20){
+      client.setName(name);
+    } else {
+      let jsonMessage = JSON.stringify({
+              type: responseTypes.nameCheck,
+              data: false
+            });
+            this.#server.broadcastWsMessage(
+              client.getCid(),
+              jsonMessage,
+              false,
+              broadcastTypes.onlyOneClient,
+              null
+            );
+    }
   }
 };
