@@ -86,13 +86,8 @@ module.exports = class TinyServer {
       websocket.send(JSON.stringify({ type: responseTypes.cookie, data: websocket.cid }));
       let lobbyID = null;
 
-      /*lobbyID = Math.floor(Math.random() * 2);                // keywords: TESTING DELETE LOBBYS
-      console.log("lobbyID: " + lobbyID);*/
-
       let client = this.#clients.addClient(websocket.cid, null, lobbyID);
       websocket.send(JSON.stringify({ type: responseTypes.menu, data: null }));   // sendMenu
-      //let request = {messageType : "addPlayerInLobby", messageBody : {client : client}};
-      //this.processWssRequest(request);
     }
 
     websocket.on("error", console.error);

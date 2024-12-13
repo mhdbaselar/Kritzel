@@ -461,6 +461,11 @@ module.exports = class ClientGame {
     createStartGameButton(this); // keywords: TESTING DELETE GAMESEQUENCE
   }
 
+  sendJoinRandomLobbyAction(){
+    let message = new Message(requestTypes.joinRandomLobby, null);
+    this.send(JSON.stringify(message));
+  }
+
   /**
    * Sends the leave lobby action to the server
    */

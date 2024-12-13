@@ -16,5 +16,6 @@ module.exports = requestTypes = {
     joinLobby : "joinLobby",
     getLobbyList : "getLobbyList",
     deleteLobby : "deleteLobby",
-    leaveLobby : "leaveLobby"
+    leaveLobby : "leaveLobby",
+    joinRandomLobby : "joinRandomLobby"
 }

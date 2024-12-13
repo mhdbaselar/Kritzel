@@ -23,13 +23,13 @@ module.exports = class Lobby {
     #lobbyName;
     #roundCount;
     #roundTimer;
-    #playerCount;
+    #maxPlayerCount;
 
     /**
      * Constructor to instanciate the lobby
      * @param {TinyServer} server websocketserver
      */
-    constructor(server, isPublic, code, lobbyName, roundCount, roundTimer, playerCount){
+    constructor(server, isPublic, code, lobbyName, roundCount, roundTimer, maxPlayerCount){
         this.#server = server;
         this.#isPublic = isPublic;
         this.#code = code;
@@ -40,7 +40,7 @@ module.exports = class Lobby {
         this.#lobbyName = lobbyName;
         this.#roundCount = Math.ceil(roundCount);
         this.#roundTimer = Math.ceil(roundTimer * 1000);
-        this.#playerCount = playerCount;
+        this.#maxPlayerCount = maxPlayerCount;
     }
 
     /**
@@ -178,7 +178,7 @@ module.exports = class Lobby {
     }
 
     getMaxPlayers(){
-        return this.#playerCount;
+        return this.#maxPlayerCount;
     }
 
     getCurrentPlayerCount(){

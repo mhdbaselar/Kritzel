@@ -127,6 +127,8 @@ module.exports = class ServerGame {
         this.#processLeaveLobbyAction(client);
       } else if (_request.messageType == requestTypes.getLobbyList) {
         this.#processGetLobbyListAction(cid);
+      } else if (_request.messageType == requestTypes.joinRandomLobby){
+        this.#processJoinRandomLobbyAction(client);
       }
     }
   }
@@ -398,6 +400,32 @@ module.exports = class ServerGame {
       let cid = client.getCid();
       this.#processSendJoinLobbyData(cid, lobbyID);
     }
+  }
+
+  #processJoinRandomLobbyAction(client){
+    let publicLobbies = [];
+    for(let i = 0; i < this.#lobbies.length; i++){
+      if(this.#lobbies[i].getIsPublic()){
+        publicLobbies.push(i);
+      }
+    }
+
+    if(publicLobbies.length > 0){
+      let randomLobbyID = publicLobbies[Math.floor(Math.random() * publicLobbies.length)];
+      console.log(randomLobbyID);
+      this.#processJoinLobbyAction(client, randomLobbyID, null);
+    } else {
+      this.#processCreateLobbyAction(client, true, null, this.#getUniqueLobbyName(), 1, 60, 10);  // create default Lobby
+    }
+  }
+
+  #getUniqueLobbyName() {
+    function s4() {
+      return Math.floor((1 + Math.random()) * 0x10000)
+        .toString(16)
+        .substring(1);
+    }
+    return s4() + s4();
   }
 
   /**

@@ -508,23 +508,7 @@ window.addEventListener("load", () => {
     clientGame.setLanguage(event.target.value);
   });
 });
-/**Test-Lobbys
-const testLobbies = [
-  {
-    id: 0,
-    name: "Lustige Runde",
-    currentPlayers: 2,
-    maxPlayers: 8,
-    code: "1234",
-  },
-  {
-    id: 2,
-    name: "Schnelle Zeichner",
-    currentPlayers: 5,
-    maxPlayers: 10,
-    code: "abc",
-  },
-];*/
+
 window.submitUsername = function () {
   return _submitUsername(clientGame);
 };
@@ -595,13 +579,12 @@ window.createLobby = function () {
 
   console.log(isPublic, codeInput, lobbyName, roundCount, roundTimer, playerCount);
   clientGame.sendCreateLobbyAction(isPublic, codeInput, lobbyName, roundCount, roundTimer, playerCount);
-  // Später: Runden, Timer und Spieleranzahl an den Server übergeben, wenn Backend das unterstützt.
 
   hideCreateLobby();
 };
 //Funktioniert nicht, da wir keine Lobbies haben. Dummy Lobbies sind ein anderes Array
 window.onRandomLobby = function () {
-  if (!clientGame.lobbyList || clientGame.lobbyList.length === 0) {
+  /*if (!clientGame.lobbyList || clientGame.lobbyList.length === 0) {
     const lobbyListContainer = document.getElementById("lobbyListContainer");
     lobbyListContainer.innerHTML = `
       <p>Keine Lobbys vorhanden. Erstelle eine neue Lobby.</p>
@@ -612,10 +595,12 @@ window.onRandomLobby = function () {
 
   const randomIndex = Math.floor(Math.random() * clientGame.lobbyList.length);
   const chosenLobby = clientGame.lobbyList[randomIndex];
-  const lobbyID = chosenLobby.id;
-  const lobbyCode = chosenLobby.code || "";
-
-  clientGame.sendJoinLobbyAction(lobbyID, lobbyCode);
+  if (chosenLobby.isPublic){
+    const lobbyID = chosenLobby.lobbyID;
+    const lobbyCode = chosenLobby.code || "";
+  }*/
+  
+  clientGame.sendJoinRandomLobbyAction();
   hideLobbyMenu();
 };
 
