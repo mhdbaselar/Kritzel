@@ -713,65 +713,143 @@ body {
   color: #1d2194;
 }
 
-/* Button für Private Open Lobby */
+/* Font-Import */
+@import url("https://fonts.googleapis.com/css?family=Sanchez");
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  backface-visibility: hidden;
+  transition: 400ms all ease-in-out 50ms;
+}
+
+/* Entferne zentrierende Formatierung global,
+   damit wir feiner justieren können */
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+/* Button-Container: Label und Switch nebeneinander */
+.button-container {
+  display: flex;
+  align-items: center; /* Vertikal zentriert */
+  justify-content: center; /* Horizontal zentriert */
+  gap: 10px;
+  margin: 20px 0;
+}
+
+/* Anpassung des Label-Texts (Lobby Privat?) */
+.label-text {
+  color: #000000;
+  font-weight: bold;
+  font-size: 16px;
+  margin: 0;
+  line-height: 34px; /* Entspricht der Höhe des Switches */
+}
+
+/* Grundstruktur des Switches */
 .switch {
   position: relative;
   display: inline-block;
-  width: 60px;
+  width: 80px; /* Vergrößerte Breite des Sliders */
   height: 34px;
 }
 
+/* Checkbox ausblenden */
 .switch input {
   opacity: 0;
   width: 0;
   height: 0;
 }
 
+/* Slider-Hintergrund */
 .slider {
-  position: absolute;
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+  background: rgba(43, 43, 43, 1);
+  border-radius: 50px;
+  box-shadow: 0 0 2px rgba(43, 43, 43, 1);
   cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  -webkit-transition: 0.4s;
-  transition: 0.4s;
+  transition: background 0.4s;
 }
 
-.slider:before {
+/* Der Knopf im Slider */
+.knob {
   position: absolute;
-  content: "";
   height: 26px;
   width: 26px;
+  background: white;
+  border-radius: 50%;
   left: 4px;
   bottom: 4px;
-  background-color: white;
-  -webkit-transition: 0.4s;
-  transition: 0.4s;
+  transform-origin: center;
+  transition: transform 0.4s ease-in-out;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
 }
 
+/* Symbole: X und ✔ im Knopf mittels pseudo-elements */
+.knob::before,
+.knob::after {
+  content: "";
+  position: absolute;
+  transition: 0.4s all ease-in-out;
+}
+
+/* "X"-Symbol */
+.knob::before {
+  content: "✗";
+  color: #2b2b2b;
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+}
+
+/* "Haken"-Symbol */
+.knob::after {
+  content: "✔";
+  color: #2b2b2b;
+  opacity: 0;
+  transform: scale(0.5) rotate(-45deg);
+}
+
+/* Eingeschalteter Zustand */
 input:checked + .slider {
-  background-color: #2196f3;
+  background: rgba(73, 168, 68, 1);
+  box-shadow: 0 0 2px rgba(73, 168, 68, 1);
 }
 
+/* Umschalten der Symbole beim Ein-/Ausschalten */
+input:checked + .slider .knob::before {
+  opacity: 0;
+  transform: scale(0.5) rotate(45deg);
+}
+
+input:checked + .slider .knob::after {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+}
+
+/* Rollende Bewegung des Knopfes beim Einschalten */
+input:checked + .slider .knob {
+  transform: translateX(40px) rotate(360deg);
+}
+
+/* Fokus-Zustand */
 input:focus + .slider {
-  box-shadow: 0 0 1px #2196f3;
+  box-shadow: 0 0 2px #2196f3;
 }
 
-input:checked + .slider:before {
-  -webkit-transform: translateX(26px);
-  -ms-transform: translateX(26px);
-  transform: translateX(26px);
-}
-
-/* Rounded sliders */
-.slider.round {
-  border-radius: 34px;
-}
-
-.slider.round:before {
-  border-radius: 50%;
+/* Hover-Effekt */
+.switch:hover .slider {
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
 }
 
 /* Language Selector Styles */
