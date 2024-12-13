@@ -32,6 +32,19 @@ module.exports = class ServerGame {
     this.#lobbies.push(lobby);
 
     this.intervalReference = setInterval(this.tick.bind(this), 100);
+    this.keepConnectionInterval = setInterval(() => {
+      let jsonMessage = JSON.stringify({
+        type: responseTypes.ping,
+        data: null
+      });
+      
+      this.#server.broadcastWsMessage(
+        null,
+        jsonMessage,
+        false,
+        broadcastTypes.all
+      );
+    }, 5000);
   }
 
   /**
