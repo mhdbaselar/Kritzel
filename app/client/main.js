@@ -509,14 +509,14 @@ window.addEventListener("load", () => {
     clientGame.setLanguage(event.target.value);
   });
 });
-//Test-Lobbys
+/**Test-Lobbys
 const testLobbies = [
   {
-    id: 1,
+    id: 0,
     name: "Lustige Runde",
     currentPlayers: 2,
     maxPlayers: 8,
-    code: "",
+    code: "1234",
   },
   {
     id: 2,
@@ -525,19 +525,19 @@ const testLobbies = [
     maxPlayers: 10,
     code: "abc",
   },
-];
+];*/
 window.submitUsername = function () {
   _submitUsername(clientGame);
 };
 
 window.submitUsernameAndShowLobbyMenu = function () {
+  clientGame.sendGetLobbyListAction();
   // Username validieren und senden
   submitUsername();
   // Danach Modal schließen und Lobby-Liste anzeigen
   document.getElementById("usernameModal").style.display = "none";
   showLobbyMenu();
-  displayLobbyList([]);
-  displayLobbyList(testLobbies);
+  //displayLobbyList(testLobbies);
 };
 
 window.submitUsernameAndShowCreateLobby = function () {
@@ -611,15 +611,16 @@ window.onRandomLobby = function () {
 
   clientGame.sendJoinLobbyAction(lobbyID, lobbyCode);
   hideLobbyMenu();
-  createStartGameButton(clientGame);
 };
 
 window.joinThisLobby = function (lobbyID, code) {
   clientGame.sendJoinLobbyAction(lobbyID, code);
+  console.log(lobbyID, code);
   hideLobbyMenu();
 };
 
 window.displayLobbyList = function (lobbyArray) {
+  console.log(lobbyArray);
   const lobbyListContainer = document.getElementById("lobbyListContainer");
   const randomLobbyButton = document.querySelector(".random-lobby-button");
   const createLobbyButton = document.querySelector(
@@ -648,21 +649,6 @@ window.displayLobbyList = function (lobbyArray) {
     return;
   }
 
-  // Wenn Lobbys vorhanden sind:
-  let html = "";
-  lobbyArray.forEach((lobby) => {
-    html += `
-      <div class="lobby-item" style="border: 1px solid #ccc; margin-bottom:10px; padding:10px;">
-        <h3>Lobby: ${lobby.name}</h3>
-        <p>Spieler: ${lobby.currentPlayers}/${lobby.maxPlayers}</p>
-        <button onclick="joinThisLobby(${lobby.id}, '${
-      lobby.code || ""
-    }')">Beitreten</button>
-      </div>
-    `;
-  });
-  lobbyListContainer.innerHTML = html;
-
   // Die Buttons wieder einblenden, falls sie zuvor ausgeblendet waren
   if (randomLobbyButton) {
     randomLobbyButton.style.display = "inline-block";
@@ -670,24 +656,17 @@ window.displayLobbyList = function (lobbyArray) {
   if (createLobbyButton) {
     createLobbyButton.style.display = "inline-block";
   }
-};
-let html = "";
-lobbyArray.forEach((lobby) => {
-  html += `
+  let html = "";
+  lobbyArray.forEach((lobby) => {
+    html += `
       <div class="lobby-item" style="border: 1px solid #ccc; margin-bottom:10px; padding:10px;">
         <h3>Lobby: ${lobby.name}</h3>
         <p>Spieler: ${lobby.currentPlayers}/${lobby.maxPlayers}</p>
-        <button onclick="joinThisLobby(${lobby.id}, '${
-    lobby.code || ""
-  }')">Beitreten</button>
+        <button onclick="joinThisLobby(${lobby.lobbyID}, '${
+      lobby.code || ""
+    }')">Beitreten</button>
       </div>
     `;
-});
-lobbyListContainer.innerHTML = html;
-// Buttons wieder einblenden, falls sie zuvor ausgeblendet waren
-if (randomLobbyButton) {
-  randomLobbyButton.style.display = "inline-block";
-}
-if (createLobbyButton) {
-  createLobbyButton.style.display = "inline-block";
-}
+  });
+  lobbyListContainer.innerHTML = html;
+};
