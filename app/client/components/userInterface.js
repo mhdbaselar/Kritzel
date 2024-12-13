@@ -67,13 +67,19 @@ function renderTimer(timerData) {
 
 // keywords: TESTING DELETE GAMESEQUENCE
 function createStartGameButton(clientGame) {
-  const startButtonContainer = document.querySelector(".users-column");
+  const startButtonContainer = document.querySelector(".start-game-button-div");
   const startButton = document.createElement("button");
   startButton.textContent = "Start Game";
   startButton.addEventListener("click", () => {
     clientGame.sendGameStartAction();
   });
   startButtonContainer.appendChild(startButton);
+  startButtonContainer.style.display = "none";
+}
+
+function displayStartGameButton(){
+  const startButtonContainer = document.querySelector(".start-game-button-div");
+  startButtonContainer.style.display = "flex";
 }
 
 // -------------------------------
@@ -221,4 +227,5 @@ module.exports = {
   _submitUsername,
   renderTimer,
   createStartGameButton,
+  displayStartGameButton
 };

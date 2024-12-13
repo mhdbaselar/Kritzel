@@ -6,6 +6,7 @@ const Message = require("./class/message");
 const ChatAction = require("./class/chatAction");
 const {
   createStartGameButton,
+  displayStartGameButton,
   displayChatMessage,
   displayChatMessageList,
   renderTimer,
@@ -62,6 +63,7 @@ module.exports = class ClientGame {
 
     // Event handler for when the connection is opened
     this.socket.onopen = (event) => {
+      createStartGameButton();
       console.log("Socket opened");
       loadingOverlay.style.display = "none"; // Spinner verstecken
     };
@@ -460,7 +462,7 @@ module.exports = class ClientGame {
       code: code,
     });
     this.send(JSON.stringify(message));
-    createStartGameButton(this); // keywords: TESTING DELETE GAMESEQUENCE
+    displayStartGameButton();
   }
 
   sendJoinRandomLobbyAction(){
@@ -491,7 +493,7 @@ module.exports = class ClientGame {
       playerCount: playerCount
     });
     this.send(JSON.stringify(message));
-    createStartGameButton(this); // keywords: TESTING DELETE GAMESEQUENCE
+    displayStartGameButton();
   }
 
   /**
