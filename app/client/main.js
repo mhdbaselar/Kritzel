@@ -49,7 +49,6 @@ const converter = new HexColorConverter();
 let canDraw = false;
 
 window.addEventListener("load", () => {
-
   // Übersetze UI beim Start
   clientGame.translateUI();
 
@@ -507,6 +506,24 @@ window.addEventListener("load", () => {
   languageSelect.addEventListener("change", function (event) {
     clientGame.setLanguage(event.target.value);
   });
+  // Dynamic switch settings
+  const switchInput = document.querySelector(
+    ".lobby-create-content .switch input"
+  );
+  const codeInputField = document.getElementById("codeInput");
+  const labelText = document.querySelector(".lobby-create-content .label-text");
+
+  function toggleCodeInputVisibility() {
+    if (switchInput.checked) {
+      codeInputField.style.display = "none";
+      labelText.textContent = "Öffentliche Lobby";
+    } else {
+      codeInputField.style.display = "block";
+      labelText.textContent = "Private Lobby";
+    }
+  }
+  toggleCodeInputVisibility();
+  switchInput.addEventListener("change", toggleCodeInputVisibility);
 });
 
 window.submitUsername = function () {
@@ -517,7 +534,7 @@ window.submitUsernameAndShowLobbyMenu = function () {
   // Username validieren und senden
   let isNameSet = submitUsername();
 
-  if(isNameSet){
+  if (isNameSet) {
     // Danach Modal schließen und Lobby-Liste anzeigen
     document.getElementById("usernameModal").style.display = "none";
     showLobbyMenu();
@@ -527,8 +544,8 @@ window.submitUsernameAndShowLobbyMenu = function () {
 window.submitUsernameAndShowCreateLobby = function () {
   // Username validieren und senden
   let isNameSet = submitUsername();
-  
-  if(isNameSet){
+
+  if (isNameSet) {
     // Danach Modal schließen und Lobby-Einstellungen anzeigen
     document.getElementById("usernameModal").style.display = "none";
     showCreateLobby();
@@ -577,8 +594,22 @@ window.createLobby = function () {
     ".lobby-create-content .switch input"
   ).checked;
 
-  console.log(isPublic, codeInput, lobbyName, roundCount, roundTimer, playerCount);
-  clientGame.sendCreateLobbyAction(isPublic, codeInput, lobbyName, roundCount, roundTimer, playerCount);
+  console.log(
+    isPublic,
+    codeInput,
+    lobbyName,
+    roundCount,
+    roundTimer,
+    playerCount
+  );
+  clientGame.sendCreateLobbyAction(
+    isPublic,
+    codeInput,
+    lobbyName,
+    roundCount,
+    roundTimer,
+    playerCount
+  );
 
   hideCreateLobby();
 };
@@ -589,13 +620,16 @@ window.onRandomLobby = function () {
 };
 
 window.joinThisLobby = function (lobbyID, isPublic) {
-  if(isPublic){
+  if (isPublic) {
     clientGame.sendJoinLobbyAction(lobbyID, null);
   } else {
     console.log(document.getElementById(`codeInputField${lobbyID}`).value);
-    clientGame.sendJoinLobbyAction(lobbyID, document.getElementById(`codeInputField${lobbyID}`).value);
+    clientGame.sendJoinLobbyAction(
+      lobbyID,
+      document.getElementById(`codeInputField${lobbyID}`).value
+    );
   }
-  
+
   hideLobbyMenu();
 };
 
@@ -641,9 +675,14 @@ window.displayLobbyList = function (lobbyArray) {
       <div class="lobby-item" style="border: 1px solid #ccc; margin-bottom:10px; padding:10px;">
         <h3>Lobby: ${lobby.lobbyName} ${lobby.isPublic ? "🌐" : "🔒"}</h3>
         <p>Spieler: ${lobby.currentPlayers}/${lobby.maxPlayers}</p>
-        ${lobby.isPublic ? ""
-        : `<input id="codeInputField${lobby.lobbyID}" type="text">`}
-        <button onclick="joinThisLobby(${lobby.lobbyID},${lobby.isPublic})">Beitreten</button>
+        ${
+          lobby.isPublic
+            ? ""
+            : `<input id="codeInputField${lobby.lobbyID}" type="text">`
+        }
+        <button onclick="joinThisLobby(${lobby.lobbyID},${
+      lobby.isPublic
+    })">Beitreten</button>
       </div>
     `;
   });

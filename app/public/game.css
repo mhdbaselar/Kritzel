@@ -732,68 +732,65 @@ body {
   padding: 0;
 }
 
-/* Button-Container: Label und Switch nebeneinander */
 .button-container {
   display: flex;
-  align-items: center; /* Vertikal zentriert */
-  justify-content: center; /* Horizontal zentriert */
+  align-items: center;
+  justify-content: flex-start;
   gap: 10px;
   margin: 20px 0;
 }
 
-/* Anpassung des Label-Texts (Lobby Privat?) */
 .label-text {
-  color: #000000;
   font-weight: bold;
   font-size: 16px;
   margin: 0;
-  line-height: 34px; /* Entspricht der Höhe des Switches */
-}
-
-/* Grundstruktur des Switches */
-.switch {
-  position: relative;
   display: inline-block;
-  width: 80px; /* Vergrößerte Breite des Sliders */
-  height: 34px;
+  vertical-align: middle;
 }
 
-/* Checkbox ausblenden */
+.switch {
+  display: relative;
+  vertical-align: middle;
+  position: relative;
+  width: 80px;
+  height: 34px;
+  z-index: 10;
+}
+
 .switch input {
   opacity: 0;
-  width: 0;
-  height: 0;
+  width: 100%;
+  height: 100%;
 }
 
-/* Slider-Hintergrund */
 .slider {
   position: relative;
   display: inline-block;
-  width: 100%;
-  height: 100%;
+  width: 80px;
+  height: 34px;
   background: rgba(43, 43, 43, 1);
   border-radius: 50px;
   box-shadow: 0 0 2px rgba(43, 43, 43, 1);
   cursor: pointer;
   transition: background 0.4s;
+  z-index: 11;
+  top: -34px;
 }
 
-/* Der Knopf im Slider */
 .knob {
   position: absolute;
   height: 26px;
   width: 26px;
-  background: white;
+  background: rgb(255, 255, 255);
   border-radius: 50%;
   left: 4px;
   bottom: 4px;
-  transform-origin: center;
-  transition: transform 0.4s ease-in-out;
-
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 14px;
+  transition: transform 0.4s ease-in-out;
+  z-index: 12;
 }
 
 /* Symbole: X und ✔ im Knopf mittels pseudo-elements */
@@ -932,6 +929,10 @@ input:focus + .slider {
 
 .lobby-create-buttons button:hover {
   background-color: #0056b3;
+}
+.lobby-create-content {
+  width: 60vw;
+  max-width: 600px;
 }
 
 /* Random Lobby Button */
