@@ -572,7 +572,12 @@ function hideCreateLobby() {
   // Versteckt das Lobby-Einstellungs-Overlay
   document.getElementById("lobbyCreate").style.display = "none";
 }
-
+window.leaveLobbyAndShowMenu = function () {
+  // Danach Modal schließen und Lobby-Einstellungen anzeigen
+  //document.getElementById("usernameModal").style.display = "none"; showLobbyMenu();
+  //clientGame.sendLeaveLobbyAction();
+  console.log("Lobby verlassen und Lobby-Menü angezeigt");
+};
 window.changeLanguage = function (language) {
   clientGame.setLanguage(language);
 };

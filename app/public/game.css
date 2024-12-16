@@ -977,22 +977,30 @@ input:focus + .slider {
 .start-game-button-div {
   display: flex;
   justify-content: center;
-  margin-top: 20px;
+  gap: 10px; /* Fügt einen kleinen Abstand zwischen den Buttons ein */
+  margin-top: 10px; /* Optionaler Abstand nach oben */
 }
 
 .start-game-button-div button {
-  background-color: #007bff;
+  background-color: #007bff; /* Blaue Farbe für den "Start Game"-Button */
   color: #fff;
-  padding: 10px;
+  padding: 10px 15px; /* Schmalere Buttons durch angepasste Innenabstände */
   border: none;
   border-radius: 4px;
   cursor: pointer;
   font-size: 1rem;
-  width: 100%;
-  max-width: 200px;
+  width: auto; /* Automatische Breite je nach Inhalt */
   transition: background-color 0.3s;
 }
 
+#leaveLobbyButton {
+  background-color: #ff4b5c; /* Rote Farbe für den "Leave Lobby"-Button */
+}
+
+#leaveLobbyButton:hover {
+  background-color: #d43f4a; /* Dunklere rote Farbe beim Hover */
+}
+
 .start-game-button-div button:hover {
-  background-color: #0056b3;
+  background-color: #0056b3; /* Dunklere blaue Farbe beim Hover für "Start Game"-Button */
 }
