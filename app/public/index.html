@@ -110,15 +110,18 @@
         <button class="random-lobby-button" onclick="onRandomLobby()">
           Zufällige Lobby beitreten
         </button>
+        <button
+          class="create-lobbies"
+          onclick="hideLobbyMenu(); showCreateLobby();"
+        >
+          Lobby erstellen
+        </button>
         <div id="lobbyListContainer">
           <!-- Beispiel für leere Anzeige:
       <p>Keine Lobbys vorhanden. Erstelle eine neue Lobby.</p>
       <button onclick="hideLobbyMenu(); showCreateLobby();">Lobby erstellen</button>
       -->
         </div>
-        <button onclick="hideLobbyMenu(); showCreateLobby();">
-          Lobby erstellen
-        </button>
       </div>
     </div>
 
