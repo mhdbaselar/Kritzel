@@ -7,5 +7,20 @@
     "JOIN": "Join",
     "CREATE": "Create",
     "DONE": "Done",
-    "USERNAME": "Username"
-  }
+    "USERNAME": "Username",
+    "LOBBY_SETTINGS": "Lobby Settings",
+    "LOBBY_NAME": "Lobby name:",
+    "ROUND_COUNT": "Number of rounds:",
+    "ROUND_TIMER": "Timer per round (sec.):",
+    "MAX_PLAYERS": "Maximum players:",
+    "PUBLIC_LOBBY": "Public lobby?:",
+    "CREATE_BUTTON": "Create",
+    "TO_LOBBIES": "To lobbies",
+    "AVAILABLE_LOBBIES": "Available lobbies",
+    "JOIN_RANDOM": "Join random lobby",
+    "CREATE_LOBBY": "Create lobby",
+    "NO_LOBBIES": "No lobbies available. Create a new lobby.",
+    "LEAVE_LOBBY": "Leave lobby",
+    "CHAT_PLACEHOLDER": "Enter message...",
+    "SEND": "Send"
+}

@@ -61,24 +61,24 @@
     <!-- Create Lobby Overlay -->
     <div class="lobby-create" id="lobbyCreate">
       <div class="lobby-create-content">
-        <h2>Lobby Einstellungen</h2>
+        <h2>{{LOBBY_SETTINGS}}</h2>
 
         <!-- Neue Eingabefelder für Lobby-Einstellungen -->
         <div class="lobby-settings">
-          <label for="lobbyName">Lobby-Name:</label>
+          <label for="lobbyName">{{LOBBY_NAME}}</label>
           <input type="text" id="lobbyName" />
 
-          <label for="roundCount">Rundenzahl:</label>
+          <label for="roundCount">{{ROUND_COUNT}}</label>
           <input type="number" id="roundCount" min="1" max="20" value="5" />
 
-          <label for="roundTimer">Timer pro Runde (Sek.):</label>
+          <label for="roundTimer">{{ROUND_TIMER}}</label>
           <input type="number" id="roundTimer" min="10" max="300" value="60" />
 
-          <label for="playerCount">Maximale Spieleranzahl:</label>
+          <label for="playerCount">{{MAX_PLAYERS}}</label>
           <input type="number" id="playerCount" min="2" max="20" value="8" />
 
           <div class="button-container">
-            <span class="label-text">Öffentliche Lobby?:</span>
+            <span class="label-text">{{PUBLIC_LOBBY}}</span>
             <label class="switch">
               <input type="checkbox" />
               <span class="slider round">
@@ -94,9 +94,9 @@
 
         <!-- Neue Buttons -->
         <div class="lobby-create-buttons">
-          <button onclick="window.createLobby()">Erstellen</button>
+          <button onclick="window.createLobby()">{{CREATE_BUTTON}}</button>
           <button onclick="hideCreateLobby(); showLobbyMenu();">
-            Zu den Lobbys
+            {{TO_LOBBIES}}
           </button>
         </div>
       </div>
@@ -105,16 +105,16 @@
     <!-- Lobby Join Overlay -->
     <div class="lobby-join" id="lobbyJoin">
       <div class="lobby-join-content">
-        <h2>Verfügbare Lobbys</h2>
+        <h2>{{AVAILABLE_LOBBIES}}</h2>
         <!-- Zufällige Lobby beitreten Button -->
         <button class="random-lobby-button" onclick="onRandomLobby()">
-          Zufällige Lobby beitreten
+          {{JOIN_RANDOM}}
         </button>
         <button
           class="create-lobbies"
           onclick="hideLobbyMenu(); showCreateLobby();"
         >
-          Lobby erstellen
+        {{CREATE_LOBBY}}
         </button>
         <div id="lobbyListContainer">
           <!-- Beispiel für leere Anzeige:
@@ -132,7 +132,7 @@
         </div>
         <div class="start-game-button-div">
           <button id="leaveLobbyButton" onclick="leaveLobbyAndShowMenu()">
-            Lobby verlassen
+            {{LEAVE_LOBBY}}
           </button>
           <!-- Start Game Button will be created here -->
         </div>
@@ -269,11 +269,11 @@
               class="chat-input-div"
               contenteditable="false"
               tabindex="0"
-              placeholder="Nachricht eingeben..."
+              placeholder="{{CHAT_PLACEHOLDER}}"
               role="textbox"
               aria-label="Chat message input"
             ></div>
-            <button id="sendButton">Senden</button>
+            <button id="sendButton">{{SEND}}</button>
           </div>
         </div>
       </div>
