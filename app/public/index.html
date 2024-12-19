@@ -106,21 +106,22 @@
     <div class="lobby-join" id="lobbyJoin">
       <div class="lobby-join-content">
         <h2>{{AVAILABLE_LOBBIES}}</h2>
-        <!-- Zufällige Lobby beitreten Button -->
-        <button class="random-lobby-button" onclick="onRandomLobby()">
-          {{JOIN_RANDOM}}
-        </button>
-        <button
-          class="create-lobbies"
-          onclick="hideLobbyMenu(); showCreateLobby();"
-        >
-        {{CREATE_LOBBY}}
-        </button>
+
+        <!-- Buttons Container -->
+        <div class="button-container">
+          <button class="random-lobby-button" onclick="onRandomLobby()">
+            {{JOIN_RANDOM}}
+          </button>
+          <button
+            class="create-lobbies"
+            onclick="hideLobbyMenu(); showCreateLobby();"
+          >
+            {{CREATE_LOBBY}}
+          </button>
+        </div>
+
         <div id="lobbyListContainer">
-          <!-- Beispiel für leere Anzeige:
-      <p>Keine Lobbys vorhanden. Erstelle eine neue Lobby.</p>
-      <button onclick="hideLobbyMenu(); showCreateLobby();">Lobby erstellen</button>
-      -->
+          <!-- Hier werden die Lobbys angezeigt -->
         </div>
       </div>
     </div>
