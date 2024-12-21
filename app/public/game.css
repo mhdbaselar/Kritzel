@@ -71,7 +71,8 @@ body {
   border-radius: 5px;
   width: 50vw;
   margin: 2vh auto 0;
-  position: absolute;
+  margin-top: 10px;
+  position: relative;
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
@@ -506,6 +507,7 @@ body {
 
 #sendButton:hover {
   background-color: #0056b3;
+  transform: translateY(-2px);
 }
 
 /* Keyboard Container Styling (Optional) */
@@ -571,6 +573,7 @@ body {
 
 .username-modal-content button:hover {
   background-color: #0056b3;
+  transform: translateY(-2px);
 }
 
 /* Anweisungstext über der Wort-Auswahl */
@@ -681,6 +684,7 @@ body {
 
 .lobby-join-content button:hover {
   background-color: #0056b3;
+  transform: translateY(-2px);
 }
 
 /* Create Lobby Styles */
@@ -732,68 +736,74 @@ body {
   padding: 0;
 }
 
-/* Button-Container: Label und Switch nebeneinander */
 .button-container {
   display: flex;
-  align-items: center; /* Vertikal zentriert */
-  justify-content: center; /* Horizontal zentriert */
+  align-items: center;
+  justify-content: flex-start;
   gap: 10px;
   margin: 20px 0;
 }
 
-/* Anpassung des Label-Texts (Lobby Privat?) */
 .label-text {
-  color: #000000;
   font-weight: bold;
   font-size: 16px;
   margin: 0;
-  line-height: 34px; /* Entspricht der Höhe des Switches */
-}
-
-/* Grundstruktur des Switches */
-.switch {
-  position: relative;
   display: inline-block;
-  width: 80px; /* Vergrößerte Breite des Sliders */
-  height: 34px;
+  vertical-align: middle;
 }
 
-/* Checkbox ausblenden */
+/* Switch-Container Styling */
+.switch-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+/* Switch Styling */
+.switch {
+  display: inline-block;
+  vertical-align: middle;
+  position: relative;
+  width: 80px;
+  height: 34px;
+  z-index: 10;
+}
+
 .switch input {
   opacity: 0;
-  width: 0;
-  height: 0;
+  width: 100%;
+  height: 100%;
 }
 
-/* Slider-Hintergrund */
 .slider {
   position: relative;
   display: inline-block;
-  width: 100%;
-  height: 100%;
+  width: 80px;
+  height: 34px;
   background: rgba(43, 43, 43, 1);
   border-radius: 50px;
   box-shadow: 0 0 2px rgba(43, 43, 43, 1);
   cursor: pointer;
   transition: background 0.4s;
+  z-index: 11;
+  top: -34px;
 }
 
-/* Der Knopf im Slider */
 .knob {
   position: absolute;
   height: 26px;
   width: 26px;
-  background: white;
+  background: rgb(255, 255, 255);
   border-radius: 50%;
   left: 4px;
   bottom: 4px;
-  transform-origin: center;
-  transition: transform 0.4s ease-in-out;
-
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 14px;
+  transition: transform 0.4s ease-in-out;
+  z-index: 12;
 }
 
 /* Symbole: X und ✔ im Knopf mittels pseudo-elements */
@@ -932,43 +942,139 @@ input:focus + .slider {
 
 .lobby-create-buttons button:hover {
   background-color: #0056b3;
+  transform: translateY(-2px);
+}
+.lobby-create-content {
+  width: 60vw;
+  max-width: 600px;
 }
 
-/* Random Lobby Button */
-.random-lobby-button {
+.lobby-join-content {
+  display: block;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  height: 70vh;
+  margin: 0 auto 20px;
+  max-width: 600px;
+  padding: 20px;
+  box-sizing: border-box;
+}
+.lobby-join-content h2 {
+  margin-bottom: 0;
+}
+
+.button-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  width: 100%;
+}
+
+.random-lobby-button,
+.create-lobbies {
   background-color: #007bff;
   color: #fff;
-  padding: 8px 12px;
+  padding: 10px 20px;
   border: none;
   border-radius: 4px;
   font-size: 1rem;
   cursor: pointer;
-  margin-bottom: 15px;
-  transition: background-color 0.3s;
+  flex: 1;
+  text-align: center;
+  transition: background-color 0.3s, transform 0.2s;
 }
 
-.random-lobby-button:hover {
+.random-lobby-button:hover,
+.create-lobbies:hover {
   background-color: #0056b3;
+  transform: translateY(-2px);
 }
 
-/* Lobby List Container */
-#lobbyListContainer p {
-  color: #1d2194;
-  font-weight: bold;
-  margin-bottom: 10px;
-}
-
-#lobbyListContainer button {
-  background-color: #007bff;
-  color: #fff;
-  padding: 8px 12px;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.3s;
+#lobbyListContainer {
+  width: 100%;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 10px;
+  box-sizing: border-box;
 }
 
 #lobbyListContainer button:hover {
   background-color: #0056b3;
+  transform: translateY(-2px);
+}
+
+.lobby-item {
+  border: 1px solid #007bff;
+  margin-bottom: 10px;
+  padding: 10px;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+}
+
+.lobby-item h3 {
+  margin: 0 0 10px 0;
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.lobby-item p {
+  margin: 0 0 10px 0;
+  color: #555;
+}
+
+.lobby-item input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.lobby-item button {
+  background-color: #007bff;
+  color: #fff;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.lobby-item button:hover {
+  background-color: #007bff;
+  transform: translateY(-2px);
+}
+.start-game-button-div {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.start-game-button-div button {
+  background-color: #007bff;
+  color: #fff;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  width: auto;
+  transition: background-color 0.3s;
+}
+.start-game-button-div button:hover {
+  background-color: #0056b3;
+  transform: translateY(-2px);
+}
+
+#leaveLobbyButton {
+  background-color: #ff4b5c;
+}
+
+#leaveLobbyButton:hover {
+  background-color: #d43f4a;
+  transform: translateY(-2px);
 }
