@@ -84,7 +84,7 @@ module.exports = class ClientGame {
 
     // Event handler for receiving messages from the server
     this.socket.onmessage = (event) => {
-      console.log("Nachricht vom Server empfangen:", event.data);
+      //console.log("Nachricht vom Server empfangen:", event.data);
       let data = JSON.parse(event.data);
       if (data.type == responseTypes.chatMsgList) {
         // Update the chat display
@@ -133,14 +133,22 @@ module.exports = class ClientGame {
       } else if (data.type === responseTypes.drawPermission) {
         this.setDrawingState(data.data);
       } else if (data.type === responseTypes.menu) {
-        document.getElementById("usernameModal").style.display = "flex";
+        const usernameInput = document.getElementById("usernameInput");
+        const username = usernameInput ? usernameInput.value.trim() : null;
+
+        if (!username || username.length < 1) {
+          // console.log("Benutzername fehlt. Zeige Username-Modal an.");
+          document.getElementById("usernameModal").style.display = "flex";
+        } else {
+          // console.log("Benutzername bereits gesetzt:", username);
+        }
       } else if (data.type === responseTypes.lobbyList) {
         this.lobbyList = data.data;
         displayLobbyList(this.lobbyList);
-      } else if (data.type === responseTypes.lobbyJoinMenu){
+      } else if (data.type === responseTypes.lobbyJoinMenu) {
         showLobbyMenu();
-      } else if (data.type === responseTypes.nameCheck){
-        if(data.data === false){
+      } else if (data.type === responseTypes.nameCheck) {
+        if (data.data === false) {
           hideLobbyMenu();
           hideCreateLobby();
           document.getElementById("usernameModal").style.display = "flex";
@@ -155,11 +163,13 @@ module.exports = class ClientGame {
   }
 
   setSessionCookie(cid) {
+    //console.log("setSessionCookie called with CID:", cid); // Log CID
     var expires = "";
     var date = new Date();
     date.setTime(date.getTime() + 2 * 24 * 60 * 60 * 1000);
     expires = "; expires=" + date.toUTCString();
     document.cookie = "cid=" + (cid || "") + expires + "; path=/";
+    //console.log("Cookie gesetzt:", document.cookie); // Log gesetztes Cookie
   }
 
   /**
@@ -472,7 +482,7 @@ module.exports = class ClientGame {
     displayStartGameButton();
   }
 
-  sendJoinRandomLobbyAction(){
+  sendJoinRandomLobbyAction() {
     let message = new Message(requestTypes.joinRandomLobby, null);
     this.send(JSON.stringify(message));
     displayStartGameButton();
@@ -491,14 +501,21 @@ module.exports = class ClientGame {
    * @param {boolean} isPublic true public or false private lobby
    * @param {string} code lobby code
    */
-  sendCreateLobbyAction(isPublic, code, lobbyName, roundCount, roundTimer, playerCount) {
+  sendCreateLobbyAction(
+    isPublic,
+    code,
+    lobbyName,
+    roundCount,
+    roundTimer,
+    playerCount
+  ) {
     let message = new Message(requestTypes.createLobby, {
       isPublic: isPublic,
       code: code,
       lobbyName: lobbyName,
       roundCount: roundCount,
       roundTimer: roundTimer,
-      playerCount: playerCount
+      playerCount: playerCount,
     });
     this.send(JSON.stringify(message));
     displayStartGameButton();
@@ -530,7 +547,7 @@ module.exports = class ClientGame {
    */
   send(message) {
     if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-      console.log("WebSocket sendet Nachricht:", message);
+      //console.log("WebSocket sendet Nachricht:", message);
       this.socket.send(message);
     } else {
       console.error(

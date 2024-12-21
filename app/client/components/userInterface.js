@@ -77,7 +77,7 @@ function createStartGameButton(clientGame) {
   startButtonContainer.style.display = "none";
 }
 
-function displayStartGameButton(){
+function displayStartGameButton() {
   const startButtonContainer = document.querySelector(".start-game-button-div");
   startButtonContainer.style.display = "flex";
 }
@@ -180,13 +180,16 @@ function _submitUsername(clientGame) {
   console.log("submitUsername function triggered"); // Test-Ausgabe
   const usernameInput = document.getElementById("usernameInput");
   const username = usernameInput.value.trim();
+  //console.log("Username:", username);
   if (username.length >= 1) {
     document.getElementById("usernameModal").style.display = "none";
     clientGame.sendNameAction(username);
+    //console.log("Benutzername gesendet:", username);
     return true;
   } else {
     alert("Der Benutzername muss mindestens 1 Zeichen lang sein.");
     usernameInput.focus();
+    //console.warn("Ungültiger Benutzername.");
     return false;
   }
 }
@@ -227,5 +230,5 @@ module.exports = {
   _submitUsername,
   renderTimer,
   createStartGameButton,
-  displayStartGameButton
+  displayStartGameButton,
 };

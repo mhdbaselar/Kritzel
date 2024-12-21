@@ -527,6 +527,7 @@ window.addEventListener("load", () => {
 });
 
 window.submitUsername = function () {
+  //console.log("submitUsername aufgerufen");
   return _submitUsername(clientGame);
 };
 
@@ -574,9 +575,20 @@ function hideCreateLobby() {
 }
 //Leave Lobby Button
 window.leaveLobbyAndShowMenu = function () {
-  showLobbyMenu();
   clientGame.sendLeaveLobbyAction();
-  console.log("Lobby verlassen und Lobby-Menü angezeigt");
+  //console.log("Leave Lobby Action gesendet");
+
+  // Überprüfung, ob der Benutzername bereits gesetzt ist
+  const usernameInput = document.getElementById("usernameInput");
+  const username = usernameInput ? usernameInput.value.trim() : null;
+
+  if (username && username.length >= 1) {
+    //console.log("Benutzername ist gesetzt:", username);
+    showLobbyMenu();
+  } else {
+    //console.log("Benutzername nicht gesetzt. Zeige Username-Modal an.");
+    document.getElementById("usernameModal").style.display = "flex";
+  }
 };
 window.changeLanguage = function (language) {
   clientGame.setLanguage(language);
@@ -599,14 +611,14 @@ window.createLobby = function () {
     ".lobby-create-content .switch input"
   ).checked;
 
-  console.log(
+  /** console.log(
     isPublic,
     codeInput,
     lobbyName,
     roundCount,
     roundTimer,
     playerCount
-  );
+  ); */
   clientGame.sendCreateLobbyAction(
     isPublic,
     codeInput,
@@ -628,7 +640,7 @@ window.joinThisLobby = function (lobbyID, isPublic) {
   if (isPublic) {
     clientGame.sendJoinLobbyAction(lobbyID, null);
   } else {
-    console.log(document.getElementById(`codeInputField${lobbyID}`).value);
+    //console.log(document.getElementById(`codeInputField${lobbyID}`).value);
     clientGame.sendJoinLobbyAction(
       lobbyID,
       document.getElementById(`codeInputField${lobbyID}`).value
