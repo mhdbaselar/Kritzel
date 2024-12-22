@@ -236,20 +236,42 @@ module.exports = class Game {
 
         let maxLength = Math.max(this.#answerTimeList.length, this.#playerList.length - 1);
         if(maxLength !== 0){
+            let resultList = [];
             let maxPointsGuesser = this.#maxPointsGuesser;
             let pointGradiation = maxPointsGuesser / maxLength;
-            let resultList = [];
+
+            // Set Points for answers
             this.#answerTimeList.forEach((answer) => {
                 let playerPoint = this.#pointList.find((playerPoint) => playerPoint.player.getCid() === answer.cid);
 
                 if(playerPoint){
                     playerPoint.points += Math.ceil(maxPointsGuesser);
+                    resultList.push({name: playerPoint.player.getName(), pointsAdded : maxPointsGuesser});
                     maxPointsGuesser -= pointGradiation;
                 }
             });
 
+            // Add no answer Players in resultList with +0 Points
+            this.#playerList.forEach((player) => {
+                let hasAnswered = this.#answerTimeList.some(answer => answer.cid === player.getCid());
+                if(!hasAnswered && player !== this.#drawer){
+                    resultList.push({name: player.getName(), pointsAdded : 0});
+                }   
+            });
+
+            // Set Points for Drawer 
             let playerPointDrawer = this.#pointList.find((playerPoint) => playerPoint.player.getCid() === this.#drawer.getCid());
             playerPointDrawer.points += Math.ceil(this.#maxPointsDrawer / maxLength * this.#answerTimeList.length);
+            resultList.push({name: this.#drawer.getName(), pointsAdded : Math.ceil(this.#maxPointsDrawer / maxLength * this.#answerTimeList.length)});
+
+            // Sort decendent results
+            resultList.sort(function(result1, result2){
+                return result2.pointsAdded - result1.pointsAdded;
+            });
+
+            // Send resultList
+            let jsonMessage = JSON.stringify({ type: responseTypes.resultList, data: resultList });
+            this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
         }
 
         // disable draw permission of current drawer
