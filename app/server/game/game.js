@@ -69,6 +69,7 @@ module.exports = class Game {
     #hangManWord;
     /**@type {{player : Client, points : int}[]} */
     #pointList;
+    /**@type {{name : string, pointsAdded : int}[]} */
     #roundResultList;
 
     /**
@@ -496,6 +497,10 @@ module.exports = class Game {
         }
     }
 
+    /**
+     * Add the player in the point list
+     * @param {*} player player Object to add
+     */
     addPlayerInPointList(player){
         if(this.#state !== null){
             let isFound = this.#pointList.some(playerPointObj => playerPointObj.player === player);
@@ -505,6 +510,9 @@ module.exports = class Game {
         }
     }
 
+    /**
+     * Send end Game Result List to all clients in Lobby
+     */
     #sendEndGameResultList(){
         let sendPlayerList = this.#createUserResultList(this.#playerList);
 
@@ -524,6 +532,11 @@ module.exports = class Game {
         
     }
 
+    /**
+     * Create a list of players with the points
+     * @param {*} playerList list of players
+     * @returns {{name: string, points: int, isDrawer: boolean}[]} list of player with points
+     */
     #createUserResultList(playerList){
         let sendPlayerList = [];
         playerList.forEach((player) => {
