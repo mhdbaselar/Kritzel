@@ -15,6 +15,7 @@ body {
   border-radius: 8px;
   background-color: #fff;
   opacity: 90%;
+  min-height: 120px;
 }
 .top-row {
   display: flex;
@@ -40,6 +41,7 @@ body {
   border-radius: 5px;
   text-align: center;
   white-space: nowrap;
+  visibility: hidden;
 }
 
 .word-guess {
@@ -47,7 +49,7 @@ body {
   left: 50%;
   transform: translateX(-50%);
   font-family: monospace;
-  font-size: 25px;
+  font-size: 30px;
   letter-spacing: 3px;
   margin: 0;
   text-align: center;
@@ -326,6 +328,7 @@ body {
     gap: 10px;
     padding: 10px;
     margin: 10px;
+    min-height: 80px;
   }
 
   .logo-container {
@@ -345,8 +348,9 @@ body {
     padding: 3px 8px;
     width: auto;
     white-space: nowrap;
-    text-align: left; /* Sicherstellen, dass der Text links ausgerichtet ist */
-    position: relative; /* Positionierung korrigiert */
+    text-align: left; 
+    position: relative; 
+    visibility: hidden;
   }
 
   .top-row {
