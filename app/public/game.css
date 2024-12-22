@@ -1078,3 +1078,43 @@ input:focus + .slider {
   background-color: #d43f4a;
   transform: translateY(-2px);
 }
+.result-overlay {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  background-color: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  text-align: center;
+}
+
+.result-overlay h2 {
+  margin-top: 0;
+  font-size: 24px;
+  color: #ffeb3b;
+}
+
+#resultListContainer {
+  margin: 20px 0;
+  text-align: left;
+  font-size: 18px;
+}
+
+.result-overlay button {
+  background-color: #ff5722;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.result-overlay button:hover {
+  background-color: #e64a19;
+}

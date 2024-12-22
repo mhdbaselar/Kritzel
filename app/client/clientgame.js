@@ -155,12 +155,12 @@ module.exports = class ClientGame {
           hideCreateLobby();
           document.getElementById("usernameModal").style.display = "flex";
         }
-      } else if (data.type === responseTypes.resultList){
+      } else if (data.type === responseTypes.resultList) {
         console.log(data.data);
-        // TODO: Show round ResultList
-      } else if (data.type === responseTypes.endResultList){
+        window.showResultOverlay(data.data);
+      } else if (data.type === responseTypes.endResultList) {
         console.log("Remove ResultOverlay");
-        // TODO: Remove round ResultList
+        window.hideResultOverlay();
       }
     };
   }
