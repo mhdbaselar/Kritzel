@@ -20,10 +20,19 @@ module.exports = class Lobby {
     #isPublic;
     /**@type {string} */
     #code;
+    /**@type {string} */
     #lobbyName;
+    /**@type {int} */
     #roundCount;
+    /**@type {int} */
     #roundTimer;
+    /**@type {int} */
     #maxPlayerCount;
+    /**@type {int} */
+    #deleteLobbyTimer = 3000; //180000; // 3min
+    /**@type {NodeJS.Timeout} */
+    #deleteLobbyTimeout;
+    #deleteLobbyFunction;
 
     /**
      * Constructor to instanciate the lobby
@@ -49,6 +58,24 @@ module.exports = class Lobby {
     startGame(){
         if(this.#game.checkGameNotStarted()){
             setTimeout(() => {this.#game.startGame(this.#playerList, this.#roundCount, this.#roundTimer)}, 0);  // async operation (not wait) execute a lobby game parallel
+        }
+    }
+
+    setDeleteLobbyFunction(func){
+        this.#deleteLobbyFunction = func;
+    }
+
+    startDeleteLobbyTimer(){
+        this.#deleteLobbyTimeout = setTimeout(this.#deleteLobbyFunction, this.#deleteLobbyTimer);
+    }
+
+    /**
+     * Stops the timer that is set to delete the lobby.
+     * Clears the timeout for the lobby deletion.
+     */
+    stopDeleteLobbyTimer(){
+        if(this.#deleteLobbyTimeout !== null){
+            clearTimeout(this.#deleteLobbyTimeout);
         }
     }
 
