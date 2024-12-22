@@ -105,6 +105,7 @@ function displayChatMessage(chatMessages, message, senderName = "") {
  * @param {Array} messageList - An array of message objects to be displayed. Each object should have `cid` and `message` properties.
  */
 function displayChatMessageList(chatMessages, messageList) {
+  chatMessages.innerHTML = "";
   messageList.forEach((message) => {
     const messageDiv = document.createElement("div");
     messageDiv.textContent = `${message.name}: ${message.msg}`;

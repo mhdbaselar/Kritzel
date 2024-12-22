@@ -59,6 +59,7 @@ module.exports = class Lobby {
     addPlayer(player){
         if (player instanceof Client){
             this.#playerList.push(player);
+            this.#game.addPlayerInPointList(player);
         }
     }
 
@@ -166,7 +167,7 @@ module.exports = class Lobby {
     }
 
     /**
-     * Get lobby isPublic (true/false) 
+     * Get lobby isPublic (true/false)
      * @returns {boolean} isPublic then true else false
      */
     getIsPublic(){

@@ -147,6 +147,8 @@ module.exports = class ClientGame {
         displayLobbyList(this.lobbyList);
       } else if (data.type === responseTypes.lobbyJoinMenu) {
         showLobbyMenu();
+      } else if (data.type === responseTypes.lobbyCreateMenu) {
+        showCreateLobby();
       } else if (data.type === responseTypes.nameCheck) {
         if (data.data === false) {
           hideLobbyMenu();

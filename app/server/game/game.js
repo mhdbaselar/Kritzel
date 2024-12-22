@@ -67,7 +67,8 @@ module.exports = class Game {
     #revealeWordOrder;
     /**@type {string} */
     #hangManWord;
-
+    /**@type {{player : Client, points : int}[]} */
+    #pointList;
 
     /**
      * Constructor to instanciate the game
@@ -93,7 +94,8 @@ module.exports = class Game {
         this.#currentCycle = 1;
         this.#currentRound = 0;
         this.#playerQueue = [...this.#playerList];      // copy current playerList to queue
-
+        this.#pointList = this.#playerList.map((player) => {return {player : player, points : 0}} );
+        this.sendUserList(playerList);
         this.#state = stateTypes.gameStarted;
         this.#nextState();
     }
@@ -238,32 +240,16 @@ module.exports = class Game {
             let pointGradiation = maxPointsGuesser / maxLength;
             let resultList = [];
             this.#answerTimeList.forEach((answer) => {
-                let player = this.#playerList.find((player) => player.getCid() === answer.cid);
-                if(player){
-                    let points = Math.ceil(maxPointsGuesser);
-                    resultList.push({name: player.getName(), points : points});
-                    player.setPoints(player.getPoints() + points);
+                let playerPoint = this.#pointList.find((playerPoint) => playerPoint.player.getCid() === answer.cid);
+
+                if(playerPoint){
+                    playerPoint.points += Math.ceil(maxPointsGuesser);
                     maxPointsGuesser -= pointGradiation;
                 }
             });
 
-            // 0 Point add resultList
-            this.#playerList.forEach((player) => {
-                let playerAnswered = this.#answerTimeList.some((answer) => player.getCid() === answer.cid);
-                if(!playerAnswered && player !== this.#drawer){
-                    resultList.push({name: player.getName(), points : 0});
-                }
-            });
-
-            let drawerPoints = Math.ceil(this.#maxPointsDrawer / maxLength * this.#answerTimeList.length);
-            this.#drawer.setPoints(this.#drawer.getPoints() + drawerPoints);
-            resultList.push({name: this.#drawer.getName(), points : drawerPoints});
-
-            resultList.sort((result1, result2) => result2.points - result1.points);
-
-            // Send ResultList to Clients
-            let jsonMessage = JSON.stringify({type: responseTypes.resultList, data: resultList});
-            this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
+            let playerPointDrawer = this.#pointList.find((playerPoint) => playerPoint.player.getCid() === this.#drawer.getCid());
+            playerPointDrawer.points += Math.ceil(this.#maxPointsDrawer / maxLength * this.#answerTimeList.length);
         }
 
         // disable draw permission of current drawer
@@ -481,6 +467,15 @@ module.exports = class Game {
         }
     }
 
+    addPlayerInPointList(player){
+        if(this.#state !== null){
+            let isFound = this.#pointList.some(playerPointObj => playerPointObj.player === player);
+            if(!isFound){
+                this.#pointList.push({player : player, points : 0});
+            }
+        }
+    }
+
     /**
      * Send the UserList to the clients
      * @param {Client[]} playerList player list
@@ -488,7 +483,14 @@ module.exports = class Game {
     sendUserList(playerList) {
         let sendPlayerList = [];
         playerList.forEach((player) => {
-            sendPlayerList.push({ name: player.getName(), points: player.getPoints(), isDrawer: player === this.#drawer });
+            if(this.#state !== null){
+                let playerPoint = this.#pointList.find((playerPoint) => playerPoint.player === player);
+                if(playerPoint){
+                    sendPlayerList.push({ name: player.getName(), points: playerPoint.points, isDrawer: player === this.#drawer });
+                }
+            } else {
+                sendPlayerList.push({ name: player.getName(), points: 0, isDrawer: player === this.#drawer });
+            }
         });
 
         let jsonMessage = JSON.stringify({ type: responseTypes.userList, data: sendPlayerList });
