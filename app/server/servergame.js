@@ -37,7 +37,7 @@ module.exports = class ServerGame {
         type: responseTypes.ping,
         data: null
       });
-      
+
       this.#server.broadcastWsMessage(
         null,
         jsonMessage,
@@ -372,22 +372,37 @@ module.exports = class ServerGame {
    * @param {string?} code lobby code
    */
   #processCreateLobbyAction(client, isPublic, code, lobbyName, roundCount, roundTimer, playerCount) {
-    let isNullFound = false;
-    let lobbyID = null;
-    for (let i = 0; i < this.#lobbies.length; i++) {
-      if (this.#lobbies[i] === null) {
-        this.#lobbies[i] = new Lobby(this.#server, isPublic, code, lobbyName, roundCount, roundTimer, playerCount);
-        isNullFound = true;
-        lobbyID = i;
-        break;
-      }
-    }
-    if (!isNullFound) {
-      this.#lobbies.push(new Lobby(this.#server, isPublic, code, lobbyName, roundCount, roundTimer, playerCount));
-      lobbyID = this.#lobbies.length - 1;
-    }
 
-    this.#processJoinLobbyAction(client, lobbyID, code);
+    playerCount = Math.ceil(playerCount);
+    if(playerCount < 2){
+      let jsonMessage = JSON.stringify({
+        type: responseTypes.lobbyCreateMenu,
+        data: null,
+      });
+      this.#server.broadcastWsMessage(
+        client.getCid(),
+        jsonMessage,
+        false,
+        broadcastTypes.onlyOneClient
+      );
+    } else {
+      let isNullFound = false;
+      let lobbyID = null;
+      for (let i = 0; i < this.#lobbies.length; i++) {
+        if (this.#lobbies[i] === null) {
+          this.#lobbies[i] = new Lobby(this.#server, isPublic, code, lobbyName, roundCount, roundTimer, playerCount);
+          isNullFound = true;
+          lobbyID = i;
+          break;
+        }
+      }
+      if (!isNullFound) {
+        this.#lobbies.push(new Lobby(this.#server, isPublic, code, lobbyName, roundCount, roundTimer, playerCount));
+        lobbyID = this.#lobbies.length - 1;
+      }
+
+      this.#processJoinLobbyAction(client, lobbyID, code);
+    }
   }
 
   /**
@@ -397,9 +412,9 @@ module.exports = class ServerGame {
    * @param {string?} code lobby code
    */
   #processJoinLobbyAction(client, lobbyID, code) {
-    if (
-      this.#lobbies[lobbyID].getIsPublic() ||
-      code == this.#lobbies[lobbyID].getCode()
+    if ( this.#lobbies[lobbyID].getCurrentPlayerCount() < this.#lobbies[lobbyID].getMaxPlayers()
+      && (this.#lobbies[lobbyID].getIsPublic() ||
+      code == this.#lobbies[lobbyID].getCode())
     ) {
       if (client.getLobbyID() !== lobbyID) {
         this.processServerRequest({
@@ -414,7 +429,7 @@ module.exports = class ServerGame {
       });
       let cid = client.getCid();
       this.#processSendJoinLobbyData(cid, lobbyID);
-    } 
+    }
     else {      // Code incorrect send Client
       let jsonMessage = JSON.stringify({
         type: responseTypes.lobbyJoinMenu,
@@ -432,15 +447,18 @@ module.exports = class ServerGame {
   #processJoinRandomLobbyAction(client){
     let publicLobbies = [];
     for(let i = 0; i < this.#lobbies.length; i++){
-      if(this.#lobbies[i].getIsPublic()){
+      if(this.#lobbies[i].getIsPublic() && this.#lobbies[i].getCurrentPlayerCount() < this.#lobbies[i].getMaxPlayers()){
         publicLobbies.push(i);
       }
     }
 
     if(publicLobbies.length > 0){
       let randomLobbyID = publicLobbies[Math.floor(Math.random() * publicLobbies.length)];
-      console.log(randomLobbyID);
-      this.#processJoinLobbyAction(client, randomLobbyID, null);
+      if(this.#lobbies[randomLobbyID].getCurrentPlayerCount() < this.#lobbies[randomLobbyID].getMaxPlayers()){
+        this.#processJoinLobbyAction(client, randomLobbyID, null);
+      } else {  // Error handling: lobby meanwhile full
+        this.#processCreateLobbyAction(client, true, null, this.#getUniqueLobbyName(), 1, 60, 10);
+      }
     } else {
       this.#processCreateLobbyAction(client, true, null, this.#getUniqueLobbyName(), 1, 60, 10);  // create default Lobby
     }
@@ -476,7 +494,7 @@ module.exports = class ServerGame {
     let lobbyList = [];
 
     for (let i = 0; i < this.#lobbies.length; i++) {
-      lobbyList.push({ lobbyID: i, isPublic: this.#lobbies[i].getIsPublic(), lobbyName: this.#lobbies[i].getLobbyName(), 
+      lobbyList.push({ lobbyID: i, isPublic: this.#lobbies[i].getIsPublic(), lobbyName: this.#lobbies[i].getLobbyName(),
         currentPlayers: this.#lobbies[i].getCurrentPlayerCount(), maxPlayers: this.#lobbies[i].getMaxPlayers()
       });
     }
