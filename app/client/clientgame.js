@@ -6,6 +6,7 @@ const Message = require("./class/message");
 const ChatAction = require("./class/chatAction");
 const {
   createStartGameButton,
+  displayStartGameButton,
   displayChatMessage,
   displayChatMessageList,
   renderTimer,
@@ -15,6 +16,7 @@ const {
 const HexColorConverter = require("./class/hexColorConverter");
 const requestTypes = require("./class/requestTypes");
 const responseTypes = require("./class/responseTypes");
+const Translator = require("./class/translator");
 
 /**
  * Instance of the HexColorConverter class.
@@ -25,21 +27,21 @@ const converter = new HexColorConverter();
 module.exports = class ClientGame {
   /**@type {string} */
   #name; // user name
+  #translator;
+  #currentLanguage;
 
   /**
    * Constructor to instanciate the ClientGame
    */
   constructor() {
-    this.#name = null;
     this.canDraw = false;
-  }
+    this.#translator = new Translator();
+    this.#currentLanguage = localStorage.getItem("preferredLanguage") || "de";
+    document.getElementById("languageSelect").value = this.#currentLanguage;
 
-  /**
-   * Sets the user name
-   * @param {string} name user name
-   */
-  setUserNameByClientGame(name) {
-    this.#name = name;
+    this.translateUI();
+
+    this.lobbyList = []; // Neue Property zum Speichern der Lobby-Daten
   }
 
   /**
@@ -49,7 +51,7 @@ module.exports = class ClientGame {
     // Determine WebSocket protocol based on current page protocol
     const protocol = location.protocol === "https:" ? "wss://" : "ws://";
 
-    // Show loadingOverlay 
+    // Show loadingOverlay
     const loadingOverlay = document.getElementById("loadingOverlay");
 
     const wordSelectionPopup = document.querySelector(".word-selection-popup");
@@ -61,13 +63,9 @@ module.exports = class ClientGame {
 
     // Event handler for when the connection is opened
     this.socket.onopen = (event) => {
+      createStartGameButton(this);
+      displayStartGameButton();
       console.log("Socket opened");
-      this.sendNameAction(this.#name);
-      this.sendGetChatAction();
-      this.sendGetCanvasAction();
-      this.sendGetUserListAction();
-      this.sendGetReconnectDataAction();
-      createStartGameButton(this); // keywords: TESTING DELETE GAMESEQUENCE
       loadingOverlay.style.display = "none"; // Spinner verstecken
     };
 
@@ -86,6 +84,7 @@ module.exports = class ClientGame {
 
     // Event handler for receiving messages from the server
     this.socket.onmessage = (event) => {
+      //console.log("Nachricht vom Server empfangen:", event.data);
       let data = JSON.parse(event.data);
       if (data.type == responseTypes.chatMsgList) {
         // Update the chat display
@@ -115,28 +114,45 @@ module.exports = class ClientGame {
         );
         wordSelectionPopup.style.display = "flex";
         renderWordChoice(data.data, this);
-
-      } else if(data.type === responseTypes.removeWordChoiceList){
+      } else if (data.type === responseTypes.removeWordChoiceList) {
         const wordContainer = document.querySelector(".word-selection-popup");
         wordContainer.style.display = "none";
-        
       } else if (data.type === responseTypes.choosingWordNotification) {
         console.log(data.data); // name from the drawer
         // TODO: Frontend anzeigen der Notification ("<Bob> is choosing a word")
 
         // Disallow drawing and hide toolbar
         this.setDrawingState(false);
-
       } else if (data.type === responseTypes.endChoosingWordNotification) {
         console.log(data.data); // name from the drawer
         // TODO: Frontend anzeigen der Notification ("<Bob> is choosing a word") ausblenden
       } else if (data.type === responseTypes.clock) {
         renderTimer(data.data);
       } else if (data.type === responseTypes.word) {
-        console.log(data);
         document.getElementById("hint").innerText = data.data;
       } else if (data.type === responseTypes.drawPermission) {
         this.setDrawingState(data.data);
+      } else if (data.type === responseTypes.menu) {
+        const usernameInput = document.getElementById("usernameInput");
+        const username = usernameInput ? usernameInput.value.trim() : null;
+
+        if (!username || username.length < 1) {
+          // console.log("Benutzername fehlt. Zeige Username-Modal an.");
+          document.getElementById("usernameModal").style.display = "flex";
+        } else {
+          // console.log("Benutzername bereits gesetzt:", username);
+        }
+      } else if (data.type === responseTypes.lobbyList) {
+        this.lobbyList = data.data;
+        displayLobbyList(this.lobbyList);
+      } else if (data.type === responseTypes.lobbyJoinMenu) {
+        showLobbyMenu();
+      } else if (data.type === responseTypes.nameCheck) {
+        if (data.data === false) {
+          hideLobbyMenu();
+          hideCreateLobby();
+          document.getElementById("usernameModal").style.display = "flex";
+        }
       } else if (data.type === responseTypes.resultList){
         console.log(data.data);
         // TODO: Show round ResultList
@@ -153,11 +169,13 @@ module.exports = class ClientGame {
   }
 
   setSessionCookie(cid) {
+    //console.log("setSessionCookie called with CID:", cid); // Log CID
     var expires = "";
     var date = new Date();
     date.setTime(date.getTime() + 2 * 24 * 60 * 60 * 1000);
     expires = "; expires=" + date.toUTCString();
     document.cookie = "cid=" + (cid || "") + expires + "; path=/";
+    //console.log("Cookie gesetzt:", document.cookie); // Log gesetztes Cookie
   }
 
   /**
@@ -431,7 +449,7 @@ module.exports = class ClientGame {
   /**
    * Requests the server to send reconnect data
    */
-  sendGetReconnectDataAction(){
+  sendGetReconnectDataAction() {
     let message = new Message(requestTypes.getReconnectData, null);
     this.send(JSON.stringify(message));
   }
@@ -450,7 +468,78 @@ module.exports = class ClientGame {
    * Sends the game start action to the server
    */
   sendGameStartAction() {
+    console.log("sendGameStartAction aufgerufen");
     let message = new Message(requestTypes.startGame, null);
+    console.log("Sende Nachricht:", message);
+    this.send(JSON.stringify(message));
+  }
+
+  /**
+   *  Sends the game end action to the server
+   * @param {int} lobbyID id of the lobby
+   * @param {string?} code lobby code
+   */
+  sendJoinLobbyAction(lobbyID, code) {
+    let message = new Message(requestTypes.joinLobby, {
+      lobbyID: lobbyID,
+      code: code,
+    });
+    this.send(JSON.stringify(message));
+    displayStartGameButton();
+  }
+
+  sendJoinRandomLobbyAction() {
+    let message = new Message(requestTypes.joinRandomLobby, null);
+    this.send(JSON.stringify(message));
+    displayStartGameButton();
+  }
+
+  /**
+   * Sends the leave lobby action to the server
+   */
+  sendLeaveLobbyAction() {
+    let message = new Message(requestTypes.leaveLobby, null);
+    this.send(JSON.stringify(message));
+  }
+
+  /**
+   * Sends the create lobby action to the server
+   * @param {boolean} isPublic true public or false private lobby
+   * @param {string} code lobby code
+   */
+  sendCreateLobbyAction(
+    isPublic,
+    code,
+    lobbyName,
+    roundCount,
+    roundTimer,
+    playerCount
+  ) {
+    let message = new Message(requestTypes.createLobby, {
+      isPublic: isPublic,
+      code: code,
+      lobbyName: lobbyName,
+      roundCount: roundCount,
+      roundTimer: roundTimer,
+      playerCount: playerCount,
+    });
+    this.send(JSON.stringify(message));
+    displayStartGameButton();
+  }
+
+  /**
+   * Sends the get lobby list action to the server
+   */
+  sendGetLobbyListAction() {
+    let message = new Message(requestTypes.getLobbyList, null);
+    this.send(JSON.stringify(message));
+  }
+
+  /**
+   * Sends the delete lobby action to the server
+   */
+  sendDeleteLobbyAction() {
+    let message = new Message(requestTypes.deleteLobby, null);
     this.send(JSON.stringify(message));
   }
 
@@ -464,6 +553,7 @@ module.exports = class ClientGame {
    */
   send(message) {
     if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+      //console.log("WebSocket sendet Nachricht:", message);
       this.socket.send(message);
     } else {
       console.error(
@@ -472,7 +562,6 @@ module.exports = class ClientGame {
       );
     }
   }
-
 
   //-------------------------------------
   //---Client-Side Drawing States--------
@@ -494,5 +583,100 @@ module.exports = class ClientGame {
   updateToolbarVisibility() {
     const toolbar = document.querySelector(".toolbar");
     toolbar.style.display = this.canDraw ? "flex" : "none";
+  }
+
+  setLanguage(language) {
+    // Sprache setzen
+    this.#currentLanguage = language;
+
+    // Im localStorage speichern
+    localStorage.setItem("preferredLanguage", language);
+
+    // UI aktualisieren
+    this.translateUI();
+
+    // Dropdown aktualisieren
+    const languageSelect = document.getElementById("languageSelect");
+    if (languageSelect) {
+      languageSelect.value = language;
+    }
+  }
+
+  // Beispiel für Verwendung in renderUI Methoden
+  renderWordChoice(words) {
+    const translatedTitle = this.#translator.translate(
+      "{{CHOOSE_WORD}}",
+      this.#currentLanguage
+    );
+
+    const wordContainer = document.querySelector(".word-selection-popup");
+    wordContainer.innerHTML = `
+      <h2>${translatedTitle}</h2>
+      <div class="word-options">
+        ${words
+          .map((word) => `<div class="word-option">${word}</div>`)
+          .join("")}
+      </div>
+    `;
+  }
+
+  translateUI() {
+    const textElements = document.querySelectorAll(
+      "h1, h2, h3, h4, h5, h6, p, span, button, label, div"
+    );
+
+    textElements.forEach((el) => {
+      for (const node of el.childNodes) {
+        if (node.nodeType === Node.TEXT_NODE) {
+          const originalText = node.textContent.trim();
+          const tokenMatch = originalText.match(
+            this.#translator.getTokenPattern()
+          );
+
+          if (tokenMatch) {
+            if (!el.hasAttribute("data-original-text")) {
+              el.setAttribute("data-original-text", originalText);
+            }
+            const translatedText = this.#translator.translate(
+              originalText,
+              this.#currentLanguage
+            );
+            node.textContent = translatedText;
+          }
+        }
+      }
+    });
+
+    const elementsWithPlaceholder = document.querySelectorAll("[placeholder]");
+    elementsWithPlaceholder.forEach((el) => {
+      const placeholder = el.getAttribute("placeholder");
+      const originalPlaceholder =
+        el.getAttribute("data-original-placeholder") || placeholder;
+      const tokenMatch = originalPlaceholder.match(
+        this.#translator.getTokenPattern()
+      );
+
+      if (tokenMatch) {
+        if (!el.hasAttribute("data-original-placeholder")) {
+          el.setAttribute("data-original-placeholder", originalPlaceholder);
+        }
+        const translatedPlaceholder = this.#translator.translate(
+          originalPlaceholder,
+          this.#currentLanguage
+        );
+        el.setAttribute("placeholder", translatedPlaceholder);
+      }
+    });
+
+    const translatedElements = document.querySelectorAll(
+      "[data-original-text]"
+    );
+    translatedElements.forEach((el) => {
+      const originalText = el.getAttribute("data-original-text");
+      el.textContent = this.#translator.translate(
+        originalText,
+        this.#currentLanguage
+      );
+    });
   }
 };

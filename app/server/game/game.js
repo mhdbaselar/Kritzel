@@ -85,10 +85,11 @@ module.exports = class Game {
      * @param {Client[]} playerList list of players to the game
      * @param {int} totalCycle Number of times a player takes a turn as a drawer (consists of round)
      */
-    startGame(playerList, totalCycle){
+    startGame(playerList, totalCycle, roundTimeout){
         console.log("Start Game");
         this.#playerList = playerList;
         this.#totalCycle = totalCycle;
+        this.#roundTimeout = roundTimeout;
         this.#currentCycle = 1;
         this.#currentRound = 0;
         this.#playerQueue = [...this.#playerList];      // copy current playerList to queue
@@ -264,7 +265,7 @@ module.exports = class Game {
             let jsonMessage = JSON.stringify({type: responseTypes.resultList, data: resultList});
             this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
         }
-        
+
         // disable draw permission of current drawer
         this.#sendDrawPermission(false);
 
@@ -359,7 +360,7 @@ module.exports = class Game {
      */
     setWord(word, cid) {
         if (this.#state === stateTypes.drawerSelected && this.#drawer.getCid() === cid) {
-            
+
             clearInterval(this.#wordSelectionTimer);
             this.#word = word;
 
@@ -449,6 +450,14 @@ module.exports = class Game {
         }
 
         return false;
+    }
+
+    /**
+     * Check if the game is ended
+     * @returns {boolean} true if the game is ended
+     */
+    checkGameEnd(){
+        return this.#state === stateTypes.gameEnded;
     }
 
     /**

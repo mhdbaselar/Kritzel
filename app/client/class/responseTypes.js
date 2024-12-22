@@ -18,5 +18,9 @@ module.exports = responseTypes = {
     clock : "clock",
     drawPermission : "drawPermission",
     resultList : "resultList",
-    endResultList : "endResultList"
+    endResultList : "endResultList",
+    lobbyList : "lobbyList",
+    menu : "menu",
+    lobbyJoinMenu : "lobbyJoinMenu",
+    nameCheck : "nameCheck"
 }

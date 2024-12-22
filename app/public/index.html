@@ -34,25 +34,109 @@
     </div>
 
     <!-- Username Modal -->
-    <div class="username-modal" id="usernameModal">
+    <div class="username-modal" id="usernameModal" style="display: none">
       <div class="username-modal-content">
-        <h2>Benutzernamen eingeben</h2>
+        <h2>{{USERNAME_PROMPT}}</h2>
         <input
           type="text"
           id="usernameInput"
-          placeholder="Prof. Dr. Ralf Peters"
+          placeholder="{{USERNAME}}"
           maxlength="20"
           minlength="1"
           required
-          onkeydown="if(event.key === 'Enter') submitUsername()"
+          onkeydown="if(event.key === 'Enter') window.submitUsername()"
         />
-        <button onclick="submitUsername()">Bestätigen</button>
+        <div class="language-selector">
+          <select id="languageSelect">
+            <option value="de">Deutsch</option>
+            <option value="en">English</option>
+          </select>
+        </div>
+        <!-- Buttons angepasst -->
+        <button onclick="submitUsernameAndShowLobbyMenu()">{{JOIN}}</button>
+        <button onclick="submitUsernameAndShowCreateLobby()">{{CREATE}}</button>
       </div>
     </div>
+
+    <!-- Create Lobby Overlay -->
+    <div class="lobby-create" id="lobbyCreate">
+      <div class="lobby-create-content">
+        <h2>{{LOBBY_SETTINGS}}</h2>
+
+        <!-- Neue Eingabefelder für Lobby-Einstellungen -->
+        <div class="lobby-settings">
+          <label for="lobbyName">{{LOBBY_NAME}}</label>
+          <input type="text" id="lobbyName" />
+
+          <label for="roundCount">{{ROUND_COUNT}}</label>
+          <input type="number" id="roundCount" min="1" max="20" value="5" />
+
+          <label for="roundTimer">{{ROUND_TIMER}}</label>
+          <input type="number" id="roundTimer" min="10" max="300" value="60" />
+
+          <label for="playerCount">{{MAX_PLAYERS}}</label>
+          <input type="number" id="playerCount" min="2" max="20" value="8" />
+
+          <!-- Spezifischer Switch-Container -->
+          <div class="switch-container">
+            <span class="label-text">{{PUBLIC_LOBBY}}</span>
+            <label class="switch">
+              <input type="checkbox" />
+              <span class="slider round">
+                <span class="knob"></span>
+              </span>
+            </label>
+          </div>
+
+          <input type="text" id="codeInput" placeholder="1234" size="15" />
+        </div>
+
+        <br />
+
+        <!-- Neue Buttons -->
+        <div class="lobby-create-buttons">
+          <button onclick="window.createLobby()">{{CREATE_BUTTON}}</button>
+          <button onclick="hideCreateLobby(); showLobbyMenu();">
+            {{TO_LOBBIES}}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lobby Join Overlay -->
+    <div class="lobby-join" id="lobbyJoin">
+      <div class="lobby-join-content">
+        <h2>{{AVAILABLE_LOBBIES}}</h2>
+
+        <!-- Buttons Container -->
+        <div class="button-container">
+          <button class="random-lobby-button" onclick="onRandomLobby()">
+            {{JOIN_RANDOM}}
+          </button>
+          <button
+            class="create-lobbies"
+            onclick="hideLobbyMenu(); showCreateLobby();"
+          >
+            {{CREATE_LOBBY}}
+          </button>
+        </div>
+
+        <div id="lobbyListContainer">
+          <!-- Hier werden die Lobbys angezeigt -->
+        </div>
+      </div>
+    </div>
+
     <div class="row">
       <div class="column users-column">
         <div class="users-container">
           <!-- Users will be listed here -->
+        </div>
+        <div class="start-game-button-div">
+          <button id="leaveLobbyButton" onclick="leaveLobbyAndShowMenu()">
+            {{LEAVE_LOBBY}}
+          </button>
+          <!-- Start Game Button will be created here -->
         </div>
       </div>
       <div class="column canvas-column">
@@ -187,11 +271,11 @@
               class="chat-input-div"
               contenteditable="false"
               tabindex="0"
-              placeholder="Nachricht eingeben..."
+              placeholder="{{CHAT_PLACEHOLDER}}"
               role="textbox"
               aria-label="Chat message input"
             ></div>
-            <button id="sendButton">Senden</button>
+            <button id="sendButton">{{SEND}}</button>
           </div>
         </div>
       </div>
