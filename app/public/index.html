@@ -16,18 +16,23 @@
 
   <body style="background-color: #000350">
     <div class="simple-keyboard"></div>
-    <div
-      class="head"
-      style="display: flex; align-items: center; justify-content: space-between"
-    >
-      <img
-        class="logo"
-        src="logo-kritzel.svg"
-        alt="Kritzel Logo"
-        height="60vh"
-      />
-      <h2 class="word-guess" id="hint"></h2>
-      <div id="timer"></div>
+    <div class="head">
+      <!-- Erste Zeile: Logo, Hinweis, Timer -->
+      <div class="top-row">
+        <div class="logo-container">
+          <img
+            class="logo"
+            src="logo-kritzel.svg"
+            alt="Kritzel Logo"
+            height="60vh"
+          />
+        </div>
+        <h2 class="word-guess" id="hint">Wort</h2>
+        <div id="timer"></div>
+      </div>
+
+      <!-- Zweite Zeile: Rundenanzeige -->
+      <div id="roundsDisplay" class="rounds-display"></div>
     </div>
     <div class="loading-overlay" id="loadingOverlay">
       <div class="spinner"></div>

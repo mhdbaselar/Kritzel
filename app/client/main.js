@@ -705,3 +705,12 @@ window.displayLobbyList = function (lobbyArray) {
   });
   document.getElementById("lobbyListContainer").innerHTML = html;
 };
+// Update Rounds
+window.updateRoundDisplay = function (current, total) {
+  const roundsDisplay = document.getElementById("roundsDisplay");
+  if (roundsDisplay) {
+    roundsDisplay.textContent = `${current} von ${total}`;
+  } else {
+    console.error("Element für die Rundenanzeige nicht gefunden.");
+  }
+};
