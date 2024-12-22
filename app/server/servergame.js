@@ -114,9 +114,7 @@ module.exports = class ServerGame {
         this.#lobbies[lobbyID].startGame();
       } else if (_request.messageType == requestTypes.getReconnectData) {
         this.#processGetReconnectData(cid, lobbyID);
-      } /*else if (_request.messageType == requestTypes.deleteLobby) {
-        this.#processDeleteLobbyAction(cid, lobbyID);
-      }*/
+      }
     }
 
     if (client !== null) {
@@ -165,11 +163,10 @@ module.exports = class ServerGame {
           lobbyID
         );
 
+        // if lobby is empty, start delete lobby timer
         if(this.#lobbies[lobbyID].getCurrentPlayerCount() === 0){
-          console.log("delete0");
           this.#lobbies[lobbyID].setDeleteLobbyFunction(() => {
-            console.log("Delete");
-            this.#processDeleteLobbyAction(request.messageBody.client.getCid(), lobbyID);
+            this.#processDeleteLobbyAction(lobbyID);
           });
           this.#lobbies[lobbyID].startDeleteLobbyTimer();
         }
@@ -181,7 +178,7 @@ module.exports = class ServerGame {
       let lobbyID = request.messageBody.client.getLobbyID();
 
       if (lobbyID !== null) {
-        this.#lobbies[lobbyID].stopDeleteLobbyTimer();
+        this.#lobbies[lobbyID].stopDeleteLobbyTimer();      // stop delete lobby timer after lobby is not empty
         this.#lobbies[lobbyID].addPlayer(request.messageBody.client);
         this.#processSendJoinLobbyData(
           request.messageBody.client.getCid(),
@@ -422,7 +419,8 @@ module.exports = class ServerGame {
    * @param {string?} code lobby code
    */
   #processJoinLobbyAction(client, lobbyID, code) {
-    if ( this.#lobbies[lobbyID].getCurrentPlayerCount() < this.#lobbies[lobbyID].getMaxPlayers()
+    if (this.#lobbies[lobbyID] !== null 
+      && this.#lobbies[lobbyID].getCurrentPlayerCount() < this.#lobbies[lobbyID].getMaxPlayers()
       && (this.#lobbies[lobbyID].getIsPublic() ||
       code == this.#lobbies[lobbyID].getCode())
     ) {
@@ -528,8 +526,7 @@ module.exports = class ServerGame {
    * @param {string} cid client unique ID
    * @param {int} lobbyID id of the lobby
    */
-  #processDeleteLobbyAction(cid, lobbyID) {
-    console.log(cid, lobbyID);
+  #processDeleteLobbyAction(lobbyID) {
     //if (this.#lobbies[lobbyID].checkGameEnd()) {
       let playerList = this.#lobbies[lobbyID].getPlayerList();
 

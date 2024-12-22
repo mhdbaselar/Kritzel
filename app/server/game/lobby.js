@@ -29,7 +29,7 @@ module.exports = class Lobby {
     /**@type {int} */
     #maxPlayerCount;
     /**@type {int} */
-    #deleteLobbyTimer = 3000; //180000; // 3min
+    #deleteLobbyTimer = 180000; // 3min
     /**@type {NodeJS.Timeout} */
     #deleteLobbyTimeout;
     #deleteLobbyFunction;
@@ -61,10 +61,17 @@ module.exports = class Lobby {
         }
     }
 
+    /**
+     * Set the function to delete the lobby
+     * @param {function} func function to delete the lobby
+     */
     setDeleteLobbyFunction(func){
         this.#deleteLobbyFunction = func;
     }
 
+    /**
+     * Starts the timer that is set to delete the lobby (3min if empty).
+     */
     startDeleteLobbyTimer(){
         this.#deleteLobbyTimeout = setTimeout(this.#deleteLobbyFunction, this.#deleteLobbyTimer);
     }

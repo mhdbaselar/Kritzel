@@ -531,14 +531,6 @@ module.exports = class ClientGame {
     this.send(JSON.stringify(message));
   }
 
-  /**
-   * Sends the delete lobby action to the server
-   */
-  sendDeleteLobbyAction() {
-    let message = new Message(requestTypes.deleteLobby, null);
-    this.send(JSON.stringify(message));
-  }
-
   //-------------------------------------
   //-----------HELP FUNCTIONS------------
   //-------------------------------------
