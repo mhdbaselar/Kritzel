@@ -726,6 +726,26 @@ window.showResultOverlay = function (resultList) {
   overlay.style.display = "block";
 };
 
+window.showEndGameResultOverlay = function (resultList) {
+  console.log("Ergebnisliste wird angezeigt:", resultList);
+
+  const overlay = document.getElementById("resultOverlay");
+  const container = document.getElementById("resultListContainer");
+
+  // Resultlist
+  container.innerHTML = "";
+  resultList.forEach((result, index) => {
+    const entry = document.createElement("div");
+    entry.textContent = `${index + 1}. ${result.name} (${
+      result.points
+    } Punkte)`;
+    container.appendChild(entry);
+  });
+
+  // Overlay
+  overlay.style.display = "block";
+};
+
 window.hideResultOverlay = function () {
   console.log("Ergebnisliste wird ausgeblendet");
   const overlay = document.getElementById("resultOverlay");

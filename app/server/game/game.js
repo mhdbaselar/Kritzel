@@ -69,6 +69,7 @@ module.exports = class Game {
     #hangManWord;
     /**@type {{player : Client, points : int}[]} */
     #pointList;
+    #roundResultList;
 
     /**
      * Constructor to instanciate the game
@@ -95,6 +96,7 @@ module.exports = class Game {
         this.#currentRound = 0;
         this.#playerQueue = [...this.#playerList];      // copy current playerList to queue
         this.#pointList = this.#playerList.map((player) => {return {player : player, points : 0}} );
+        this.#roundResultList = [];
         this.sendUserList(playerList);
         this.#state = stateTypes.gameStarted;
         this.#nextState();
@@ -115,6 +117,12 @@ module.exports = class Game {
         this.#wordChoicesList = null;
         this.#revealeWordOrder = [];
 
+        // Show last round results
+        if(this.#roundResultList.length > 0){
+            let jsonMessage = JSON.stringify({ type: responseTypes.roundResultList, data: this.#roundResultList });
+            this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
+        }
+
         // wait before next round start
         this.#timeleft = this.#nextRoundTimeout / 1000;
 
@@ -124,7 +132,7 @@ module.exports = class Game {
                 clearInterval(nextRoundTimer);
                 this.#state = stateTypes.roundStarted;
                 // Send remove ResultList
-                let jsonMessage = JSON.stringify({type: responseTypes.endResultList, data: null});
+                let jsonMessage = JSON.stringify({type: responseTypes.endRoundResultList, data: null});
                 this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
                 this.#nextState();
             }
@@ -236,7 +244,7 @@ module.exports = class Game {
 
         let maxLength = Math.max(this.#answerTimeList.length, this.#playerList.length - 1);
         if(maxLength !== 0){
-            let resultList = [];
+            this.#roundResultList = [];
             let maxPointsGuesser = this.#maxPointsGuesser;
             let pointGradiation = maxPointsGuesser / maxLength;
 
@@ -246,7 +254,7 @@ module.exports = class Game {
 
                 if(playerPoint){
                     playerPoint.points += Math.ceil(maxPointsGuesser);
-                    resultList.push({name: playerPoint.player.getName(), pointsAdded : maxPointsGuesser});
+                    this.#roundResultList.push({name: playerPoint.player.getName(), pointsAdded : maxPointsGuesser});
                     maxPointsGuesser -= pointGradiation;
                 }
             });
@@ -255,23 +263,19 @@ module.exports = class Game {
             this.#playerList.forEach((player) => {
                 let hasAnswered = this.#answerTimeList.some(answer => answer.cid === player.getCid());
                 if(!hasAnswered && player !== this.#drawer){
-                    resultList.push({name: player.getName(), pointsAdded : 0});
+                    this.#roundResultList.push({name: player.getName(), pointsAdded : 0});
                 }   
             });
 
             // Set Points for Drawer 
             let playerPointDrawer = this.#pointList.find((playerPoint) => playerPoint.player.getCid() === this.#drawer.getCid());
             playerPointDrawer.points += Math.ceil(this.#maxPointsDrawer / maxLength * this.#answerTimeList.length);
-            resultList.push({name: this.#drawer.getName(), pointsAdded : Math.ceil(this.#maxPointsDrawer / maxLength * this.#answerTimeList.length)});
+            this.#roundResultList.push({name: this.#drawer.getName(), pointsAdded : Math.ceil(this.#maxPointsDrawer / maxLength * this.#answerTimeList.length)});
 
             // Sort decendent results
-            resultList.sort(function(result1, result2){
+            this.#roundResultList.sort(function(result1, result2){
                 return result2.pointsAdded - result1.pointsAdded;
-            });
-
-            // Send resultList
-            let jsonMessage = JSON.stringify({ type: responseTypes.resultList, data: resultList });
-            this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
+            });  
         }
 
         // disable draw permission of current drawer
@@ -307,6 +311,9 @@ module.exports = class Game {
         this.sendUserList(this.#playerList);
 
         this.#state = stateTypes.gameEnded;
+
+        // Send Game EndResult List
+        this.#sendEndGameResultList();
     }
 
     /**
@@ -498,11 +505,26 @@ module.exports = class Game {
         }
     }
 
+    #sendEndGameResultList(){
+        let sendPlayerList = this.#createUserResultList(this.#playerList);
+
+        let jsonMessage = JSON.stringify({ type: responseTypes.gameResultList, data: sendPlayerList });
+        this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
+    }
+
     /**
      * Send the UserList to the clients
-     * @param {Client[]} playerList player list
+     * @param {Client[]} playerList list of players
      */
     sendUserList(playerList) {
+        let sendPlayerList = this.#createUserResultList(playerList);
+
+        let jsonMessage = JSON.stringify({ type: responseTypes.userList, data: sendPlayerList });
+        this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, playerList);
+        
+    }
+
+    #createUserResultList(playerList){
         let sendPlayerList = [];
         playerList.forEach((player) => {
             if(this.#state !== null){
@@ -515,8 +537,11 @@ module.exports = class Game {
             }
         });
 
-        let jsonMessage = JSON.stringify({ type: responseTypes.userList, data: sendPlayerList });
-        this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, playerList);
+        sendPlayerList.sort(function(result1, result2){
+            return result2.points - result1.points;
+        });
+
+        return sendPlayerList;
     }
 
     /**
