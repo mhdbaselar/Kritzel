@@ -67,6 +67,7 @@ module.exports = class Game {
     #revealeWordOrder;
     /**@type {string} */
     #hangManWord;
+    /**@type {{player : Client, points : int}[]} */
     #pointList;
 
     /**
@@ -94,6 +95,7 @@ module.exports = class Game {
         this.#currentRound = 0;
         this.#playerQueue = [...this.#playerList];      // copy current playerList to queue
         this.#pointList = this.#playerList.map((player) => {return {player : player, points : 0}} );
+        this.sendUserList(playerList);
         this.#state = stateTypes.gameStarted;
         this.#nextState();
     }
