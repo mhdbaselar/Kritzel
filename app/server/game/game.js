@@ -92,6 +92,7 @@ module.exports = class Game {
         this.#totalCycle = totalCycle;
         this.#roundTimeout = roundTimeout;
         this.#currentCycle = 1;
+        this.#sendCycle(null, broadcastTypes.allInLobby);
         this.#currentRound = 0;
         this.#playerQueue = [...this.#playerList];      // copy current playerList to queue
         this.#pointList = this.#playerList.map((player) => {return {player : player, points : 0}} );
@@ -108,6 +109,7 @@ module.exports = class Game {
         if (this.#playerQueue.length === 0) {
             this.#playerQueue = [...this.#playerList];      // copy current playerList to queue
             this.#currentCycle++;
+            this.#sendCycle(null, broadcastTypes.allInLobby);
             this.#currentRound = 1;
         } else {this.#currentRound++;}
         this.#answerTimeList = [];
@@ -514,6 +516,11 @@ module.exports = class Game {
             }
         } else if (this.#state == stateTypes.gameEnded){
             this.#sendTimer("beendet","");
+        } 
+        
+        // In all States without null
+        if (this.#state !== null){
+            this.#sendCycle(cid, broadcastTypes.onlyOneClient);
         }
     }
 
@@ -586,5 +593,15 @@ module.exports = class Game {
     #sendDrawPermission(isEnabled){
         let jsonMessage = JSON.stringify({type: responseTypes.drawPermission, data: isEnabled});
         this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessage, false, broadcastTypes.onlyOneClient);
+    }
+
+    /**
+     * Send the current und total cycle to the clients
+     * @param {string?} cid client unique ID
+     * @param {string} broadcastType broadcastType
+     */
+    #sendCycle(cid, broadcastType){
+        let jsonMessage = JSON.stringify({type: responseTypes.cycleCount, data: {current : this.#currentCycle, total : this.#totalCycle}});
+        this.#server.broadcastWsMessage(cid, jsonMessage, false, broadcastType, this.#playerList);
     }
 }

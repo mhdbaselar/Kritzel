@@ -155,6 +155,9 @@ module.exports = class ClientGame {
           hideCreateLobby();
           document.getElementById("usernameModal").style.display = "flex";
         }
+      } else if(data.type === responseTypes.cycleCount) {
+        // TODO Frontend : show current und total cycle | data : {current: int, total : int}[]
+        console.log(data.data);
       }
     };
   }
