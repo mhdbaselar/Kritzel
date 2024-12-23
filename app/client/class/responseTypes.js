@@ -24,5 +24,6 @@ module.exports = responseTypes = {
     menu : "menu",
     lobbyJoinMenu : "lobbyJoinMenu",
     lobbyCreateMenu : "lobbyCreateMenu",
-    nameCheck : "nameCheck"
+    nameCheck : "nameCheck",
+    cycleCount : "cycleCount"
 }

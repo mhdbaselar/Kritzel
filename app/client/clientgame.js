@@ -119,13 +119,20 @@ module.exports = class ClientGame {
         wordContainer.style.display = "none";
       } else if (data.type === responseTypes.choosingWordNotification) {
         console.log(data.data); // name from the drawer
-        // TODO: Frontend anzeigen der Notification ("<Bob> is choosing a word")
-
+        const drawerName = data.data;  
+        const popup = document.querySelector(".word-selection-popup");
+        popup.style.display = "flex";
+        popup.innerHTML = `
+          <div>
+            <h2>${drawerName} wählt gerade ein Wort ...</h2>
+          </div>
+        `;
         // Disallow drawing and hide toolbar
         this.setDrawingState(false);
       } else if (data.type === responseTypes.endChoosingWordNotification) {
         console.log(data.data); // name from the drawer
-        // TODO: Frontend anzeigen der Notification ("<Bob> is choosing a word") ausblenden
+        const popup = document.querySelector(".word-selection-popup");
+        popup.style.display = "none"; 
       } else if (data.type === responseTypes.clock) {
         renderTimer(data.data);
       } else if (data.type === responseTypes.word) {
@@ -162,6 +169,10 @@ module.exports = class ClientGame {
         window.hideResultOverlay();
       } else if (data.type === responseTypes.gameResultList) {
         window.showEndGameResultOverlay(data.data);
+      } else if (data.type === responseTypes.cycleCount) {
+        const { current, total } = data.data;
+        //console.log(`Aktueller Zyklus: ${current}, Gesamtzyklen: ${total}`);
+        updateRoundDisplay(current, total);
       }
     };
   }

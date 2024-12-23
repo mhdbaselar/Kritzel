@@ -751,3 +751,13 @@ window.hideResultOverlay = function () {
   const overlay = document.getElementById("resultOverlay");
   overlay.style.display = "none";
 };
+// Update Rounds
+window.updateRoundDisplay = function (current, total) {
+  const roundsDisplay = document.getElementById("roundsDisplay");
+  if (roundsDisplay) {
+    roundsDisplay.textContent = `${current} von ${total}`;
+    roundsDisplay.style.visibility = "visible";
+  } else {
+    console.error("Element für die Rundenanzeige nicht gefunden.");
+  }
+};
