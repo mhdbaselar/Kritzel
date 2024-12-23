@@ -162,6 +162,13 @@ module.exports = class ClientGame {
           hideCreateLobby();
           document.getElementById("usernameModal").style.display = "flex";
         }
+      } else if (data.type === responseTypes.roundResultList) {
+        window.showResultOverlay(data.data);
+      } else if (data.type === responseTypes.endRoundResultList) {
+        console.log("Remove ResultOverlay");
+        window.hideResultOverlay();
+      } else if (data.type === responseTypes.gameResultList) {
+        window.showEndGameResultOverlay(data.data);
       } else if (data.type === responseTypes.cycleCount) {
         const { current, total } = data.data;
         //console.log(`Aktueller Zyklus: ${current}, Gesamtzyklen: ${total}`);

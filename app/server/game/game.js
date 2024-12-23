@@ -69,6 +69,8 @@ module.exports = class Game {
     #hangManWord;
     /**@type {{player : Client, points : int}[]} */
     #pointList;
+    /**@type {{name : string, pointsAdded : int}[]} */
+    #roundResultList;
 
     /**
      * Constructor to instanciate the game
@@ -96,6 +98,7 @@ module.exports = class Game {
         this.#currentRound = 0;
         this.#playerQueue = [...this.#playerList];      // copy current playerList to queue
         this.#pointList = this.#playerList.map((player) => {return {player : player, points : 0}} );
+        this.#roundResultList = [];
         this.sendUserList(playerList);
         this.#state = stateTypes.gameStarted;
         this.#nextState();
@@ -117,6 +120,12 @@ module.exports = class Game {
         this.#wordChoicesList = null;
         this.#revealeWordOrder = [];
 
+        // Show last round results
+        if(this.#roundResultList.length > 0){
+            let jsonMessage = JSON.stringify({ type: responseTypes.roundResultList, data: this.#roundResultList });
+            this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
+        }
+
         // wait before next round start
         this.#timeleft = this.#nextRoundTimeout / 1000;
 
@@ -125,6 +134,9 @@ module.exports = class Game {
             if(this.#timeleft <= 0){
                 clearInterval(nextRoundTimer);
                 this.#state = stateTypes.roundStarted;
+                // Send remove ResultList
+                let jsonMessage = JSON.stringify({type: responseTypes.endRoundResultList, data: null});
+                this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
                 this.#nextState();
             }
             this.#timeleft -= 1;
@@ -235,20 +247,38 @@ module.exports = class Game {
 
         let maxLength = Math.max(this.#answerTimeList.length, this.#playerList.length - 1);
         if(maxLength !== 0){
+            this.#roundResultList = [];
             let maxPointsGuesser = this.#maxPointsGuesser;
             let pointGradiation = maxPointsGuesser / maxLength;
 
+            // Set Points for answers
             this.#answerTimeList.forEach((answer) => {
                 let playerPoint = this.#pointList.find((playerPoint) => playerPoint.player.getCid() === answer.cid);
 
                 if(playerPoint){
                     playerPoint.points += Math.ceil(maxPointsGuesser);
+                    this.#roundResultList.push({name: playerPoint.player.getName(), pointsAdded : maxPointsGuesser});
                     maxPointsGuesser -= pointGradiation;
                 }
             });
 
+            // Add no answer Players in resultList with +0 Points
+            this.#playerList.forEach((player) => {
+                let hasAnswered = this.#answerTimeList.some(answer => answer.cid === player.getCid());
+                if(!hasAnswered && player !== this.#drawer){
+                    this.#roundResultList.push({name: player.getName(), pointsAdded : 0});
+                }   
+            });
+
+            // Set Points for Drawer 
             let playerPointDrawer = this.#pointList.find((playerPoint) => playerPoint.player.getCid() === this.#drawer.getCid());
             playerPointDrawer.points += Math.ceil(this.#maxPointsDrawer / maxLength * this.#answerTimeList.length);
+            this.#roundResultList.push({name: this.#drawer.getName(), pointsAdded : Math.ceil(this.#maxPointsDrawer / maxLength * this.#answerTimeList.length)});
+
+            // Sort decendent results
+            this.#roundResultList.sort(function(result1, result2){
+                return result2.pointsAdded - result1.pointsAdded;
+            });  
         }
 
         // disable draw permission of current drawer
@@ -281,6 +311,9 @@ module.exports = class Game {
         this.sendUserList(this.#playerList);
 
         this.#state = stateTypes.gameEnded;
+
+        // Send Game EndResult List
+        this.#sendEndGameResultList();
     }
 
     /**
@@ -463,6 +496,10 @@ module.exports = class Game {
         }
     }
 
+    /**
+     * Add the player in the point list
+     * @param {*} player player Object to add
+     */
     addPlayerInPointList(player){
         if(this.#state !== null){
             let isFound = this.#pointList.some(playerPointObj => playerPointObj.player === player);
@@ -473,10 +510,33 @@ module.exports = class Game {
     }
 
     /**
+     * Send end Game Result List to all clients in Lobby
+     */
+    #sendEndGameResultList(){
+        let sendPlayerList = this.#createUserResultList(this.#playerList);
+
+        let jsonMessage = JSON.stringify({ type: responseTypes.gameResultList, data: sendPlayerList });
+        this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
+    }
+
+    /**
      * Send the UserList to the clients
-     * @param {Client[]} playerList player list
+     * @param {Client[]} playerList list of players
      */
     sendUserList(playerList) {
+        let sendPlayerList = this.#createUserResultList(playerList);
+
+        let jsonMessage = JSON.stringify({ type: responseTypes.userList, data: sendPlayerList });
+        this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, playerList);
+        
+    }
+
+    /**
+     * Create a list of players with the points
+     * @param {*} playerList list of players
+     * @returns {{name: string, points: int, isDrawer: boolean}[]} list of player with points
+     */
+    #createUserResultList(playerList){
         let sendPlayerList = [];
         playerList.forEach((player) => {
             if(this.#state !== null){
@@ -489,8 +549,11 @@ module.exports = class Game {
             }
         });
 
-        let jsonMessage = JSON.stringify({ type: responseTypes.userList, data: sendPlayerList });
-        this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, playerList);
+        sendPlayerList.sort(function(result1, result2){
+            return result2.points - result1.points;
+        });
+
+        return sendPlayerList;
     }
 
     /**
