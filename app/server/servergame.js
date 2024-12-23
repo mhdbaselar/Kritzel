@@ -455,14 +455,14 @@ module.exports = class ServerGame {
   #processJoinRandomLobbyAction(client){
     let publicLobbies = [];
     for(let i = 0; i < this.#lobbies.length; i++){
-      if(this.#lobbies[i].getIsPublic() && this.#lobbies[i].getCurrentPlayerCount() < this.#lobbies[i].getMaxPlayers()){
+      if(this.#lobbies[i] !== null && this.#lobbies[i].getIsPublic() && this.#lobbies[i].getCurrentPlayerCount() < this.#lobbies[i].getMaxPlayers()){
         publicLobbies.push(i);
       }
     }
 
     if(publicLobbies.length > 0){
       let randomLobbyID = publicLobbies[Math.floor(Math.random() * publicLobbies.length)];
-      if(this.#lobbies[randomLobbyID].getCurrentPlayerCount() < this.#lobbies[randomLobbyID].getMaxPlayers()){
+      if(this.#lobbies[randomLobbyID] !== null && this.#lobbies[randomLobbyID].getCurrentPlayerCount() < this.#lobbies[randomLobbyID].getMaxPlayers()){
         this.#processJoinLobbyAction(client, randomLobbyID, null);
       } else {  // Error handling: lobby meanwhile full
         this.#processCreateLobbyAction(client, true, null, this.#getUniqueLobbyName(), 1, 60, 10);
