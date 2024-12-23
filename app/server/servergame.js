@@ -114,8 +114,6 @@ module.exports = class ServerGame {
         this.#lobbies[lobbyID].startGame();
       } else if (_request.messageType == requestTypes.getReconnectData) {
         this.#processGetReconnectData(cid, lobbyID);
-      } else if (_request.messageType == requestTypes.deleteLobby) {
-        this.#processDeleteLobbyAction(cid, lobbyID);
       }
     }
 
@@ -164,6 +162,14 @@ module.exports = class ServerGame {
           request.messageBody.client.getCid(),
           lobbyID
         );
+
+        // if lobby is empty, start delete lobby timer
+        if(this.#lobbies[lobbyID].getCurrentPlayerCount() === 0){
+          this.#lobbies[lobbyID].setDeleteLobbyFunction(() => {
+            this.#processDeleteLobbyAction(lobbyID);
+          });
+          this.#lobbies[lobbyID].startDeleteLobbyTimer();
+        }
       }
     } else if (
       request.messageType === "addPlayerInLobby" &&
@@ -172,6 +178,7 @@ module.exports = class ServerGame {
       let lobbyID = request.messageBody.client.getLobbyID();
 
       if (lobbyID !== null) {
+        this.#lobbies[lobbyID].stopDeleteLobbyTimer();      // stop delete lobby timer after lobby is not empty
         this.#lobbies[lobbyID].addPlayer(request.messageBody.client);
         this.#processSendJoinLobbyData(
           request.messageBody.client.getCid(),
@@ -412,7 +419,8 @@ module.exports = class ServerGame {
    * @param {string?} code lobby code
    */
   #processJoinLobbyAction(client, lobbyID, code) {
-    if ( this.#lobbies[lobbyID].getCurrentPlayerCount() < this.#lobbies[lobbyID].getMaxPlayers()
+    if (this.#lobbies[lobbyID] !== null 
+      && this.#lobbies[lobbyID].getCurrentPlayerCount() < this.#lobbies[lobbyID].getMaxPlayers()
       && (this.#lobbies[lobbyID].getIsPublic() ||
       code == this.#lobbies[lobbyID].getCode())
     ) {
@@ -494,9 +502,11 @@ module.exports = class ServerGame {
     let lobbyList = [];
 
     for (let i = 0; i < this.#lobbies.length; i++) {
-      lobbyList.push({ lobbyID: i, isPublic: this.#lobbies[i].getIsPublic(), lobbyName: this.#lobbies[i].getLobbyName(),
-        currentPlayers: this.#lobbies[i].getCurrentPlayerCount(), maxPlayers: this.#lobbies[i].getMaxPlayers()
-      });
+      if(this.#lobbies[i] !== null){
+        lobbyList.push({ lobbyID: i, isPublic: this.#lobbies[i].getIsPublic(), lobbyName: this.#lobbies[i].getLobbyName(),
+          currentPlayers: this.#lobbies[i].getCurrentPlayerCount(), maxPlayers: this.#lobbies[i].getMaxPlayers()
+        });
+      }
     }
 
     let jsonMessage = JSON.stringify({
@@ -516,18 +526,18 @@ module.exports = class ServerGame {
    * @param {string} cid client unique ID
    * @param {int} lobbyID id of the lobby
    */
-  #processDeleteLobbyAction(cid, lobbyID) {
-    if (this.#lobbies[lobbyID].checkGameEnd()) {
+  #processDeleteLobbyAction(lobbyID) {
+    //if (this.#lobbies[lobbyID].checkGameEnd()) {
       let playerList = this.#lobbies[lobbyID].getPlayerList();
 
       playerList.forEach((player) => {
         player.setLobbyID(null);
       });
 
-      this.#processGetMenuAction(null, broadcastTypes.allInLobby);
+      //this.#processGetMenuAction(null, broadcastTypes.allInLobby);
 
       this.#lobbies[lobbyID] = null;
-    }
+    //}
   }
 
   /**
