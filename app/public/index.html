@@ -16,18 +16,22 @@
 
   <body style="background-color: #000350">
     <div class="simple-keyboard"></div>
-    <div
-      class="head"
-      style="display: flex; align-items: center; justify-content: space-between"
-    >
-      <img
-        class="logo"
-        src="logo-kritzel.svg"
-        alt="Kritzel Logo"
-        height="60vh"
-      />
-      <h2 class="word-guess" id="hint"></h2>
-      <div id="timer"></div>
+    <div class="head">
+      <!-- Erste Zeile: Logo, Hinweis, Timer -->
+      <div class="top-row">
+        <div class="logo-container">
+          <img
+            class="logo"
+            src="logo-kritzel.svg"
+            alt="Kritzel Logo"
+            height="60vh"
+          />
+          <!-- Zweite Zeile: Rundenanzeige -->
+      <div id="roundsDisplay" class="rounds-display"></div>
+        </div>
+        <h2 class="word-guess" id="hint"></h2>
+        <div id="timer"></div>
+      </div>
     </div>
     <div class="loading-overlay" id="loadingOverlay">
       <div class="spinner"></div>
@@ -36,16 +40,28 @@
     <!-- Username Modal -->
     <div class="username-modal" id="usernameModal" style="display: none">
       <div class="username-modal-content">
-        <h2>{{USERNAME_PROMPT}}</h2>
-        <input
-          type="text"
-          id="usernameInput"
-          placeholder="{{USERNAME}}"
-          maxlength="20"
-          minlength="1"
-          required
-          onkeydown="if(event.key === 'Enter') window.submitUsernameAndShowLobbyMenu()"
-        />
+        <!-- <h2>{{USERNAME_PROMPT}}</h2> -->
+        <div class="form-control">
+          <input
+            type="text"
+            id="usernameInput" 
+            maxlength="20"
+            minlength="1"
+            required
+            onkeydown="if(event.key === 'Enter') window.submitUsernameAndShowLobbyMenu()"
+          />
+          <!-- Animiertes Label mit Delay je Buchstabe -->
+          <label>
+            <span style="transition-delay:0ms">U</span>
+            <span style="transition-delay:50ms">s</span>
+            <span style="transition-delay:100ms">e</span>
+            <span style="transition-delay:150ms">r</span>
+            <span style="transition-delay:200ms">n</span>
+            <span style="transition-delay:250ms">a</span>
+            <span style="transition-delay:300ms">m</span>
+            <span style="transition-delay:350ms">e</span>
+          </label>
+        </div>
         <div class="language-selector">
           <select id="languageSelect">
             <option value="de">Deutsch</option>
@@ -126,7 +142,11 @@
         </div>
       </div>
     </div>
-
+    <div id="resultOverlay" style="display: none" class="result-overlay">
+      <h2>Ranking</h2>
+      <div id="resultListContainer"></div>
+      <button onclick="hideResultOverlay()">Schließen</button>
+    </div>
     <div class="row">
       <div class="column users-column">
         <div class="users-container">

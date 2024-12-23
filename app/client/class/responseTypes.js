@@ -17,9 +17,13 @@ module.exports = responseTypes = {
     chatMsgList : "chatMsgList",
     clock : "clock",
     drawPermission : "drawPermission",
+    roundResultList : "roundResultList",
+    endRoundResultList : "endRoundResultList",
+    gameResultList : "gameResultList",
     lobbyList : "lobbyList",
     menu : "menu",
     lobbyJoinMenu : "lobbyJoinMenu",
     lobbyCreateMenu : "lobbyCreateMenu",
-    nameCheck : "nameCheck"
+    nameCheck : "nameCheck",
+    cycleCount : "cycleCount"
 }

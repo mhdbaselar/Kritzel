@@ -69,6 +69,8 @@ module.exports = class Game {
     #hangManWord;
     /**@type {{player : Client, points : int}[]} */
     #pointList;
+    /**@type {{name : string, pointsAdded : int}[]} */
+    #roundResultList;
 
     /**
      * Constructor to instanciate the game
@@ -92,9 +94,11 @@ module.exports = class Game {
         this.#totalCycle = totalCycle;
         this.#roundTimeout = roundTimeout;
         this.#currentCycle = 1;
+        this.#sendCycle(null, broadcastTypes.allInLobby);
         this.#currentRound = 0;
         this.#playerQueue = [...this.#playerList];      // copy current playerList to queue
         this.#pointList = this.#playerList.map((player) => {return {player : player, points : 0}} );
+        this.#roundResultList = [];
         this.sendUserList(playerList);
         this.#state = stateTypes.gameStarted;
         this.#nextState();
@@ -108,6 +112,7 @@ module.exports = class Game {
         if (this.#playerQueue.length === 0) {
             this.#playerQueue = [...this.#playerList];      // copy current playerList to queue
             this.#currentCycle++;
+            this.#sendCycle(null, broadcastTypes.allInLobby);
             this.#currentRound = 1;
         } else {this.#currentRound++;}
         this.#answerTimeList = [];
@@ -115,14 +120,23 @@ module.exports = class Game {
         this.#wordChoicesList = null;
         this.#revealeWordOrder = [];
 
+        // Show last round results
+        if(this.#roundResultList.length > 0){
+            let jsonMessage = JSON.stringify({ type: responseTypes.roundResultList, data: this.#roundResultList });
+            this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
+        }
+
         // wait before next round start
         this.#timeleft = this.#nextRoundTimeout / 1000;
 
         let nextRoundTimer = setInterval(() => {
-            this.#sendTimer("Nächste Runde in ", this.#timeleft);
+            this.#sendTimer("NextRound", this.#timeleft);
             if(this.#timeleft <= 0){
                 clearInterval(nextRoundTimer);
                 this.#state = stateTypes.roundStarted;
+                // Send remove ResultList
+                let jsonMessage = JSON.stringify({type: responseTypes.endRoundResultList, data: null});
+                this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
                 this.#nextState();
             }
             this.#timeleft -= 1;
@@ -170,7 +184,7 @@ module.exports = class Game {
         this.#timeleft = this.#wordTimeout / 1000;
 
         this.#wordSelectionTimer = setInterval(() => {      // 10s to select a word;
-            this.#sendTimer("Wortauswahl verbleibend: ", this.#timeleft);
+            this.#sendTimer("Word", this.#timeleft);
             if(this.#timeleft <= 0){
                 clearInterval(this.#wordSelectionTimer);
                 this.#sendRemoveWordChoicesList();
@@ -200,7 +214,7 @@ module.exports = class Game {
         let revealLetterIntervalTime = Math.ceil(this.#timeleft / (revealLetterCount + 1));
         // Set a timer for the drawer phase
         const drawTimer = setInterval(() => {
-            this.#sendTimer("Zeichnen verbleibend: ", this.#timeleft);
+            this.#sendTimer("Draw", this.#timeleft);
 
             let allAnswered = this.#playerList.every((player) => player === this.#drawer ||
                                                     this.#answerTimeList.some((answer) => answer.cid === player.getCid()));
@@ -233,20 +247,38 @@ module.exports = class Game {
 
         let maxLength = Math.max(this.#answerTimeList.length, this.#playerList.length - 1);
         if(maxLength !== 0){
+            this.#roundResultList = [];
             let maxPointsGuesser = this.#maxPointsGuesser;
             let pointGradiation = maxPointsGuesser / maxLength;
 
+            // Set Points for answers
             this.#answerTimeList.forEach((answer) => {
                 let playerPoint = this.#pointList.find((playerPoint) => playerPoint.player.getCid() === answer.cid);
 
                 if(playerPoint){
                     playerPoint.points += Math.ceil(maxPointsGuesser);
+                    this.#roundResultList.push({name: playerPoint.player.getName(), pointsAdded : maxPointsGuesser});
                     maxPointsGuesser -= pointGradiation;
                 }
             });
 
+            // Add no answer Players in resultList with +0 Points
+            this.#playerList.forEach((player) => {
+                let hasAnswered = this.#answerTimeList.some(answer => answer.cid === player.getCid());
+                if(!hasAnswered && player !== this.#drawer){
+                    this.#roundResultList.push({name: player.getName(), pointsAdded : 0});
+                }   
+            });
+
+            // Set Points for Drawer 
             let playerPointDrawer = this.#pointList.find((playerPoint) => playerPoint.player.getCid() === this.#drawer.getCid());
             playerPointDrawer.points += Math.ceil(this.#maxPointsDrawer / maxLength * this.#answerTimeList.length);
+            this.#roundResultList.push({name: this.#drawer.getName(), pointsAdded : Math.ceil(this.#maxPointsDrawer / maxLength * this.#answerTimeList.length)});
+
+            // Sort decendent results
+            this.#roundResultList.sort(function(result1, result2){
+                return result2.pointsAdded - result1.pointsAdded;
+            });  
         }
 
         // disable draw permission of current drawer
@@ -254,9 +286,6 @@ module.exports = class Game {
 
         // update playerList
         this.sendUserList(this.#playerList);
-
-        // Reset Display Timer
-        this.#sendTimer("","");
 
         // show answer word all player
         this.#sendWord(this.#word, broadcastTypes.allInLobby);
@@ -275,13 +304,16 @@ module.exports = class Game {
         this.#sendWord("", broadcastTypes.allInLobby);
 
         // show game end in timer overlay
-        this.#sendTimer("beendet","");
+        this.#sendTimer("End","");
 
         // Reset Drawer Icon UserList
         this.#drawer = null;
         this.sendUserList(this.#playerList);
 
         this.#state = stateTypes.gameEnded;
+
+        // Send Game EndResult List
+        this.#sendEndGameResultList();
     }
 
     /**
@@ -464,6 +496,10 @@ module.exports = class Game {
         }
     }
 
+    /**
+     * Add the player in the point list
+     * @param {*} player player Object to add
+     */
     addPlayerInPointList(player){
         if(this.#state !== null){
             let isFound = this.#pointList.some(playerPointObj => playerPointObj.player === player);
@@ -474,10 +510,33 @@ module.exports = class Game {
     }
 
     /**
+     * Send end Game Result List to all clients in Lobby
+     */
+    #sendEndGameResultList(){
+        let sendPlayerList = this.#createUserResultList(this.#playerList);
+
+        let jsonMessage = JSON.stringify({ type: responseTypes.gameResultList, data: sendPlayerList });
+        this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, this.#playerList);
+    }
+
+    /**
      * Send the UserList to the clients
-     * @param {Client[]} playerList player list
+     * @param {Client[]} playerList list of players
      */
     sendUserList(playerList) {
+        let sendPlayerList = this.#createUserResultList(playerList);
+
+        let jsonMessage = JSON.stringify({ type: responseTypes.userList, data: sendPlayerList });
+        this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, playerList);
+        
+    }
+
+    /**
+     * Create a list of players with the points
+     * @param {*} playerList list of players
+     * @returns {{name: string, points: int, isDrawer: boolean}[]} list of player with points
+     */
+    #createUserResultList(playerList){
         let sendPlayerList = [];
         playerList.forEach((player) => {
             if(this.#state !== null){
@@ -490,8 +549,11 @@ module.exports = class Game {
             }
         });
 
-        let jsonMessage = JSON.stringify({ type: responseTypes.userList, data: sendPlayerList });
-        this.#server.broadcastWsMessage(null, jsonMessage, false, broadcastTypes.allInLobby, playerList);
+        sendPlayerList.sort(function(result1, result2){
+            return result2.points - result1.points;
+        });
+
+        return sendPlayerList;
     }
 
     /**
@@ -513,7 +575,12 @@ module.exports = class Game {
                 this.#sendWord(this.#hangManWord, broadcastTypes.allInLobbyWithoutOneClient, this.#drawer.getCid());
             }
         } else if (this.#state == stateTypes.gameEnded){
-            this.#sendTimer("beendet","");
+            this.#sendTimer("End","");
+        } 
+        
+        // In all States without null
+        if (this.#state !== null){
+            this.#sendCycle(cid, broadcastTypes.onlyOneClient);
         }
     }
 
@@ -586,5 +653,15 @@ module.exports = class Game {
     #sendDrawPermission(isEnabled){
         let jsonMessage = JSON.stringify({type: responseTypes.drawPermission, data: isEnabled});
         this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessage, false, broadcastTypes.onlyOneClient);
+    }
+
+    /**
+     * Send the current und total cycle to the clients
+     * @param {string?} cid client unique ID
+     * @param {string} broadcastType broadcastType
+     */
+    #sendCycle(cid, broadcastType){
+        let jsonMessage = JSON.stringify({type: responseTypes.cycleCount, data: {current : this.#currentCycle, total : this.#totalCycle}});
+        this.#server.broadcastWsMessage(cid, jsonMessage, false, broadcastType, this.#playerList);
     }
 }
