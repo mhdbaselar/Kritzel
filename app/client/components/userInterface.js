@@ -61,6 +61,15 @@ function renderWordChoice(words, clientGame) {
   });
 }
 function renderTimer(timerData) {
+  if(timerData.timetype === "NextRound") {
+    timerData.timetype = "▶ ";
+  } else if(timerData.timetype === "Word") {
+    timerData.timetype = "💬 ";
+  } else if(timerData.timetype === "Draw") {
+    timerData.timetype = "🖌️ ";
+  } else if(timerData.timetype === "End") {
+    timerData.timetype = "🏁 ";
+  }
   document.getElementById("timer").innerHTML =
     timerData.timetype + timerData.time;
 }

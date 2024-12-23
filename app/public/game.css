@@ -1,37 +1,37 @@
-/* Base Styling */
+/******************************************************
+ * 1) BASIS & GLOBAL
+ ******************************************************/
+
+/* Font-Import */
+@import url("https://fonts.googleapis.com/css?family=Sanchez");
+
+/* Reset & Global */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  backface-visibility: hidden;
+  transition: 400ms all ease-in-out 50ms;
+}
+
+html,
 body {
   margin: 0;
+  padding: 0;
   overflow: hidden;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
 }
 
-/* Header */
-.head {
-  padding-left: 1vw;
-  margin: 20px 30px 10px;
-  border-radius: 8px;
-  background-color: #fff;
-  opacity: 90%;
+body {
+  background-color: #000350; 
 }
 
-.word-guess {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  margin: 0;
-  font-family: monospace;
-  font-size: 25px;
-  letter-spacing: 3px;
-}
+/******************************************************
+ * 2) GRUND- & LAYOUT-KLASSEN
+ ******************************************************/
 
-#timer {
-  font-family: monospace;
-  font-size: 25px;
-  margin: 0 10px 0 0;
-}
-
-/* Layout Containers */
+/* Row & Column Layout */
 .row {
   display: flex;
   padding: 0 20px;
@@ -46,7 +46,89 @@ body {
   box-sizing: border-box;
 }
 
-/* Canvas */
+.canvas-column {
+  flex: 2;
+  position: relative; /* Für absolut positionierte Overlays wie word-selection-popup */
+}
+
+/******************************************************
+ * 3) HEADER-BEREICH (.head, .top-row usw.)
+ ******************************************************/
+
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+  margin: 20px 30px;
+  border-radius: 8px;
+  background-color: #fff;
+  opacity: 90%;
+  min-height: 90px;
+}
+
+.top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  width: 100%;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/******************************************************
+ * 4) RUNDENANZEIGE & TIMER (.rounds-display, .word-guess, #timer)
+ ******************************************************/
+
+.rounds-display {
+  font-family: monospace;
+  font-size: 18px;
+  font-weight: bold;
+  width: 124px;
+  color: #ffffff;
+  background-color: #1d2194;
+  padding: 5px 12px;
+  border-radius: 5px;
+  text-align: center;
+  white-space: nowrap;
+  visibility: hidden;
+}
+
+.word-guess {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: monospace;
+  font-size: 30px;
+  letter-spacing: 3px;
+  margin: 0;
+  text-align: center;
+}
+
+#timer {
+  font-family: monospace;
+  font-size: 25px;
+  margin: 0;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/******************************************************
+ * 5) CANVAS & CANVAS-CONTAINER
+ ******************************************************/
+
+.canvas-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+}
+
 #drawingCanvas {
   display: block;
   width: 100%;
@@ -57,17 +139,16 @@ body {
   flex-shrink: 0; /* Verhindert Schrumpfen */
 }
 
-.canvas-column {
-  flex: 2;
-}
+/******************************************************
+ * 6) TOOLBAR & TOOLS
+ ******************************************************/
 
-/* Toolbar */
 .toolbar {
   display: none;
   justify-content: center;
   align-items: center;
   gap: 10px;
-  padding: 0 10px 10px;
+  padding: 10px; /* doppelt, aber unverändert gelassen */
   border-radius: 5px;
   width: 50vw;
   margin: 2vh auto 0;
@@ -76,7 +157,6 @@ body {
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
-  padding: 10px;
   z-index: 100;
 }
 
@@ -105,7 +185,7 @@ body {
   outline: 2px solid #fff;
 }
 
-/* Pen Size Buttons */
+/* Pen Size */
 .penSizePicker {
   margin: 0 20px;
   display: flex;
@@ -143,7 +223,7 @@ body {
   outline: 3px solid #1d2194;
 }
 
-/* Tool Buttons */
+/* Tool / Clear Buttons */
 .tool-selection {
   display: flex;
   gap: 5px;
@@ -181,7 +261,7 @@ body {
   fill: #ffffff;
 }
 
-/* Icons */
+/* Icon Hover Effekt */
 .icon {
   cursor: pointer;
   transition: background-color 0.3s;
@@ -196,7 +276,10 @@ body {
   background-color: #1d2194;
 }
 
-/* Chat Styling */
+/******************************************************
+ * 7) CHAT-BEREICH
+ ******************************************************/
+
 .chat-container {
   flex-direction: column;
   height: 100%;
@@ -207,6 +290,7 @@ body {
   padding: 10px;
   overflow-y: auto;
   background-color: #f9f9f9;
+  height: 300px; /* Vorgabe */
 }
 
 .chat-input {
@@ -225,7 +309,16 @@ body {
   cursor: pointer;
 }
 
-/* User Container */
+/* Chat-Messages-Sender */
+.message-sender {
+  font-weight: bold;
+  margin-right: 5px;
+}
+
+/******************************************************
+ * 8) USERS / USERLIST
+ ******************************************************/
+
 .users-container {
   border: 1px solid #ccc;
   padding: 10px;
@@ -252,7 +345,11 @@ body {
   color: #555;
 }
 
-/* Fullscreen overlay */
+/******************************************************
+ * 9) OVERLAYS & MODALS
+ ******************************************************/
+
+/* Loading Overlay */
 .loading-overlay {
   position: fixed;
   top: 0;
@@ -260,15 +357,13 @@ body {
   width: 100vw;
   height: 100vh;
   background-color: #000350;
-  /* Fullscreen color */
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  /* Ensure it’s on top */
 }
 
-/* Spinner styling */
+/* Spinner */
 .spinner {
   width: 50px;
   height: 50px;
@@ -282,247 +377,14 @@ body {
   0% {
     transform: rotate(0deg);
   }
-
   100% {
     transform: rotate(360deg);
   }
 }
 
-@media (max-width: 850px) {
-  html {
-    font-size: 12px;
-  }
-
-  .logo {
-    display: none;
-  }
-
-  .head {
-    margin: 20px 20px 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 10px;
-  }
-
-  .word-guess {
-    position: static;
-    transform: none;
-    margin: 0;
-    text-align: center;
-    font-size: 15pt;
-  }
-
-  #timer {
-    text-align: center;
-    font-size: 15pt;
-  }
-
-  /* Main container to organize elements in a vertical column */
-  .row {
-    display: flex;
-    flex-wrap: wrap;
-    margin: 0;
-    gap: 10px;
-  }
-
-  /* Full-width column sections */
-  .column {
-    padding: 0;
-  }
-
-  /* Canvas sizing */
-  #drawingCanvas {
-    width: 100%;
-    height: auto;
-  }
-
-  .canvas-column {
-    min-width: 100%;
-  }
-
-  /* Chat messages section with limited height */
-  .chat-messages {
-    height: 50%;
-  }
-
-  /* Toolbar with wrap and spacing adjustments */
-  .toolbar {
-    width: 90vw;
-    flex-wrap: wrap;
-    gap: 5px;
-  }
-
-  /* User container positioned below canvas */
-  .users-column {
-    order: 2;
-    width: 50%;
-  }
-
-  /* Chat column positioned below users, optionally adjustable */
-  .chat-column {
-    order: 3;
-    width: 50%;
-  }
-
-  .chat-input {
-    margin-top: 0%;
-  }
-
-  #sendButton {
-    display: none;
-  }
-
-  .canvas-container {
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* Canvas Styling */
-  #drawingCanvas {
-    order: 1;
-    width: 100%;
-    height: auto;
-    margin-bottom: 10px;
-  }
-
-  .toolbar {
-    display: none;
-    order: 2;
-    position: relative;
-    bottom: auto;
-    transform: none;
-    left: auto;
-    width: 100%;
-    margin: 0;
-    padding: 10px;
-    background-color: rgba(0, 0, 0, 0.1);
-    border-radius: 5px;
-  }
-
-  .canvas-column {
-    padding-bottom: 10px;
-  }
-}
-
-.simple-keyboard {
-  display: none;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  z-index: 1000;
-  background-color: #f0f0f0;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
-}
-
-/* Visual feedback for active Caps Lock */
-.simple-keyboard .hg-button.active-capslock {
-  background-color: #007bff;
-  /* Blue background to indicate active state */
-  color: white;
-  /* White text for contrast */
-}
-
-.chat-input-div:not(:empty)::before {
-  content: "";
-}
-
-/* Focus styling */
-.chat-input-div:focus {
-  border-color: #007bff;
-  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-}
-
-/* Chat Messages Styling */
-.chat-messages {
-  border: 1px solid #ccc;
-  padding: 10px;
-  overflow-y: auto;
-  background-color: #f9f9f9;
-  height: 300px;
-  /* Adjust as needed or make dynamic */
-}
-
-.message-sender {
-  font-weight: bold;
-  margin-right: 5px;
-}
-
-/* Chat Input Div Styling */
-.chat-input-div {
-  flex: 1;
-  padding: 8px 12px; /* Adjust as needed */
-  font-size: 1rem;
-  line-height: 1.5; /* Ensures vertical centering */
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  background-color: #ffffff;
-  cursor: text;
-  user-select: text;
-  outline: none;
-  position: relative;
-  min-height: 40px;
-  box-sizing: border-box;
-}
-
-.chat-input-div[contenteditable="false"] {
-  cursor: pointer;
-  /* Indicate it's clickable to show the virtual keyboard */
-}
-
-.chat-input-div::before {
-  content: attr(placeholder);
-  color: #888;
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  pointer-events: none;
-}
-
-.chat-input-div:not(:empty)::before {
-  content: "";
-}
-
-/* Focus styling */
-.chat-input-div:focus {
-  border-color: #007bff;
-  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-}
-
-/* Send Button Styling (Optional) */
-#sendButton {
-  padding: 8px 16px;
-  margin-left: 10px;
-  font-size: 1rem;
-  cursor: pointer;
-  border: none;
-  border-radius: 4px;
-  background-color: #007bff;
-  color: #ffffff;
-  transition: background-color 0.3s;
-}
-
-#sendButton:hover {
-  background-color: #0056b3;
-  transform: translateY(-2px);
-}
-
-/* Keyboard Container Styling (Optional) */
-.simple-keyboard {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background-color: #ffffff;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
-}
-/* Username Modal Styles */
+/* Username Modal */
 .username-modal {
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   position: fixed;
@@ -530,8 +392,8 @@ body {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
-  z-index: 1100; /* Above other content */
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 1100;
 }
 
 .username-modal-content {
@@ -575,23 +437,65 @@ body {
   background-color: #0056b3;
   transform: translateY(-2px);
 }
+.form-control {
+  position: relative;
+  margin: 20px auto 40px; 
+  width: 190px;           
+  text-align: center;     
+}
 
-/* Anweisungstext über der Wort-Auswahl */
+
+.form-control input {
+  background-color: transparent;
+  border: none;
+  border-bottom: 2px solid #1d2194; 
+  display: block;
+  width: 100%;
+  padding: 15px 0;
+  font-size: 18px;
+  color: #1d2194;        
+}
+
+.form-control input:focus,
+.form-control input:valid {
+  outline: 0;
+  border-bottom-color: #007bff; 
+}
+
+.form-control label {
+  position: absolute;
+  top: 15px;
+  left: 0;
+  pointer-events: none;
+}
+
+.form-control label span {
+  display: inline-block;
+  font-size: 18px;
+  min-width: 5px;
+  color: #1d2194; 
+  transition: 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.form-control input:focus + label span,
+.form-control input:valid + label span {
+  color: #007bff;         
+  transform: translateY(-30px);
+}
+
+/******************************************************
+ * 10) WORD SELECTION POPUP
+ ******************************************************/
+
 .word-selection-instruction {
   text-align: center;
   color: #ffffff;
   font-size: 16px;
-  margin-bottom: 10px; /* Etwas Abstand zwischen dem Text und den Optionen */
+  margin-bottom: 10px;
   font-weight: bold;
 }
 
-/* Container für die Wortauswahl */
-.canvas-column {
-  position: relative;
-  /* Setzt den Container relativ, damit das absolute Positionieren der Box innerhalb des Containers möglich ist */
-}
-
-/* Container für das Wortauswahl Popup */
+/* Overlay über dem Canvas */
 .word-selection-popup {
   position: absolute;
   top: 50%; /* Vertikale Mitte */
@@ -616,7 +520,6 @@ body {
   pointer-events: auto;
 }
 
-/* Styling der Wort-Optionen */
 .word-option {
   padding: 12px 20px;
   cursor: pointer;
@@ -630,17 +533,12 @@ body {
   background-color: #1d2194;
 }
 
-/* Container für Canvas und Toolbar */
-.canvas-container {
-  display: flex;
-  flex-direction: column;
-  height: 100%; /* oder feste Höhe */
-  position: relative;
-}
+/******************************************************
+ * 11) LOBBY JOIN
+ ******************************************************/
 
-/* Lobby Styles */
 .lobby-join {
-  display: none; /* Anfangs versteckt */
+  display: none;
   align-items: center;
   justify-content: center;
   position: fixed;
@@ -648,8 +546,8 @@ body {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.7); /* Halbtransparenter Hintergrund */
-  z-index: 1100; /* Über andere Inhalte */
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 1100;
 }
 
 .lobby-join-content {
@@ -658,14 +556,9 @@ body {
   border-radius: 8px;
   text-align: center;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-
-  /* Größe auf 60% des Viewports setzen */
   width: 60vw;
   height: 60vh;
-
-  /* Scrollbar, falls Inhalt größer als 60% */
   overflow: auto;
-
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -687,7 +580,10 @@ body {
   transform: translateY(-2px);
 }
 
-/* Create Lobby Styles */
+/******************************************************
+ * 12) LOBBY CREATE
+ ******************************************************/
+
 .lobby-create {
   display: none;
   position: absolute;
@@ -697,8 +593,8 @@ body {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
-  z-index: 1200; /* Above other content */
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 1200;
 }
 
 .lobby-create-content {
@@ -717,187 +613,9 @@ body {
   color: #1d2194;
 }
 
-/* Font-Import */
-@import url("https://fonts.googleapis.com/css?family=Sanchez");
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  backface-visibility: hidden;
-  transition: 400ms all ease-in-out 50ms;
-}
-
-/* Entferne zentrierende Formatierung global,
-   damit wir feiner justieren können */
-html,
-body {
-  margin: 0;
-  padding: 0;
-}
-
-.button-container {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 10px;
-  margin: 20px 0;
-}
-
-.label-text {
-  font-weight: bold;
-  font-size: 16px;
-  margin: 0;
-  display: inline-block;
-  vertical-align: middle;
-}
-
-/* Switch-Container Styling */
-.switch-container {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 10px 0;
-}
-
-/* Switch Styling */
-.switch {
-  display: inline-block;
-  vertical-align: middle;
-  position: relative;
-  width: 80px;
-  height: 34px;
-  z-index: 10;
-}
-
-.switch input {
-  opacity: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.slider {
-  position: relative;
-  display: inline-block;
-  width: 80px;
-  height: 34px;
-  background: rgba(43, 43, 43, 1);
-  border-radius: 50px;
-  box-shadow: 0 0 2px rgba(43, 43, 43, 1);
-  cursor: pointer;
-  transition: background 0.4s;
-  z-index: 11;
-  top: -34px;
-}
-
-.knob {
-  position: absolute;
-  height: 26px;
-  width: 26px;
-  background: rgb(255, 255, 255);
-  border-radius: 50%;
-  left: 4px;
-  bottom: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  transition: transform 0.4s ease-in-out;
-  z-index: 12;
-}
-
-/* Symbole: X und ✔ im Knopf mittels pseudo-elements */
-.knob::before,
-.knob::after {
-  content: "";
-  position: absolute;
-  transition: 0.4s all ease-in-out;
-}
-
-/* "X"-Symbol */
-.knob::before {
-  content: "✗";
-  color: #2b2b2b;
-  opacity: 1;
-  transform: scale(1) rotate(0deg);
-}
-
-/* "Haken"-Symbol */
-.knob::after {
-  content: "✔";
-  color: #2b2b2b;
-  opacity: 0;
-  transform: scale(0.5) rotate(-45deg);
-}
-
-/* Eingeschalteter Zustand */
-input:checked + .slider {
-  background: rgba(73, 168, 68, 1);
-  box-shadow: 0 0 2px rgba(73, 168, 68, 1);
-}
-
-/* Umschalten der Symbole beim Ein-/Ausschalten */
-input:checked + .slider .knob::before {
-  opacity: 0;
-  transform: scale(0.5) rotate(45deg);
-}
-
-input:checked + .slider .knob::after {
-  opacity: 1;
-  transform: scale(1) rotate(0deg);
-}
-
-/* Rollende Bewegung des Knopfes beim Einschalten */
-input:checked + .slider .knob {
-  transform: translateX(40px) rotate(360deg);
-}
-
-/* Fokus-Zustand */
-input:focus + .slider {
-  box-shadow: 0 0 2px #2196f3;
-}
-
-/* Hover-Effekt */
-.switch:hover .slider {
-  box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
-}
-
-/* Language Selector Styles */
-.language-selector {
-  margin: 10px 0;
-  width: 80%;
-  display: block;
-  margin: 10px auto;
-}
-
-.language-selector select {
-  width: 100%;
-  padding: 8px;
-  font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  background-color: #fff;
-  color: #1d2194;
-  cursor: pointer;
-  outline: none;
-  transition: all 0.3s ease;
-}
-
-.language-selector select:hover {
-  border-color: #007bff;
-}
-
-.language-selector select:focus {
-  border-color: #007bff;
-  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-}
-
-.language-selector select option {
-  padding: 8px;
-  background-color: #fff;
-  color: #1d2194;
-}
-/* Zusätzliche Styles für Lobby-Einstellungen */
+/******************************************************
+ * 13) LOBBY SETTINGS
+ ******************************************************/
 
 .lobby-settings {
   display: flex;
@@ -944,6 +662,7 @@ input:focus + .slider {
   background-color: #0056b3;
   transform: translateY(-2px);
 }
+
 .lobby-create-content {
   width: 60vw;
   max-width: 600px;
@@ -960,15 +679,21 @@ input:focus + .slider {
   padding: 20px;
   box-sizing: border-box;
 }
+
 .lobby-join-content h2 {
   margin-bottom: 0;
 }
 
+/******************************************************
+ * 14) LOBBY ITEM LIST
+ ******************************************************/
+
 .button-container {
   display: flex;
-  justify-content: space-between;
-  gap: 20px;
-  width: 100%;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  margin: 20px 0;
 }
 
 .random-lobby-button,
@@ -1047,6 +772,11 @@ input:focus + .slider {
   background-color: #007bff;
   transform: translateY(-2px);
 }
+
+/******************************************************
+ * 15) START GAME BUTTONS
+ ******************************************************/
+
 .start-game-button-div {
   display: flex;
   justify-content: center;
@@ -1065,6 +795,7 @@ input:focus + .slider {
   width: auto;
   transition: background-color 0.3s;
 }
+
 .start-game-button-div button:hover {
   background-color: #0056b3;
   transform: translateY(-2px);
@@ -1076,5 +807,358 @@ input:focus + .slider {
 
 #leaveLobbyButton:hover {
   background-color: #d43f4a;
+  transform: translateY(-2px);
+}
+
+/******************************************************
+ * 16) LANGUAGE SELECTOR
+ ******************************************************/
+
+.language-selector {
+  margin: 10px 0;
+  width: 80%;
+  display: block;
+  margin: 10px auto;
+}
+
+.language-selector select {
+  width: 100%;
+  padding: 8px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+  color: #1d2194;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.language-selector select:hover {
+  border-color: #007bff;
+}
+
+.language-selector select:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+.language-selector select option {
+  padding: 8px;
+  background-color: #fff;
+  color: #1d2194;
+}
+
+/******************************************************
+ * 17) SWITCH (LOBBY CREATE) 
+ ******************************************************/
+
+.switch-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.switch {
+  display: inline-block;
+  vertical-align: middle;
+  position: relative;
+  width: 80px;
+  height: 34px;
+  z-index: 10;
+}
+
+.switch input {
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.slider {
+  position: relative;
+  display: inline-block;
+  width: 80px;
+  height: 34px;
+  background: rgba(43, 43, 43, 1);
+  border-radius: 50px;
+  box-shadow: 0 0 2px rgba(43, 43, 43, 1);
+  cursor: pointer;
+  transition: background 0.4s;
+  z-index: 11;
+  top: -34px;
+}
+
+.knob {
+  position: absolute;
+  height: 26px;
+  width: 26px;
+  background: rgb(255, 255, 255);
+  border-radius: 50%;
+  left: 4px;
+  bottom: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: transform 0.4s ease-in-out;
+  z-index: 12;
+}
+
+.knob::before,
+.knob::after {
+  content: "";
+  position: absolute;
+  transition: 0.4s all ease-in-out;
+}
+
+.knob::before {
+  content: "✗";
+  color: #2b2b2b;
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+}
+
+.knob::after {
+  content: "✔";
+  color: #2b2b2b;
+  opacity: 0;
+  transform: scale(0.5) rotate(-45deg);
+}
+
+input:checked + .slider {
+  background: rgba(73, 168, 68, 1);
+  box-shadow: 0 0 2px rgba(73, 168, 68, 1);
+}
+
+input:checked + .slider .knob::before {
+  opacity: 0;
+  transform: scale(0.5) rotate(45deg);
+}
+
+input:checked + .slider .knob::after {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+}
+
+input:checked + .slider .knob {
+  transform: translateX(40px) rotate(360deg);
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 2px #2196f3;
+}
+
+.switch:hover .slider {
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+}
+
+/******************************************************
+ * 18) LABEL TEXT
+ ******************************************************/
+
+.label-text {
+  font-weight: bold;
+  font-size: 16px;
+  margin: 0;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/******************************************************
+ * 19) MOBILE / RESPONSIVE STYLES (@media max-width: 850px)
+ ******************************************************/
+
+@media (max-width: 850px) {
+  .head {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px;
+    margin: 10px;
+    min-height: 80px;
+  }
+
+  .logo {
+    display: none;
+  }
+
+  .rounds-display {
+    font-size: 14px;
+    padding: 3px 8px;
+    width: auto;
+    text-align: left;
+    position: relative;
+    visibility: hidden;
+  }
+
+  .top-row {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+
+  .word-guess {
+    font-size: 20px;
+    letter-spacing: 2px;
+    text-align: center;
+    margin: 0;
+  }
+
+  #timer {
+    font-size: 16px;
+    margin: 0;
+    text-align: left;
+    width: auto;
+    white-space: nowrap;
+  }
+
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0;
+    gap: 10px;
+  }
+
+  .column {
+    padding: 0;
+  }
+
+  #drawingCanvas {
+    width: 100%;
+    height: auto;
+  }
+
+  .canvas-column {
+    min-width: 100%;
+    padding-bottom: 10px;
+  }
+
+  .chat-messages {
+    height: 50%;
+  }
+
+  .toolbar {
+    width: 90vw;
+    flex-wrap: wrap;
+    gap: 5px;
+    display: none;
+    order: 2;
+    position: relative;
+    bottom: auto;
+    transform: none;
+    left: auto;
+    margin: 0;
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+  }
+
+  .users-column {
+    order: 2;
+    width: 50%;
+  }
+
+  .chat-column {
+    order: 3;
+    width: 50%;
+  }
+
+  .chat-input {
+    margin-top: 0%;
+  }
+
+  #sendButton {
+    display: none;
+  }
+
+  #drawingCanvas {
+    order: 1;
+    width: 100%;
+    height: auto;
+    margin-bottom: 10px;
+  }
+}
+
+/******************************************************
+ * 20) VIRTUAL KEYBOARD (.simple-keyboard)
+ ******************************************************/
+
+.simple-keyboard {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #ffffff;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.simple-keyboard .hg-button.active-capslock {
+  background-color: #007bff;
+  color: white;
+}
+
+/******************************************************
+ * 21) CHAT INPUT DIV (CONTENTEDITABLE)
+ ******************************************************/
+
+.chat-input-div {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 1rem;
+  line-height: 1.5;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #ffffff;
+  cursor: text;
+  user-select: text;
+  outline: none;
+  position: relative;
+  min-height: 40px;
+  box-sizing: border-box;
+}
+
+.chat-input-div[contenteditable="false"] {
+  cursor: pointer;
+}
+
+.chat-input-div::before {
+  content: attr(placeholder);
+  color: #888;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.chat-input-div:not(:empty)::before {
+  content: "";
+}
+
+.chat-input-div:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+/* Send Button */
+
+#sendButton {
+  padding: 8px 16px;
+  margin-left: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  border: none;
+  border-radius: 4px;
+  background-color: #007bff;
+  color: #ffffff;
+  transition: background-color 0.3s;
+}
+
+#sendButton:hover {
+  background-color: #0056b3;
   transform: translateY(-2px);
 }
