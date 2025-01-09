@@ -249,7 +249,7 @@ module.exports = class Game {
         if(maxLength !== 0){
             this.#roundResultList = [];
             let maxPointsGuesser = this.#maxPointsGuesser;
-            let pointGradiation = maxPointsGuesser / maxLength;
+            let pointGradiation = Math.ceil(maxPointsGuesser / maxLength);
 
             // Set Points for answers
             this.#answerTimeList.forEach((answer) => {
