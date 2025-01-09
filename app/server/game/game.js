@@ -249,7 +249,7 @@ module.exports = class Game {
         if(maxLength !== 0){
             this.#roundResultList = [];
             let maxPointsGuesser = this.#maxPointsGuesser;
-            let pointGradiation = maxPointsGuesser / maxLength;
+            let pointGradiation = Math.ceil(maxPointsGuesser / maxLength);
 
             // Set Points for answers
             this.#answerTimeList.forEach((answer) => {
@@ -446,19 +446,24 @@ module.exports = class Game {
      */
     checkAnswer(answer){
         if(this.#state === stateTypes.wordSelected){
-            let rightLetterCounter = 0;
+            let distanz = 0;
             let word = this.#word.toLowerCase().trim();
             let answerWord = answer.toLowerCase().trim();
 
-            if(answerWord.length >= 2 && word.length >= 2){
-                for(let i = 0; (i < answerWord.length || i < word.length); i++){
-                    if(word[i] !== null && answerWord[i] !== null && word[i] === answerWord[i]){
-                        rightLetterCounter += 1;
-                    }
+            const minLaenge = Math.min(word.length, answerWord.length);
+            const maxLaenge = Math.max(word.length, answerWord.length);
+            
+            // Count failed letters
+            for (let i = 0; i < minLaenge; i++) {
+                if (word[i] !== answerWord[i]) {
+                        distanz++;
                 }
             }
+            
+            // Adds the difference in length to the distance
+            distanz += maxLaenge - minLaenge;
 
-            let accuracy = rightLetterCounter / this.#word.length;
+            let accuracy = (this.#word.length - distanz) / this.#word.length;
             if(accuracy >= this.#wordCheckAccuracyRate){
                 return true;
             }
