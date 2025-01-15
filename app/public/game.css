@@ -293,6 +293,10 @@ body {
   height: 300px; /* Vorgabe */
 }
 
+.server-message {
+  color: red;
+}
+
 .chat-input {
   display: flex;
   margin-top: 2vh;
