@@ -295,6 +295,7 @@ body {
 
 .server-message {
   color: red;
+  font-weight: bold;
 }
 
 .chat-input {
