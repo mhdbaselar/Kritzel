@@ -714,11 +714,19 @@ window.showResultOverlay = function (resultList) {
 
   // Resultlist
   container.innerHTML = "";
+  container.style.textAlign = "center";
+  // Set heading for this round
+  const heading = document.createElement("h2");
+  heading.textContent = "Punkte für diese Runde";
+  heading.style.textAlign = "left";
+  container.appendChild(heading);
+
   resultList.forEach((result, index) => {
     const entry = document.createElement("div");
     entry.textContent = `${index + 1}. ${result.name} (+${
       result.pointsAdded
     } Punkte)`;
+    entry.style.textAlign = "left";
     container.appendChild(entry);
   });
 
@@ -734,11 +742,19 @@ window.showEndGameResultOverlay = function (resultList) {
 
   // Resultlist
   container.innerHTML = "";
+  container.style.textAlign = "center";
+  // Set heading for end game
+  const heading = document.createElement("h2");
+  heading.textContent = "Endstand";
+  heading.style.textAlign = "left";
+  container.appendChild(heading);
+
   resultList.forEach((result, index) => {
     const entry = document.createElement("div");
     entry.textContent = `${index + 1}. ${result.name} (${
       result.points
     } Punkte)`;
+    entry.style.textAlign = "left";
     container.appendChild(entry);
   });
 
