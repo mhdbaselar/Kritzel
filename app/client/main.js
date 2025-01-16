@@ -49,6 +49,7 @@ const converter = new HexColorConverter();
 let canDraw = false;
 
 window.addEventListener("load", () => {
+  //document.querySelector(".row").classList.add("hidden-background");
   // Übersetze UI beim Start
   clientGame.translateUI();
 
@@ -557,16 +558,19 @@ function showLobbyMenu() {
   clientGame.sendGetLobbyListAction();
   // Zeigt nur das Lobby-Overlay an
   document.getElementById("lobbyJoin").style.display = "flex";
+  document.querySelector(".row").classList.add("hidden-background");
 }
 
 function hideLobbyMenu() {
   // Versteckt das Lobby-Overlay
   document.getElementById("lobbyJoin").style.display = "none";
+  document.querySelector(".row").classList.remove("hidden-background");
 }
 
 function showCreateLobby() {
   // Zeigt nur das Lobby-Einstellungs-Overlay an
   document.getElementById("lobbyCreate").style.display = "flex";
+  document.querySelector(".row").classList.add("hidden-background");
 }
 
 function hideCreateLobby() {
@@ -588,6 +592,7 @@ window.leaveLobbyAndShowMenu = function () {
   } else {
     //console.log("Benutzername nicht gesetzt. Zeige Username-Modal an.");
     document.getElementById("usernameModal").style.display = "flex";
+    document.querySelector(".row").classList.add("hidden-background");
   }
 };
 window.changeLanguage = function (language) {
@@ -627,7 +632,7 @@ window.createLobby = function () {
     roundTimer,
     playerCount
   );
-
+  document.querySelector(".row").classList.remove("hidden-background");
   hideCreateLobby();
 };
 //Funktioniert nicht, da wir keine Lobbies haben. Dummy Lobbies sind ein anderes Array
@@ -646,7 +651,7 @@ window.joinThisLobby = function (lobbyID, isPublic) {
       document.getElementById(`codeInputField${lobbyID}`).value
     );
   }
-
+  document.querySelector(".row").classList.remove("hidden-background");
   hideLobbyMenu();
 };
 

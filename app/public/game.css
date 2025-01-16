@@ -30,7 +30,9 @@ body {
 /******************************************************
  * 2) GRUND- & LAYOUT-KLASSEN
  ******************************************************/
-
+.hidden-background {
+  display: none !important;
+}
 /* Row & Column Layout */
 .row {
   display: flex;
