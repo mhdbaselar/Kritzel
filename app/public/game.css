@@ -535,7 +535,31 @@ body {
 /******************************************************
  * 11) LOBBY JOIN
  ******************************************************/
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
 
+.header-container h2 {
+  flex: 1;
+  text-align: center;
+}
+
+.reload-icon {
+  position: absolute;
+  right: 0;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+}
+.reload-icon svg {
+  fill: #0056b3;
+  width: 100%;
+  height: 100%;
+  transform: translateY(50%) scaleX(-1) rotate(-50deg);
+}
 .lobby-join {
   display: none;
   align-items: center;
@@ -726,19 +750,6 @@ body {
 #lobbyListContainer button:hover {
   background-color: #0056b3;
   transform: translateY(-2px);
-}
-.reload-icon {
-  display: block;
-  margin: 20px auto; /* Center the icon and add some margin */
-  cursor: pointer;
-  width: 24px;
-  height: 24px;
-}
-
-.reload-icon svg {
-  fill: #4caf50; /* Color of the reload icon */
-  width: 100%;
-  height: 100%;
 }
 
 .lobby-item {
@@ -1134,6 +1145,19 @@ input:focus + .slider {
     width: 100%;
     height: auto;
     margin-bottom: 10px;
+  }
+  .header-container {
+    flex-direction: column;
+  }
+
+  .reload-icon {
+    position: static;
+    transform: scaleX(-1) rotate(-15deg); /* Apply transformations without vertical centering */
+    margin-bottom: 10px; /* Add some margin below the icon */
+  }
+
+  .header-container h2 {
+    text-align: center;
   }
 }
 
