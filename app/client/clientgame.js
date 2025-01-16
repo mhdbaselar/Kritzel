@@ -177,6 +177,8 @@ module.exports = class ClientGame {
         const { current, total } = data.data;
         //console.log(`Aktueller Zyklus: ${current}, Gesamtzyklen: ${total}`);
         updateRoundDisplay(current, total);
+      } else if (data.type === responseTypes.showLobbyContent) {
+        document.querySelector(".row").classList.remove("hidden-background");
       }
     };
   }

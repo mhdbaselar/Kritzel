@@ -550,6 +550,11 @@ module.exports = class ServerGame {
     this.#server.broadcastWsMessage(cid, jsonMessage, false, broadcastType);
   }
 
+  #processShowLobbyContentAction(cid){
+    let jsonMessage = JSON.stringify({ type: responseTypes.showLobbyContent, data: null });
+    this.#server.broadcastWsMessage(cid, jsonMessage, false, broadcastTypes.onlyOneClient);
+  }
+
   /**
    * Sends the chat, canvas, userlist and reconnect data to the join client
    * @param {string} cid client unique ID
@@ -560,6 +565,7 @@ module.exports = class ServerGame {
     this.#processGetCanvasAction(cid, lobbyID);
     this.#processGetUserListAction(cid, lobbyID);
     this.#processGetReconnectData(cid, lobbyID);
+    this.#processShowLobbyContentAction(cid, lobbyID);
   }
 
   #processSetUserName(client, name){
