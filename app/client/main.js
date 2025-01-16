@@ -705,6 +705,10 @@ window.displayLobbyList = function (lobbyArray) {
   });
   document.getElementById("lobbyListContainer").innerHTML = html;
 };
+window.reloadLobbyList = function () {
+  console.log("Lobbyliste wird aktualisiert");
+  clientGame.sendGetLobbyListAction();
+};
 // Result-Overlay
 window.showResultOverlay = function (resultList) {
   console.log("Ergebnisliste wird angezeigt:", resultList);
