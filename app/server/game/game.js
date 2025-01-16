@@ -179,7 +179,7 @@ module.exports = class Game {
         this.#wordChoicesList = this.#dictionary.getWords(this.#wordChoicesCount);
 
         this.#sendWordChoicesList();
-        this.#sendWordChoicesNotification(broadcastTypes.allInLobbyWithoutOneClient);
+        this.#sendWordChoicesNotification(this.#drawer.getCid(), broadcastTypes.allInLobbyWithoutOneClient);
 
         this.#timeleft = this.#wordTimeout / 1000;
 
@@ -570,7 +570,7 @@ module.exports = class Game {
             if(this.#drawer && this.#drawer.getCid() === cid){
                 this.#sendWordChoicesList();
             } else if(this.#drawer && this.#drawer.getCid() !== cid){
-                this.#sendWordChoicesNotification(broadcastTypes.onlyOneClient);
+                this.#sendWordChoicesNotification(cid, broadcastTypes.onlyOneClient);
             }
         } else if (this.#state == stateTypes.wordSelected){
             if(this.#drawer && this.#drawer.getCid() === cid){
@@ -625,9 +625,9 @@ module.exports = class Game {
      * Send the word choices notification to the guesser
      * @param {string} broadcastType broadcast type
      */
-    #sendWordChoicesNotification(broadcastType){
+    #sendWordChoicesNotification(cid, broadcastType){
         let jsonMessageGuesser = JSON.stringify({type: responseTypes.choosingWordNotification, data: this.#drawer.getName()});
-        this.#server.broadcastWsMessage(this.#drawer.getCid(), jsonMessageGuesser, false, broadcastType, this.#playerList);
+        this.#server.broadcastWsMessage(cid, jsonMessageGuesser, false, broadcastType, this.#playerList);
     }
 
     /**
