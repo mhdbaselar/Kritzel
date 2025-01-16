@@ -379,7 +379,7 @@ module.exports = class ServerGame {
    * @param {string?} code lobby code
    */
   #processCreateLobbyAction(client, isPublic, code, lobbyName, roundCount, roundTimer, playerCount) {
-    if(isPublic === false && code === "" || lobbyName === ""){
+    if((isPublic === false && code === "") || lobbyName === ""){
       let jsonMessage = JSON.stringify({
         type: responseTypes.lobbyCreateMenu,
         data: null,
