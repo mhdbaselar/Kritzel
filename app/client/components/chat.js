@@ -77,9 +77,13 @@ function initializeChat(clientGame, sendButton, chatInputDiv, chatMessages) {
  * @param {HTMLElement} chatMessages - The container for chat messages.
  * @param {string} message - The message to display.
  * @param {string} sender - The sender of the message.
+ * @param {boolean} [isSystemMessage] - Whether the message is a system message.
  */
-function displayChatMessage(chatMessages, message, sender) {
+function displayChatMessage(chatMessages, message, sender, isServerMessage = false) {
   const messageDiv = document.createElement("div");
+  if (isServerMessage) {
+    messageDiv.classList.add("server-message");
+  }
   messageDiv.textContent = `${sender}: ${message}`;
   chatMessages.appendChild(messageDiv);
   chatMessages.scrollTop = chatMessages.scrollHeight;
