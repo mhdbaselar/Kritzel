@@ -9,7 +9,7 @@ module.exports = class Dictionary {
      * Constructor to instanciate the dictionary
      */
     constructor(){
-        const data = fs.readFileSync('./server/data/words_german.json');
+        const data = fs.readFileSync('./server/data/new_words_german.json');
         this.#wordList = JSON.parse(data);
     }
 
