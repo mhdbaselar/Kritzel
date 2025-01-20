@@ -81,6 +81,7 @@ module.exports = class Game {
         this.#server = server;
         this.#board = board;
         this.#dictionary = new Dictionary();
+        this.#answerTimeList = [];
     }
 
     /**
@@ -470,6 +471,14 @@ module.exports = class Game {
         }
 
         return false;
+    }
+
+    checkChatPermission(cid){
+        let hasGuessed = this.#answerTimeList.some(answer => answer.cid === cid);
+        if((this.#state === stateTypes.wordSelected && hasGuessed === true)){
+            return false;
+        }
+        return true;
     }
 
     /**
