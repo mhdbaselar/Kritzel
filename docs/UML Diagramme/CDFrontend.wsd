@@ -1,15 +1,50 @@
 @startuml CDFrontend
 
 class ClientGame {
+  -#name: string
+  -#translator: Translator
+  -#currentLanguage: string
+  -canDraw: boolean
+  -userList: User[]
+  -socket: WebSocket
+  -lobbyList: Lobby[]
+  +constructor()
   +openWebSocket(): void
-  +sendDrawAction(tool: string, x: number, y: number, color: string, thickness: number): void
+  +sendDrawAction(tool: string, x: number, y: number, color: string, thickness: number): void 
   +sendClearAction(): void
+  +sendFillAction(x: number, y: number, color: string): void
   +sendChatAction(chatMessage: string): void
+  +sendWordAction(word: string): void
+  +sendGameStartAction(): void
+  +updateWithPoints(data: Point[]): void
+  +update(data: number[][]): void
+  +setLanguage(language: string): void
+  +translateUI(): void
+  +setDrawingState(canDraw: boolean): void
+}
+
+class Message {
+  +messageType: string
+  +messageBody: DrawAction | ChatAction
+  +constructor(messageType: string, messageBody: any)
+}
+
+class DrawAction {
+  +tool: string
+  +x: number 
+  +y: number
+  +color: number
+  +thickness: number
+  +constructor(tool: string, x: number, y: number, color: number, thickness: number)
 }
 
 class UserInterface {
   +renderUsers(users: User[]): void
-  +displayChatMessages(messages: ChatMessage[], clientId: string): void
+  +renderWordChoice(words: string[], client: ClientGame): void
+  +renderTimer(timerData: any): void
+  +displayChatMessage(chatMessages: HTMLElement, message: string, senderName: string, isServerMessage: boolean): void
+  +displayChatMessageList(chatMessages: HTMLElement, messageList: ChatMessage[]): void
+  +initializeChat(clientGame: ClientGame, sendButton: HTMLElement, chatInputDiv: HTMLElement, chatMessages: HTMLElement): void
 }
 
 class Chat {
@@ -37,6 +72,7 @@ class VirtualKeyboard {
 class User {
   -name: string
   -points: number
+  -isDrawer: boolean
 }
 
 class ChatMessage {
@@ -54,20 +90,38 @@ class Main {
   +getPointerPosition(event: Event): {x: number, y: number}
 }
 
+class HexColorConverter {
+  +hexToInt(hex: string): number
+  +intToHex(int: number): string
+}
+
+class Translator {
+  -_tokenPattern: RegExp
+  -_translations: object
+  +translate(text: string, language: string): string
+  +getTokenPattern(): RegExp
+}
+
+ClientGame --> Message
+ClientGame --> DrawAction
+ClientGame --> Translator
+ClientGame --> HexColorConverter
 ClientGame --> UserInterface
+ClientGame --> User
 ClientGame --> Chat
 ClientGame --> Toolbar
 ClientGame --> VirtualKeyboard
-UserInterface --> Chat
-Chat --> VirtualKeyboard
+
+Message --> DrawAction
+
+UserInterface --> User
+UserInterface --> ChatMessage
+Chat --> ChatMessage
+
 Main --> ClientGame
 Main --> UserInterface
 Main --> Chat
 Main --> Toolbar
 Main --> VirtualKeyboard
-
-UserInterface --> User
-UserInterface --> ChatMessage
-Chat --> ChatMessage
 
 @enduml
