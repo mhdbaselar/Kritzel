@@ -42,6 +42,10 @@ module.exports = class ClientGame {
     this.translateUI();
 
     this.lobbyList = []; // Neue Property zum Speichern der Lobby-Daten
+    // Event listener for reload button
+    document
+      .getElementById("reloadLobbyListButton")
+      .addEventListener("click", window.reloadLobbyList);
   }
 
   /**
@@ -120,7 +124,7 @@ module.exports = class ClientGame {
         wordContainer.style.display = "none";
       } else if (data.type === responseTypes.choosingWordNotification) {
         console.log(data.data); // name from the drawer
-        const drawerName = data.data;  
+        const drawerName = data.data;
         const popup = document.querySelector(".word-selection-popup");
         popup.style.display = "flex";
         popup.innerHTML = `
@@ -133,7 +137,7 @@ module.exports = class ClientGame {
       } else if (data.type === responseTypes.endChoosingWordNotification) {
         console.log(data.data); // name from the drawer
         const popup = document.querySelector(".word-selection-popup");
-        popup.style.display = "none"; 
+        popup.style.display = "none";
       } else if (data.type === responseTypes.clock) {
         renderTimer(data.data);
       } else if (data.type === responseTypes.word) {
@@ -174,6 +178,8 @@ module.exports = class ClientGame {
         const { current, total } = data.data;
         //console.log(`Aktueller Zyklus: ${current}, Gesamtzyklen: ${total}`);
         updateRoundDisplay(current, total);
+      } else if (data.type === responseTypes.showLobbyContent) {
+        document.querySelector(".row").classList.remove("hidden-background");
       }
     };
   }

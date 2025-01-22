@@ -24,13 +24,15 @@ body {
 }
 
 body {
-  background-color: #000350; 
+  background-color: #000350;
 }
 
 /******************************************************
  * 2) GRUND- & LAYOUT-KLASSEN
  ******************************************************/
-
+.hidden-background {
+  display: none !important;
+}
 /* Row & Column Layout */
 .row {
   display: flex;
@@ -444,27 +446,26 @@ body {
 }
 .form-control {
   position: relative;
-  margin: 20px auto 40px; 
-  width: 190px;           
-  text-align: center;     
+  margin: 20px auto 40px;
+  width: 190px;
+  text-align: center;
 }
-
 
 .form-control input {
   background-color: transparent;
   border: none;
-  border-bottom: 2px solid #1d2194; 
+  border-bottom: 2px solid #1d2194;
   display: block;
   width: 100%;
   padding: 15px 0;
   font-size: 18px;
-  color: #1d2194;        
+  color: #1d2194;
 }
 
 .form-control input:focus,
 .form-control input:valid {
   outline: 0;
-  border-bottom-color: #007bff; 
+  border-bottom-color: #007bff;
 }
 
 .form-control label {
@@ -478,13 +479,13 @@ body {
   display: inline-block;
   font-size: 18px;
   min-width: 5px;
-  color: #1d2194; 
+  color: #1d2194;
   transition: 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
 .form-control input:focus + label span,
 .form-control input:valid + label span {
-  color: #007bff;         
+  color: #007bff;
   transform: translateY(-30px);
 }
 
@@ -541,7 +542,31 @@ body {
 /******************************************************
  * 11) LOBBY JOIN
  ******************************************************/
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
 
+.header-container h2 {
+  flex: 1;
+  text-align: center;
+}
+
+.reload-icon {
+  position: absolute;
+  right: 0;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+}
+.reload-icon svg {
+  fill: #0056b3;
+  width: 100%;
+  height: 100%;
+  transform: translateY(50%) scaleX(-1) rotate(-50deg);
+}
 .lobby-join {
   display: none;
   align-items: center;
@@ -830,30 +855,32 @@ body {
   text-align: center;
 }
 
-.result-overlay h2 {
-  margin-top: 0;
-  font-size: 24px;
-  color: #ffeb3b;
+#resultListContainer {
+  text-align: center; /* Center align the container */
+  margin: 0 auto; /* Center the container itself */
+  display: inline-block;
 }
 
-#resultListContainer {
-  margin: 20px 0;
-  text-align: left;
-  font-size: 18px;
+#resultListContainer h2,
+#resultListContainer div {
+  text-align: left; /* Left align the text inside the container */
+  display: block;
 }
 
 .result-overlay button {
-  background-color: #ff5722;
+  background-color: #ff4b5c;
   color: white;
   padding: 10px 20px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
   font-size: 16px;
+  display: block; /* Ensure the button is displayed as a block element */
+  margin: 20px auto 0;
 }
 
 .result-overlay button:hover {
-  background-color: #e64a19;
+  background-color: #d43f4a;
 }
 
 /******************************************************
@@ -1125,6 +1152,19 @@ input:focus + .slider {
     width: 100%;
     height: auto;
     margin-bottom: 10px;
+  }
+  .header-container {
+    flex-direction: column;
+  }
+
+  .reload-icon {
+    position: static;
+    transform: scaleX(-1) rotate(-15deg); /* Apply transformations without vertical centering */
+    margin-bottom: 10px; /* Add some margin below the icon */
+  }
+
+  .header-container h2 {
+    text-align: center;
   }
 }
 

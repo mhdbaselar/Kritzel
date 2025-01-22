@@ -27,7 +27,7 @@
             height="60vh"
           />
           <!-- Zweite Zeile: Rundenanzeige -->
-      <div id="roundsDisplay" class="rounds-display"></div>
+          <div id="roundsDisplay" class="rounds-display"></div>
         </div>
         <h2 class="word-guess" id="hint"></h2>
         <div id="timer"></div>
@@ -44,7 +44,7 @@
         <div class="form-control">
           <input
             type="text"
-            id="usernameInput" 
+            id="usernameInput"
             maxlength="20"
             minlength="1"
             required
@@ -52,14 +52,14 @@
           />
           <!-- Animiertes Label mit Delay je Buchstabe -->
           <label>
-            <span style="transition-delay:0ms">U</span>
-            <span style="transition-delay:50ms">s</span>
-            <span style="transition-delay:100ms">e</span>
-            <span style="transition-delay:150ms">r</span>
-            <span style="transition-delay:200ms">n</span>
-            <span style="transition-delay:250ms">a</span>
-            <span style="transition-delay:300ms">m</span>
-            <span style="transition-delay:350ms">e</span>
+            <span style="transition-delay: 0ms">U</span>
+            <span style="transition-delay: 50ms">s</span>
+            <span style="transition-delay: 100ms">e</span>
+            <span style="transition-delay: 150ms">r</span>
+            <span style="transition-delay: 200ms">n</span>
+            <span style="transition-delay: 250ms">a</span>
+            <span style="transition-delay: 300ms">m</span>
+            <span style="transition-delay: 350ms">e</span>
           </label>
         </div>
         <div class="language-selector">
@@ -122,8 +122,26 @@
     <!-- Lobby Join Overlay -->
     <div class="lobby-join" id="lobbyJoin">
       <div class="lobby-join-content">
-        <h2>{{AVAILABLE_LOBBIES}}</h2>
-
+        <div class="header-container">
+          <h2>{{AVAILABLE_LOBBIES}}</h2>
+          <!-- Reload Icon -->
+          <div
+            id="reloadLobbyListButton"
+            class="reload-icon"
+            onclick="reloadLobbyList()"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              width="24"
+              height="24"
+            >
+              <path
+                d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"
+              />
+            </svg>
+          </div>
+        </div>
         <!-- Buttons Container -->
         <div class="button-container">
           <button class="random-lobby-button" onclick="onRandomLobby()">
@@ -136,14 +154,13 @@
             {{CREATE_LOBBY}}
           </button>
         </div>
-
         <div id="lobbyListContainer">
           <!-- Hier werden die Lobbys angezeigt -->
         </div>
       </div>
     </div>
     <div id="resultOverlay" style="display: none" class="result-overlay">
-      <h2>Ranking</h2>
+      <!-- <h2>Ranking</h2> -->
       <div id="resultListContainer"></div>
       <button onclick="hideResultOverlay()">Schließen</button>
     </div>

@@ -49,6 +49,7 @@ const converter = new HexColorConverter();
 let canDraw = false;
 
 window.addEventListener("load", () => {
+  
   // Übersetze UI beim Start
   clientGame.translateUI();
 
@@ -524,6 +525,8 @@ window.addEventListener("load", () => {
   }
   toggleCodeInputVisibility();
   switchInput.addEventListener("change", toggleCodeInputVisibility);
+
+  document.querySelector(".row").classList.add("hidden-background");
 });
 
 window.submitUsername = function () {
@@ -589,6 +592,7 @@ window.leaveLobbyAndShowMenu = function () {
     //console.log("Benutzername nicht gesetzt. Zeige Username-Modal an.");
     document.getElementById("usernameModal").style.display = "flex";
   }
+  document.querySelector(".row").classList.add("hidden-background");
 };
 window.changeLanguage = function (language) {
   clientGame.setLanguage(language);
@@ -627,7 +631,6 @@ window.createLobby = function () {
     roundTimer,
     playerCount
   );
-
   hideCreateLobby();
 };
 //Funktioniert nicht, da wir keine Lobbies haben. Dummy Lobbies sind ein anderes Array
@@ -646,7 +649,6 @@ window.joinThisLobby = function (lobbyID, isPublic) {
       document.getElementById(`codeInputField${lobbyID}`).value
     );
   }
-
   hideLobbyMenu();
 };
 
@@ -705,6 +707,10 @@ window.displayLobbyList = function (lobbyArray) {
   });
   document.getElementById("lobbyListContainer").innerHTML = html;
 };
+window.reloadLobbyList = function () {
+  console.log("Lobbyliste wird aktualisiert");
+  clientGame.sendGetLobbyListAction();
+};
 // Result-Overlay
 window.showResultOverlay = function (resultList) {
   console.log("Ergebnisliste wird angezeigt:", resultList);
@@ -714,11 +720,19 @@ window.showResultOverlay = function (resultList) {
 
   // Resultlist
   container.innerHTML = "";
+  container.style.textAlign = "center";
+  // Set heading for this round
+  const heading = document.createElement("h2");
+  heading.textContent = "Punkte für diese Runde";
+  heading.style.textAlign = "left";
+  container.appendChild(heading);
+
   resultList.forEach((result, index) => {
     const entry = document.createElement("div");
     entry.textContent = `${index + 1}. ${result.name} (+${
       result.pointsAdded
     } Punkte)`;
+    entry.style.textAlign = "left";
     container.appendChild(entry);
   });
 
@@ -734,11 +748,19 @@ window.showEndGameResultOverlay = function (resultList) {
 
   // Resultlist
   container.innerHTML = "";
+  container.style.textAlign = "center";
+  // Set heading for end game
+  const heading = document.createElement("h2");
+  heading.textContent = "Endstand";
+  heading.style.textAlign = "left";
+  container.appendChild(heading);
+
   resultList.forEach((result, index) => {
     const entry = document.createElement("div");
     entry.textContent = `${index + 1}. ${result.name} (${
       result.points
     } Punkte)`;
+    entry.style.textAlign = "left";
     container.appendChild(entry);
   });
 
