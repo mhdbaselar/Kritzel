@@ -97,7 +97,8 @@ module.exports = class ClientGame {
       } else if (data.type == responseTypes.chatMsg) {
         // Update the chat display
         const chatMessages = document.querySelector(".chat-messages");
-        displayChatMessage(chatMessages, data.data, data.name);
+        const isServerMessage = data.name === "Server";
+        displayChatMessage(chatMessages, data.data, data.name, isServerMessage);
       } else if (data.type === responseTypes.pointList) {
         // 'pl' = PointList
         this.updateWithPoints(data.data);

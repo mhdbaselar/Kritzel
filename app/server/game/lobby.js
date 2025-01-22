@@ -228,6 +228,9 @@ module.exports = class Lobby {
      */
     addMessage(message, cid, timestamp){
         //TODO: CHECK PERMISSION OF CID
+        if(!this.#game.checkChatPermission(cid)){
+            return false;
+        }
         if(this.#game.checkAnswer(message)){
             if(this.#game.getDrawer().getCid() !== cid){
                 this.#game.addAnswer(cid, timestamp, this.#chat);

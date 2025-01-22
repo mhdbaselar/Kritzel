@@ -100,8 +100,11 @@ function displayStartGameButton() {
  * @param {string} message - The message to display.
  * @param {string} senderCid - The sender of the message.
  */
-function displayChatMessage(chatMessages, message, senderName = "") {
+function displayChatMessage(chatMessages, message, senderName = "", isServerMessage = false) {
   const messageDiv = document.createElement("div");
+  if (isServerMessage) {
+    messageDiv.classList.add("server-message");
+  }
   messageDiv.textContent = `${senderName}: ${message}`;
   chatMessages.appendChild(messageDiv);
   chatMessages.scrollTop = chatMessages.scrollHeight;

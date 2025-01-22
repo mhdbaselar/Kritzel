@@ -379,6 +379,19 @@ module.exports = class ServerGame {
    * @param {string?} code lobby code
    */
   #processCreateLobbyAction(client, isPublic, code, lobbyName, roundCount, roundTimer, playerCount) {
+    if((isPublic === false && code === "") || lobbyName === ""){
+      let jsonMessage = JSON.stringify({
+        type: responseTypes.lobbyCreateMenu,
+        data: null,
+      });
+      this.#server.broadcastWsMessage(
+        client.getCid(),
+        jsonMessage,
+        false,
+        broadcastTypes.onlyOneClient
+      );
+      return;
+    }
 
     playerCount = Math.ceil(playerCount);
     if(playerCount < 2){
