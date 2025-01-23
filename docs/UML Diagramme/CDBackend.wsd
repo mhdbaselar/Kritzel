@@ -40,6 +40,17 @@ class ServerGame {
     - processGetChatAction(cid: string, lobbyID: int)
     - processGetUserListAction(cid: string, lobbyID: int)
     - processSetWordAction(cid: string, word: string, lobbyID: int)
+    - processGetReconnectData(cid: string, lobbyID: int)
+    - processCreateLobbyAction(client: Client, isPublic: boolean, code: string, lobbyName: string, roundCount: int, roundTimer: int, playerCount: int)
+    - processJoinLobbyAction(client: Client, lobbyID: int, code: string)
+    - processJoinRandomLobbyAction(client: Client)
+    - processLeaveLobbyAction(client: Client)
+    - processGetLobbyListAction(cid: string)
+    - processDeleteLobbyAction(lobbyID: int)
+    - processGetMenuAction(cid: string, broadcastType: string)
+    - processShowLobbyContentAction(cid: string)
+    - processSendJoinLobbyData(cid: string, lobbyID: int)
+    - processSetUserName(client: Client, name: string)
 }
 
 class Lobby {
