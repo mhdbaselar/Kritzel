@@ -1,26 +1,43 @@
 @startuml CDFrontend
 
 class ClientGame {
-  -#name: string
-  -#translator: Translator
-  -#currentLanguage: string
-  -canDraw: boolean
-  -userList: User[]
-  -socket: WebSocket
-  -lobbyList: Lobby[]
-  +constructor()
-  +openWebSocket(): void
-  +sendDrawAction(tool: string, x: number, y: number, color: string, thickness: number): void 
-  +sendClearAction(): void
-  +sendFillAction(x: number, y: number, color: string): void
-  +sendChatAction(chatMessage: string): void
-  +sendWordAction(word: string): void
-  +sendGameStartAction(): void
-  +updateWithPoints(data: Point[]): void
-  +update(data: number[][]): void
-  +setLanguage(language: string): void
-  +translateUI(): void
-  +setDrawingState(canDraw: boolean): void
+  - #name: string
+  - #translator: Translator
+  - #currentLanguage: string
+  - canDraw: boolean
+  - lobbyList: Lobby[]
+  - socket: WebSocket
+  - userList: User[]
+  + constructor()
+  + openWebSocket(): void
+  + setUserList(data: User[]): void
+  + setSessionCookie(cid: string): void
+  + updateWithPoints(data: {x: number, y: number, color: string, thickness: number}[]): void
+  + update(data: string[][]): void
+  + sendDrawAction(tool: string, x: number, y: number, color: string, thickness: number): void
+  + sendClearAction(): void
+  + sendFillAction(x: number, y: number, color: string): void
+  + sendGetCanvasAction(): void
+  + sendChatAction(chatMessage: string): void
+  + sendGetChatAction(): void
+  + sendNameAction(name: string): void
+  + sendGetUserListAction(): void
+  + sendGetReconnectDataAction(): void
+  + sendWordAction(word: string): void
+  + sendGameStartAction(): void
+  + sendJoinLobbyAction(lobbyID: number, code: string): void
+  + sendJoinRandomLobbyAction(): void
+  + sendLeaveLobbyAction(): void
+  + sendCreateLobbyAction(isPublic: boolean, code: string, lobbyName: string, roundCount: number, roundTimer: number, playerCount: number): void
+  + sendGetLobbyListAction(): void
+  + send(message: string): void
+  + setDrawingState(canDraw: boolean): void
+  + getCanDraw(): boolean
+  + setCanDraw(value: boolean): void
+  + updateToolbarVisibility(): void
+  + setLanguage(language: string): void
+  + renderWordChoice(words: string[]): void
+  + translateUI(): void
 }
 
 class Message {
@@ -31,7 +48,7 @@ class Message {
 
 class DrawAction {
   +tool: string
-  +x: number 
+  +x: number
   +y: number
   +color: number
   +thickness: number
