@@ -3,9 +3,10 @@
 const TinyServer = require("./server/tinyserver");
 const ServerGame = require("./server/servergame");
 const responseTypes = require("./client/class/responseTypes");
+const port = Number(process.env.PORT || 8123);
 
 // Creates a Server (organizes WebSocketServer)
-let server = new TinyServer(8123,
+let server = new TinyServer(port,
   (cid, request) => {
     receive(cid, request);
   },

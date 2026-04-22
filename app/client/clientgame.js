@@ -52,8 +52,18 @@ module.exports = class ClientGame {
    * Opens a WebSocket connection to the server.
    */
   openWebSocket() {
-    // Determine WebSocket protocol based on current page protocol
-    const protocol = location.protocol === "https:" ? "wss://" : "ws://";
+    let configuredWsUrl = null;
+
+    if (
+      typeof window !== "undefined" &&
+      window.KRITZEL_CONFIG &&
+      typeof window.KRITZEL_CONFIG.wsUrl === "string"
+    ) {
+      const trimmedUrl = window.KRITZEL_CONFIG.wsUrl.trim();
+      if (trimmedUrl.length > 0) {
+        configuredWsUrl = trimmedUrl;
+      }
+    }
 
     // Show loadingOverlay
     const loadingOverlay = document.getElementById("loadingOverlay");
@@ -62,8 +72,13 @@ module.exports = class ClientGame {
 
     const cookie = document.cookie;
 
-    // Build WebSocket URL with correct protocol
-    this.socket = new WebSocket(protocol + location.host + location.pathname);
+    if (configuredWsUrl !== null) {
+      this.socket = new WebSocket(configuredWsUrl);
+    } else {
+      // Determine WebSocket protocol based on current page protocol
+      const protocol = location.protocol === "https:" ? "wss://" : "ws://";
+      this.socket = new WebSocket(protocol + location.host + location.pathname);
+    }
 
     // Event handler for when the connection is opened
     this.socket.onopen = (event) => {

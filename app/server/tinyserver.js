@@ -34,8 +34,8 @@ module.exports = class TinyServer {
       clientTracking: true,
     });
     this.websocketServer.on("connection", this.connectWs.bind(this));
-    this.server.listen(port, () => {
-      console.log(`tinyserver running at http://127.0.0.1:${port}/`);
+    this.server.listen(port, "0.0.0.0", () => {
+      console.log(`tinyserver running on 0.0.0.0:${port}`);
     });
   }
 

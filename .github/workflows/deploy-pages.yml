@@ -1,0 +1,69 @@
+name: Deploy Frontend To GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: app/package-lock.json
+
+      - name: Build frontend bundle
+        working-directory: app
+        run: |
+          set -euo pipefail
+          npm ci
+          npx browserify ./client/main.js -o ./public/bundle.js
+
+      - name: Inject runtime WebSocket config
+        env:
+          KRITZEL_WS_URL: ${{ secrets.KRITZEL_WS_URL }}
+        run: |
+          set -euo pipefail
+          if [ -n "${KRITZEL_WS_URL:-}" ]; then
+            node -e "const fs=require('fs'); const wsUrl=process.env.KRITZEL_WS_URL; fs.writeFileSync('app/public/runtime-config.js', 'window.KRITZEL_CONFIG = { wsUrl: ' + JSON.stringify(wsUrl) + ' };\\n');"
+          fi
+
+      - name: Prepare artifact
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          cp -R app/public/. dist/
+          touch dist/.nojekyll
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
